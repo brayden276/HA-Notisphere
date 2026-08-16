@@ -76,28 +76,39 @@ class HomeAssistantRecipientDiscoveryCoordinator:
             EVENT_SERVICE_REMOVED,
             EVENT_STATE_CHANGED,
         )
+        from homeassistant.core import callback
 
-        self._unsubscribers.extend(
-            (
-                self._hass.bus.async_listen(
-                    EVENT_SERVICE_REGISTERED,
-                    self._async_handle_event,
-                    event_filter=_mobile_app_service_event,
-                ),
-                self._hass.bus.async_listen(
-                    EVENT_SERVICE_REMOVED,
-                    self._async_handle_event,
-                    event_filter=_mobile_app_service_event,
-                ),
-                self._hass.bus.async_listen(
-                    EVENT_STATE_CHANGED,
-                    self._async_handle_event,
-                    event_filter=_person_metadata_event,
-                ),
-                self._hass.bus.async_listen(EVENT_USER_ADDED, self._async_handle_event),
-                self._hass.bus.async_listen(EVENT_USER_REMOVED, self._async_handle_event),
-                self._hass.bus.async_listen(EVENT_USER_UPDATED, self._async_handle_event),
+        mobile_app_service_event = callback(_mobile_app_service_event)
+        person_metadata_event = callback(_person_metadata_event)
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(
+                EVENT_SERVICE_REGISTERED,
+                self._async_handle_event,
+                event_filter=mobile_app_service_event,
             )
+        )
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(
+                EVENT_SERVICE_REMOVED,
+                self._async_handle_event,
+                event_filter=mobile_app_service_event,
+            )
+        )
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(
+                EVENT_STATE_CHANGED,
+                self._async_handle_event,
+                event_filter=person_metadata_event,
+            )
+        )
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(EVENT_USER_ADDED, self._async_handle_event)
+        )
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(EVENT_USER_REMOVED, self._async_handle_event)
+        )
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(EVENT_USER_UPDATED, self._async_handle_event)
         )
 
     async def async_stop(self) -> None:

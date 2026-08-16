@@ -50,19 +50,33 @@ class HomeAssistantRuleHealthCoordinator:
 
     async def async_start(self) -> None:
         from homeassistant.const import EVENT_STATE_CHANGED
+        from homeassistant.core import callback
         from homeassistant.helpers.entity_registry import EVENT_ENTITY_REGISTRY_UPDATED
 
         await self.async_reconcile()
-        self._unsubscribers.extend(
-            (
-                self._hass.bus.async_listen(
-                    EVENT_STATE_CHANGED,
-                    self._state_changed,
-                    event_filter=self._state_event_filter,
-                ),
-                self._hass.bus.async_listen(
-                    EVENT_ENTITY_REGISTRY_UPDATED, self._registry_changed
-                ),
+
+        @callback
+        def state_event_filter(data: dict[str, Any]) -> bool:
+            return self._state_event_filter(data)
+
+        @callback
+        def state_changed(event: Any) -> None:
+            self._state_changed(event)
+
+        @callback
+        def registry_changed(event: Any) -> None:
+            self._registry_changed(event)
+
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(
+                EVENT_STATE_CHANGED,
+                state_changed,
+                event_filter=state_event_filter,
+            )
+        )
+        self._unsubscribers.append(
+            self._hass.bus.async_listen(
+                EVENT_ENTITY_REGISTRY_UPDATED, registry_changed
             )
         )
 

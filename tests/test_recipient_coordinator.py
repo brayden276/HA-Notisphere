@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from dataclasses import dataclass
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 from custom_components.notification_manager.recipients.coordinator import (
     HomeAssistantRecipientDiscoveryCoordinator,
@@ -64,6 +65,58 @@ def test_discovery_refresh_events_ignore_normal_person_state_changes() -> None:
             },
         )
     )
+
+
+def test_start_marks_home_assistant_event_filters_as_callbacks(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    homeassistant = ModuleType("homeassistant")
+    homeassistant.__path__ = []  # type: ignore[attr-defined]
+    auth = ModuleType("homeassistant.auth")
+    auth.EVENT_USER_ADDED = "user_added"  # type: ignore[attr-defined]
+    auth.EVENT_USER_REMOVED = "user_removed"  # type: ignore[attr-defined]
+    auth.EVENT_USER_UPDATED = "user_updated"  # type: ignore[attr-defined]
+    const = ModuleType("homeassistant.const")
+    const.EVENT_SERVICE_REGISTERED = "service_registered"  # type: ignore[attr-defined]
+    const.EVENT_SERVICE_REMOVED = "service_removed"  # type: ignore[attr-defined]
+    const.EVENT_STATE_CHANGED = "state_changed"  # type: ignore[attr-defined]
+    core = ModuleType("homeassistant.core")
+
+    def callback(function):  # type: ignore[no-untyped-def]
+        function._hass_callback = True
+        return function
+
+    core.callback = callback  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "homeassistant", homeassistant)
+    monkeypatch.setitem(sys.modules, "homeassistant.auth", auth)
+    monkeypatch.setitem(sys.modules, "homeassistant.const", const)
+    monkeypatch.setitem(sys.modules, "homeassistant.core", core)
+
+    listeners: list[tuple[str, object | None]] = []
+    unsubscribed = 0
+
+    class Bus:
+        def async_listen(self, event_type, _listener, event_filter=None):  # type: ignore[no-untyped-def]
+            listeners.append((event_type, event_filter))
+
+            def unsubscribe() -> None:
+                nonlocal unsubscribed
+                unsubscribed += 1
+
+            return unsubscribe
+
+    async def scenario() -> None:
+        coordinator = HomeAssistantRecipientDiscoveryCoordinator(
+            SimpleNamespace(bus=Bus()), SimpleNamespace(), SimpleNamespace()
+        )
+        await coordinator.async_start()
+        assert len(listeners) == 6
+        assert all(
+            getattr(event_filter, "_hass_callback", False)
+            for _, event_filter in listeners[:3]
+        )
+        await coordinator.async_stop()
+
+    run(scenario())
+    assert unsubscribed == 6
 
 
 def test_coordinator_refresh_replaces_directory_and_exposes_ambiguity() -> None:

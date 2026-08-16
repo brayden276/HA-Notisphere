@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from dataclasses import replace
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 from custom_components.notification_manager.health import (
     HealthEntitySnapshot,
@@ -299,3 +300,54 @@ def test_health_events_ignore_normal_state_changes_and_reconcile_availability() 
     )
     assert coordinator.requests == 1
     assert coordinator.invalidations == 2
+
+
+def test_health_start_uses_event_loop_safe_callbacks(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    homeassistant = ModuleType("homeassistant")
+    homeassistant.__path__ = []  # type: ignore[attr-defined]
+    const = ModuleType("homeassistant.const")
+    const.EVENT_STATE_CHANGED = "state_changed"  # type: ignore[attr-defined]
+    core = ModuleType("homeassistant.core")
+    helpers = ModuleType("homeassistant.helpers")
+    helpers.__path__ = []  # type: ignore[attr-defined]
+    entity_registry = ModuleType("homeassistant.helpers.entity_registry")
+    entity_registry.EVENT_ENTITY_REGISTRY_UPDATED = "entity_registry_updated"  # type: ignore[attr-defined]
+
+    def callback(function):  # type: ignore[no-untyped-def]
+        function._hass_callback = True
+        return function
+
+    core.callback = callback  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "homeassistant", homeassistant)
+    monkeypatch.setitem(sys.modules, "homeassistant.const", const)
+    monkeypatch.setitem(sys.modules, "homeassistant.core", core)
+    monkeypatch.setitem(sys.modules, "homeassistant.helpers", helpers)
+    monkeypatch.setitem(
+        sys.modules, "homeassistant.helpers.entity_registry", entity_registry
+    )
+
+    listeners: list[tuple[object, object | None]] = []
+
+    class Bus:
+        def async_listen(self, _event_type, listener, event_filter=None):  # type: ignore[no-untyped-def]
+            listeners.append((listener, event_filter))
+            return lambda: None
+
+    class Coordinator(HomeAssistantRuleHealthCoordinator):
+        async def async_reconcile(self):  # type: ignore[no-untyped-def]
+            return SimpleNamespace()
+
+    async def scenario() -> None:
+        coordinator = Coordinator(
+            SimpleNamespace(bus=Bus()),
+            RuleRepository(InMemoryStorageBackend()),
+            SimpleNamespace(),
+            adapter=SimpleNamespace(),
+        )
+        await coordinator.async_start()
+        assert len(listeners) == 2
+        assert all(getattr(listener, "_hass_callback", False) for listener, _ in listeners)
+        assert getattr(listeners[0][1], "_hass_callback", False)
+        await coordinator.async_stop()
+
+    run(scenario())
