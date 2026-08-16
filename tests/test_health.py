@@ -225,7 +225,7 @@ def test_home_assistant_adapter_cache_requires_explicit_invalidation() -> None:
             super().__init__(object())
             self.calls = 0
 
-        def _snapshots(self) -> tuple[HealthEntitySnapshot, ...]:
+        def _snapshots(self, targets=()) -> tuple[HealthEntitySnapshot, ...]:  # type: ignore[no-untyped-def]
             self.calls += 1
             return (entity(),)
 
@@ -264,27 +264,27 @@ def test_health_events_ignore_normal_state_changes_and_reconcile_availability() 
         return SimpleNamespace(state=value, attributes=attributes)
 
     coordinator = RecordingCoordinator()
+    normal_change = {
+        "entity_id": "binary_sensor.garage_door",
+        "old_state": state("off", friendly_name="Garage Door"),
+        "new_state": state("on", friendly_name="Garage Door"),
+    }
+    assert not coordinator._state_event_filter(normal_change)
     coordinator._state_changed(
         SimpleNamespace(
-            data={
-                "entity_id": "binary_sensor.garage_door",
-                "old_state": state("off", friendly_name="Garage Door"),
-                "new_state": state("on", friendly_name="Garage Door"),
-            }
+            data=normal_change
         )
     )
     assert coordinator.requests == 0
     assert coordinator.invalidations == 0
 
-    coordinator._state_changed(
-        SimpleNamespace(
-            data={
-                "entity_id": "binary_sensor.garage_door",
-                "old_state": state("on", friendly_name="Garage Door"),
-                "new_state": state("unavailable", friendly_name="Garage Door"),
-            }
-        )
-    )
+    unavailable_change = {
+        "entity_id": "binary_sensor.garage_door",
+        "old_state": state("on", friendly_name="Garage Door"),
+        "new_state": state("unavailable", friendly_name="Garage Door"),
+    }
+    assert coordinator._state_event_filter(unavailable_change)
+    coordinator._state_changed(SimpleNamespace(data=unavailable_change))
     assert coordinator.requests == 1
     assert coordinator.invalidations == 1
 

@@ -31,12 +31,14 @@ class TimerManager:
         self._create_task = create_task
         self._tasks: dict[str, TaskHandle] = {}
         self._generations: dict[str, int] = {}
+        self._generation_counter = 0
 
     def schedule(self, rule_id: str, delay_seconds: float, callback: TimerCallback) -> None:
         if delay_seconds <= 0:
             raise ValueError("Timer delay must be greater than zero")
         self.cancel_rule(rule_id)
-        generation = self._generations.get(rule_id, 0) + 1
+        self._generation_counter += 1
+        generation = self._generation_counter
         self._generations[rule_id] = generation
 
         async def run() -> None:
@@ -44,17 +46,19 @@ class TimerManager:
                 await self._sleep(delay_seconds)
                 if self._generations.get(rule_id) == generation:
                     self._tasks.pop(rule_id, None)
+                    self._generations.pop(rule_id, None)
                     await callback()
             except asyncio.CancelledError:
                 return
             finally:
                 if self._generations.get(rule_id) == generation:
                     self._tasks.pop(rule_id, None)
+                    self._generations.pop(rule_id, None)
 
         self._tasks[rule_id] = self._create_task(run())
 
     def cancel_rule(self, rule_id: str) -> bool:
-        self._generations[rule_id] = self._generations.get(rule_id, 0) + 1
+        self._generations.pop(rule_id, None)
         task = self._tasks.pop(rule_id, None)
         if task is None or task.done():
             return False

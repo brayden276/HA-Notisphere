@@ -69,6 +69,24 @@ class RecordingDelivery:
             raise RuntimeError("phone offline")
 
 
+class IndexedStateListener:
+    def __init__(self) -> None:
+        self.initial: tuple[str, ...] = ()
+        self.updates: list[tuple[str, ...]] = []
+        self.unsubscribed = False
+
+    def async_listen(self, callback, entity_ids):  # type: ignore[no-untyped-def]
+        self.initial = entity_ids
+
+        def unsubscribe() -> None:
+            self.unsubscribed = True
+
+        return unsubscribe
+
+    def async_update_entity_ids(self, entity_ids):  # type: ignore[no-untyped-def]
+        self.updates.append(entity_ids)
+
+
 def _recipient(identifier: str) -> RecipientProfile:
     return RecipientProfile(
         id=identifier,
@@ -139,6 +157,56 @@ def test_binary_state_fires_only_on_available_transition() -> None:
 
         assert delivery.calls == ["notify.mobile_app_alice"]
         assert (await repository.list_activity())[0].status is ActivityStatus.SENT
+
+    run(scenario())
+
+
+def test_runtime_subscribes_only_to_indexed_rule_entities_and_updates_incrementally() -> None:
+    async def scenario() -> None:
+        repository = RuleRepository(InMemoryStorageBackend(), clock=lambda: NOW)
+        saved = await repository.create(make_rule())
+        recipients = RecipientManager(repository)
+        listener = IndexedStateListener()
+
+        async def directory() -> tuple[RequestUser, ...]:
+            return ()
+
+        runtime = RuntimeManager(
+            repository,
+            recipients,
+            RecordingDelivery(),
+            States(),
+            directory,
+            state_listener=listener,
+        )
+        await runtime.async_start()
+        assert listener.initial == ("binary_sensor.garage_door",)
+
+        disabled = replace(saved, enabled=False)
+        await runtime.async_upsert_rule(disabled)
+        assert listener.updates[-1] == ()
+
+        await runtime.async_stop()
+        assert listener.unsubscribed
+
+    run(scenario())
+
+
+def test_timer_generation_bookkeeping_is_released_after_cancel() -> None:
+    async def scenario() -> None:
+        sleep = ControlledSleep()
+        timers = TimerManager(sleep=sleep)
+
+        async def callback() -> None:
+            return None
+
+        timers.schedule("temporary-rule", 30, callback)
+        await asyncio.sleep(0)
+        assert timers.cancel_rule("temporary-rule")
+        await asyncio.sleep(0)
+
+        assert timers.pending_rule_ids == ()
+        assert timers._generations == {}  # type: ignore[attr-defined]
 
     run(scenario())
 

@@ -6,6 +6,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Protocol
 
+from .const import MAX_ACTIVITY_PAGE_SIZE
 from .manager import PermissionDeniedError, RequestUser
 from .models import (
     ActivityRecord,
@@ -118,8 +119,14 @@ class ObservabilityService:
         rule_id: str | None = None,
         recipient_id: str | None = None,
         status: ActivityStatus | None = None,
+        limit: int = 100,
     ) -> tuple[ActivityRecord, ...]:
         """List newest-first activity constrained to the caller's visible rules."""
+
+        if not 1 <= limit <= MAX_ACTIVITY_PAGE_SIZE:
+            raise ValueError(
+                f"Activity limit must be between 1 and {MAX_ACTIVITY_PAGE_SIZE}"
+            )
 
         visible_rule_ids = {
             rule.id
@@ -141,7 +148,7 @@ class ObservabilityService:
                     for result in record.recipient_results
                 )
             )
-        )
+        )[:limit]
 
     async def get_settings(self, user: RequestUser) -> ActivityRetentionSettings:
         self._require_admin(user)

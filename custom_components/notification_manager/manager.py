@@ -6,6 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
+from .const import DEFAULT_ACTIVITY_PAGE_SIZE
 from .models import (
     ActivityRecord,
     AudienceType,
@@ -124,6 +125,7 @@ class NotificationManager:
     async def bootstrap(self, user: RequestUser) -> dict[str, Any]:
         snapshot = await self.repository.snapshot()
         rules = tuple(rule for rule in snapshot.rules if self._can_read(rule, user))
+        visible_rule_ids = {rule.id for rule in rules}
         recipients = self._visible_recipients(snapshot.recipients, user)
         groups = await self.recipients.list_groups()
         capability_targets = (
@@ -147,8 +149,13 @@ class NotificationManager:
             "capability_targets": [item.to_dict() for item in capability_targets],
             "activity": [
                 item.to_dict()
-                for item in snapshot.activity
-                if any(rule.id == item.rule_id for rule in rules)
+                for item in (
+                    tuple(
+                        activity
+                        for activity in snapshot.activity
+                        if activity.rule_id in visible_rule_ids
+                    )[:DEFAULT_ACTIVITY_PAGE_SIZE]
+                )
             ],
         }
 

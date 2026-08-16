@@ -17,6 +17,7 @@ from .service import RuleHealthReconciliationService
 _LOGGER = logging.getLogger(__name__)
 _UNAVAILABLE_STATES = frozenset({"unknown", "unavailable"})
 _CAPABILITY_ATTRIBUTES = ("friendly_name", "device_class", "unit_of_measurement")
+_CAPABILITY_DOMAINS = frozenset({"binary_sensor", "person", "sensor"})
 
 
 class HealthRuntime(Protocol):
@@ -55,7 +56,9 @@ class HomeAssistantRuleHealthCoordinator:
         self._unsubscribers.extend(
             (
                 self._hass.bus.async_listen(
-                    EVENT_STATE_CHANGED, self._state_changed
+                    EVENT_STATE_CHANGED,
+                    self._state_changed,
+                    event_filter=self._state_event_filter,
                 ),
                 self._hass.bus.async_listen(
                     EVENT_ENTITY_REGISTRY_UPDATED, self._registry_changed
@@ -89,6 +92,7 @@ class HomeAssistantRuleHealthCoordinator:
             snapshot.recipients,
             snapshot.groups,
             users,
+            snapshot.rules,
         )
         for rule in report.updated_rules:
             await self._runtime.async_upsert_rule(rule)
@@ -132,6 +136,7 @@ class HomeAssistantRuleHealthCoordinator:
         new_state = event.data.get("new_state")
         if (
             self._invalidate_capabilities is not None
+            and entity_id.partition(".")[0] in _CAPABILITY_DOMAINS
             and _capability_signature(old_state) != _capability_signature(new_state)
         ):
             self._invalidate_capabilities()
@@ -140,6 +145,22 @@ class HomeAssistantRuleHealthCoordinator:
             and _state_is_available(old_state) != _state_is_available(new_state)
         ):
             self.request_reconciliation()
+
+    def _state_event_filter(self, data: dict[str, Any]) -> bool:
+        """Avoid scheduling a Home Assistant job for irrelevant state traffic."""
+
+        entity_id = data.get("entity_id")
+        if not isinstance(entity_id, str):
+            return False
+        old_state = data.get("old_state")
+        new_state = data.get("new_state")
+        return (
+            entity_id in self._tracked_entity_ids
+            and _state_is_available(old_state) != _state_is_available(new_state)
+        ) or (
+            entity_id.partition(".")[0] in _CAPABILITY_DOMAINS
+            and _capability_signature(old_state) != _capability_signature(new_state)
+        )
 
     def _registry_changed(self, _event: Any) -> None:
         if self._invalidate_capabilities is not None:

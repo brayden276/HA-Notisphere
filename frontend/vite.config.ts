@@ -10,7 +10,7 @@ export default defineConfig({
     },
     outDir: "../custom_components/notification_manager/frontend",
     emptyOutDir: false,
-    sourcemap: true,
+    sourcemap: false,
   },
   test: {
     environment: "node",

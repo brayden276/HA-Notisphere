@@ -10,7 +10,13 @@ from homeassistant.components import websocket_api
 
 from .capabilities import CapabilityRegistryError
 from .capabilities.registry import SYNTHETIC_TIME_TARGET
-from .const import DATA_MANAGER, DATA_WEBSOCKET_REGISTERED, DOMAIN
+from .const import (
+    DATA_MANAGER,
+    DATA_WEBSOCKET_REGISTERED,
+    DEFAULT_ACTIVITY_PAGE_SIZE,
+    DOMAIN,
+    MAX_ACTIVITY_PAGE_SIZE,
+)
 from .manager import (
     NotificationManager,
     PermissionDeniedError,
@@ -437,6 +443,9 @@ async def ws_capability_resolve(hass: Any, connection: Any, msg: dict[str, Any])
         vol.Optional("rule_id"): str,
         vol.Optional("recipient_id"): str,
         vol.Optional("status"): vol.In(tuple(item.value for item in ActivityStatus)),
+        vol.Optional("limit", default=DEFAULT_ACTIVITY_PAGE_SIZE): vol.All(
+            int, vol.Range(min=1, max=MAX_ACTIVITY_PAGE_SIZE)
+        ),
     }
 )
 @websocket_api.async_response
@@ -451,6 +460,7 @@ async def ws_activity_list(hass: Any, connection: Any, msg: dict[str, Any]) -> N
         rule_id=msg.get("rule_id"),
         recipient_id=msg.get("recipient_id"),
         status=status,
+        limit=msg["limit"],
     )
     connection.send_result(msg["id"], [record.to_dict() for record in records])
 

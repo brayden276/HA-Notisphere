@@ -47,7 +47,11 @@ Unsubscribe: TypeAlias = Callable[[], None]
 class StateListener(Protocol):
     """Structural state-listener boundary implemented by the HA adapter."""
 
-    def async_listen(self, callback: StateChangeCallback) -> Unsubscribe: ...
+    def async_listen(
+        self, callback: StateChangeCallback, entity_ids: tuple[str, ...]
+    ) -> Unsubscribe: ...
+
+    def async_update_entity_ids(self, entity_ids: tuple[str, ...]) -> None: ...
 
 
 @dataclass(frozen=True, slots=True)
@@ -116,7 +120,9 @@ class RuntimeManager:
             return
         await self.async_reload()
         if self._state_listener is not None:
-            self._unsubscribe = self._state_listener.async_listen(self.async_state_changed)
+            self._unsubscribe = self._state_listener.async_listen(
+                self.async_state_changed, self._watchers.entity_ids
+            )
         self._started = True
 
     async def async_stop(self) -> None:
@@ -142,6 +148,7 @@ class RuntimeManager:
         for rule in enabled:
             if rule.trigger.type is TriggerType.BINARY_STATE_DURATION:
                 self._start_duration_if_current(rule)
+        self._refresh_state_listener()
 
     async def async_upsert_rule(self, rule: NotificationRule) -> None:
         """Synchronise one successfully persisted create, update or enable mutation."""
@@ -151,10 +158,12 @@ class RuntimeManager:
         self._watchers.upsert(rule)
         if not rule.enabled:
             self._rules.pop(rule.id, None)
+            self._refresh_state_listener()
             return
         self._rules[rule.id] = rule
         if rule.trigger.type is TriggerType.BINARY_STATE_DURATION:
             self._start_duration_if_current(rule)
+        self._refresh_state_listener()
 
     async def async_remove_rule(self, rule_id: str) -> None:
         """Remove a successfully deleted rule and cancel all pending work."""
@@ -163,6 +172,7 @@ class RuntimeManager:
         self._watchers.remove(rule_id)
         self._rules.pop(rule_id, None)
         self._last_delivery_at.pop(rule_id, None)
+        self._refresh_state_listener()
 
     async def async_test_rule(
         self, rule: NotificationRule, *, persist_activity: bool = True
@@ -198,12 +208,22 @@ class RuntimeManager:
     ) -> None:
         """Process one HA-style state transition without allowing failures to escape."""
 
+        rule_ids = self._watchers.rule_ids_for(entity_id)
+        if not rule_ids:
+            return
+        if len(rule_ids) == 1:
+            await self._safe_process_transition(rule_ids[0], old_state, new_state)
+            return
         await asyncio.gather(
             *(
                 self._safe_process_transition(rule_id, old_state, new_state)
-                for rule_id in self._watchers.rule_ids_for(entity_id)
+                for rule_id in rule_ids
             )
         )
+
+    def _refresh_state_listener(self) -> None:
+        if self._started and self._state_listener is not None:
+            self._state_listener.async_update_entity_ids(self._watchers.entity_ids)
 
     async def _safe_process_transition(
         self, rule_id: str, old_state: str | None, new_state: str | None

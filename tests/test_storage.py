@@ -64,6 +64,52 @@ def test_repository_persists_across_instances_and_backend_returns_copies() -> No
     run(scenario())
 
 
+def test_immutable_snapshots_are_reused_and_noop_directory_writes_are_skipped() -> None:
+    class CountingBackend(InMemoryStorageBackend):
+        def __init__(self) -> None:
+            super().__init__()
+            self.saves = 0
+
+        async def save(self, data):  # type: ignore[no-untyped-def]
+            self.saves += 1
+            await super().save(data)
+
+    async def scenario() -> None:
+        backend = CountingBackend()
+        repository = RuleRepository(backend)
+        first = await repository.snapshot()
+        second = await repository.snapshot()
+        assert first is second
+
+        await repository.replace_recipients(())
+        await repository.replace_groups(())
+        assert backend.saves == 0
+
+    run(scenario())
+
+
+def test_activity_uses_delayed_backend_save_when_available() -> None:
+    class DelayedBackend(InMemoryStorageBackend):
+        def __init__(self) -> None:
+            super().__init__()
+            self.delayed = 0
+
+        def save_snapshot_delayed(self, snapshot):  # type: ignore[no-untyped-def]
+            self.delayed += 1
+            self._data = snapshot.to_dict()
+
+    async def scenario() -> None:
+        now = datetime(2026, 8, 15, 10, 0, tzinfo=UTC)
+        backend = DelayedBackend()
+        repository = RuleRepository(backend, clock=lambda: now)
+        await repository.append_activity(_activity(1, now))
+
+        assert backend.delayed == 1
+        assert [item.id for item in await repository.list_activity()] == ["activity-1"]
+
+    run(scenario())
+
+
 def _activity(identifier: int, timestamp: datetime) -> ActivityRecord:
     return ActivityRecord(
         id=f"activity-{identifier}",

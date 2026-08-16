@@ -13,6 +13,9 @@ class HomeAssistantRuntimeAdapter:
 
     def __init__(self, hass: Any) -> None:
         self._hass = hass
+        self._callback: StateChangeCallback | None = None
+        self._entity_ids: tuple[str, ...] = ()
+        self._unsubscribe: Unsubscribe | None = None
 
     def get_state(self, entity_id: str) -> str | None:
         state = self._hass.states.get(entity_id)
@@ -25,10 +28,41 @@ class HomeAssistantRuntimeAdapter:
             if user.is_active
         )
 
-    def async_listen(self, callback: StateChangeCallback) -> Unsubscribe:
-        from homeassistant.const import EVENT_STATE_CHANGED
+    def async_listen(
+        self, callback: StateChangeCallback, entity_ids: tuple[str, ...]
+    ) -> Unsubscribe:
+        self._callback = callback
+        self._entity_ids = entity_ids
+        self._replace_listener()
 
-        def state_changed(event: Any) -> None:
+        def unsubscribe() -> None:
+            if self._unsubscribe is not None:
+                self._unsubscribe()
+                self._unsubscribe = None
+            self._callback = None
+            self._entity_ids = ()
+
+        return unsubscribe
+
+    def async_update_entity_ids(self, entity_ids: tuple[str, ...]) -> None:
+        """Replace the indexed HA subscription only when watched targets change."""
+
+        if entity_ids == self._entity_ids:
+            return
+        self._entity_ids = entity_ids
+        if self._callback is not None:
+            self._replace_listener()
+
+    def _replace_listener(self) -> None:
+        from homeassistant.helpers.event import async_track_state_change_event
+
+        if self._unsubscribe is not None:
+            self._unsubscribe()
+
+        async def state_changed(event: Any) -> None:
+            callback = self._callback
+            if callback is None:
+                return
             entity_id = event.data.get("entity_id")
             if not isinstance(entity_id, str):
                 return
@@ -36,9 +70,11 @@ class HomeAssistantRuntimeAdapter:
             new = event.data.get("new_state")
             old_state = getattr(old, "state", None)
             new_state = getattr(new, "state", None)
-            self._hass.async_create_task(callback(entity_id, old_state, new_state))
+            await callback(entity_id, old_state, new_state)
 
-        return self._hass.bus.async_listen(EVENT_STATE_CHANGED, state_changed)
+        self._unsubscribe = async_track_state_change_event(
+            self._hass, self._entity_ids, state_changed
+        )
 
 
 __all__ = ["HomeAssistantRuntimeAdapter"]

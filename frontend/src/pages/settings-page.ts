@@ -186,7 +186,7 @@ export class SettingsPage extends LitElement {
             <input
               type="number"
               min="1"
-              max="100000"
+              max="1000"
               .value=${String(this._records)}
               @input=${(event: Event) =>
                 (this._records = Number((event.currentTarget as HTMLInputElement).value))}

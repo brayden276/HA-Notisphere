@@ -29,7 +29,7 @@ ACTIVITY_RETENTION_PREFERENCES_KEY = "activity_retention"
 MIN_ACTIVITY_RETENTION_DAYS = 1
 MAX_ACTIVITY_RETENTION_DAYS = 3_650
 MIN_ACTIVITY_RETENTION_RECORDS = 1
-MAX_ACTIVITY_RETENTION_RECORDS = 100_000
+MAX_ACTIVITY_RETENTION_RECORDS = 1_000
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,6 +206,7 @@ class RuleRepository:
         self._retention_days = defaults.days
         self._retention_records = defaults.records
         self._snapshot: StorageSnapshot | None = None
+        self._rules_by_id: dict[str, NotificationRule] = {}
         self._lock = asyncio.Lock()
 
     async def _ensure_loaded(self) -> StorageSnapshot:
@@ -220,12 +221,17 @@ class RuleRepository:
             settings = self._retention_settings_from_preferences(self._snapshot.preferences)
             self._retention_days = settings.days
             self._retention_records = settings.records
+            retained_activity = self._retain_activity(self._snapshot.activity)
+            if retained_activity != self._snapshot.activity:
+                self._snapshot = replace(self._snapshot, activity=retained_activity)
+            self._rules_by_id = {rule.id: rule for rule in self._snapshot.rules}
         return self._snapshot
 
     async def snapshot(self) -> StorageSnapshot:
+        """Return the immutable in-memory snapshot without serialising a copy."""
+
         async with self._lock:
-            snapshot = await self._ensure_loaded()
-            return StorageSnapshot.from_dict(snapshot.to_dict())
+            return await self._ensure_loaded()
 
     async def list(self) -> tuple[NotificationRule, ...]:
         async with self._lock:
@@ -234,17 +240,14 @@ class RuleRepository:
 
     async def get(self, rule_id: str) -> NotificationRule | None:
         async with self._lock:
-            snapshot = await self._ensure_loaded()
-            return next((rule for rule in snapshot.rules if rule.id == rule_id), None)
+            await self._ensure_loaded()
+            return self._rules_by_id.get(rule_id)
 
     async def create(self, rule: NotificationRule) -> NotificationRule:
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            if any(existing.id == rule.id for existing in snapshot.rules):
-                actual = next(
-                    existing.revision for existing in snapshot.rules if existing.id == rule.id
-                )
-                raise RevisionConflictError(rule.id, None, actual)
+            if (existing := self._rules_by_id.get(rule.id)) is not None:
+                raise RevisionConflictError(rule.id, None, existing.revision)
             now = self._now()
             created = replace(rule, revision=1, created_at=now, updated_at=now)
             require_valid_rule(created)
@@ -254,7 +257,7 @@ class RuleRepository:
     async def update(self, rule: NotificationRule, *, expected_revision: int) -> NotificationRule:
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            existing = next((item for item in snapshot.rules if item.id == rule.id), None)
+            existing = self._rules_by_id.get(rule.id)
             if existing is None:
                 raise RuleNotFoundError(rule.id)
             if existing.revision != expected_revision:
@@ -280,7 +283,7 @@ class RuleRepository:
 
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            existing = next((item for item in snapshot.rules if item.id == rule.id), None)
+            existing = self._rules_by_id.get(rule.id)
             if existing is None:
                 if expected_revision is not None:
                     raise RevisionConflictError(rule.id, expected_revision, None)
@@ -305,7 +308,7 @@ class RuleRepository:
     async def delete(self, rule_id: str, *, expected_revision: int) -> None:
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            existing = next((item for item in snapshot.rules if item.id == rule_id), None)
+            existing = self._rules_by_id.get(rule_id)
             if existing is None:
                 raise RuleNotFoundError(rule_id)
             if existing.revision != expected_revision:
@@ -319,13 +322,21 @@ class RuleRepository:
     async def append_activity(self, record: ActivityRecord) -> None:
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            retained = self._retain_activity((*snapshot.activity, record))
-            await self._persist(replace(snapshot, activity=retained))
+            newest_first = (
+                not snapshot.activity or record.timestamp >= snapshot.activity[0].timestamp
+            )
+            records = (
+                (record, *snapshot.activity)
+                if newest_first
+                else (*snapshot.activity, record)
+            )
+            retained = self._retain_activity(records, newest_first=newest_first)
+            await self._persist(replace(snapshot, activity=retained), delayed=True)
 
     async def list_activity(self) -> tuple[ActivityRecord, ...]:
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            return self._retain_activity(snapshot.activity)
+            return self._retain_activity(snapshot.activity, newest_first=True)
 
     async def activity_retention_settings(self) -> ActivityRetentionSettings:
         """Return the active limits after applying persisted safe preferences."""
@@ -356,6 +367,7 @@ class RuleRepository:
                 snapshot.activity,
                 days=settings.days,
                 record_limit=settings.records,
+                newest_first=True,
             )
             await self._persist(
                 replace(
@@ -375,7 +387,10 @@ class RuleRepository:
             require_valid_recipient(recipient)
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            await self._persist(replace(snapshot, recipients=tuple(recipients)))
+            recipients = tuple(recipients)
+            if snapshot.recipients == recipients:
+                return
+            await self._persist(replace(snapshot, recipients=recipients))
 
     async def replace_groups(self, groups: tuple[RecipientGroup, ...]) -> None:
         """Persist groups while their Phase 3 CRUD service remains separate."""
@@ -384,7 +399,10 @@ class RuleRepository:
             require_valid_group(group)
         async with self._lock:
             snapshot = await self._ensure_loaded()
-            await self._persist(replace(snapshot, groups=tuple(groups)))
+            groups = tuple(groups)
+            if snapshot.groups == groups:
+                return
+            await self._persist(replace(snapshot, groups=groups))
 
     def _retain_activity(
         self,
@@ -392,10 +410,15 @@ class RuleRepository:
         *,
         days: int | None = None,
         record_limit: int | None = None,
+        newest_first: bool = False,
     ) -> tuple[ActivityRecord, ...]:
         cutoff = self._now() - timedelta(days=days or self._retention_days)
-        recent = (record for record in records if record.timestamp >= cutoff)
-        ordered = sorted(recent, key=lambda record: record.timestamp, reverse=True)
+        recent = tuple(record for record in records if record.timestamp >= cutoff)
+        ordered = (
+            recent
+            if newest_first
+            else tuple(sorted(recent, key=lambda record: record.timestamp, reverse=True))
+        )
         return tuple(ordered[: record_limit or self._retention_records])
 
     def _retention_settings_from_preferences(
@@ -436,9 +459,26 @@ class RuleRepository:
             raise ValueError("Repository clock must return a timezone-aware datetime")
         return value.astimezone(UTC)
 
-    async def _persist(self, snapshot: StorageSnapshot) -> None:
-        await self._backend.save(snapshot.to_dict())
+    async def _persist(
+        self, snapshot: StorageSnapshot, *, delayed: bool = False
+    ) -> None:
+        rules_changed = self._snapshot is None or snapshot.rules is not self._snapshot.rules
+        delayed_snapshot_save = getattr(self._backend, "save_snapshot_delayed", None)
+        if delayed and callable(delayed_snapshot_save):
+            delayed_snapshot_save(snapshot)
+            self._snapshot = snapshot
+            if rules_changed:
+                self._rules_by_id = {rule.id: rule for rule in snapshot.rules}
+            return
+        data = snapshot.to_dict()
+        delayed_save = getattr(self._backend, "save_delayed", None)
+        if delayed and callable(delayed_save):
+            delayed_save(data)
+        else:
+            await self._backend.save(data)
         self._snapshot = snapshot
+        if rules_changed:
+            self._rules_by_id = {rule.id: rule for rule in snapshot.rules}
 
 
 __all__ = [

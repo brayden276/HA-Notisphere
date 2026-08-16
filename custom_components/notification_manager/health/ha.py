@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..models import RecipientGroup, RecipientProfile
+from ..models import NotificationRule, RecipientGroup, RecipientProfile, TargetRef
 from .models import (
     HealthEntitySnapshot,
     HealthReconciliationReport,
@@ -31,9 +31,10 @@ class HomeAssistantRuleHealthAdapter:
         recipients: tuple[RecipientProfile, ...],
         groups: tuple[RecipientGroup, ...],
         directory_users: tuple[HealthUserSnapshot, ...],
+        rules: tuple[NotificationRule, ...] = (),
     ) -> RuleHealthSnapshot:
         if self._entities is None:
-            self._entities = self._snapshots()
+            self._entities = self._snapshots(_targets_for_rules(rules))
         return RuleHealthSnapshot(self._entities, recipients, groups, directory_users)
 
     async def async_reconcile(
@@ -42,27 +43,40 @@ class HomeAssistantRuleHealthAdapter:
         recipients: tuple[RecipientProfile, ...],
         groups: tuple[RecipientGroup, ...],
         directory_users: tuple[HealthUserSnapshot, ...],
+        rules: tuple[NotificationRule, ...] = (),
     ) -> HealthReconciliationReport:
         """Refresh and reconcile once; callers decide which HA events invoke this."""
 
         self.invalidate()
-        snapshot = await self.async_snapshot(recipients, groups, directory_users)
+        snapshot = await self.async_snapshot(
+            recipients, groups, directory_users, rules
+        )
         return await service.async_reconcile(snapshot)
 
-    def _snapshots(self) -> tuple[HealthEntitySnapshot, ...]:
+    def _snapshots(
+        self, targets: tuple[TargetRef, ...]
+    ) -> tuple[HealthEntitySnapshot, ...]:
         from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN
         from homeassistant.helpers import entity_registry as er
 
         entity_registry = er.async_get(self._hass)
-        entries_by_entity_id = {
-            entry.entity_id: entry for entry in entity_registry.entities.values()
-        }
-        entity_ids = set(entries_by_entity_id)
-        entity_ids.update(state.entity_id for state in self._hass.states.async_all())
+        entries_by_entity_id: dict[str, Any] = {}
+        unresolved_registry_ids: set[str] = set()
+        for target in targets:
+            entry = entity_registry.async_get(target.entity_id)
+            if target.registry_id is None:
+                entries_by_entity_id[target.entity_id] = entry
+            elif entry is not None and entry.id == target.registry_id:
+                entries_by_entity_id[entry.entity_id] = entry
+            else:
+                unresolved_registry_ids.add(target.registry_id)
+        if unresolved_registry_ids:
+            for entry in entity_registry.entities.values():
+                if entry.id in unresolved_registry_ids:
+                    entries_by_entity_id[entry.entity_id] = entry
 
         snapshots = []
-        for entity_id in sorted(entity_ids):
-            entry = entries_by_entity_id.get(entity_id)
+        for entity_id, entry in sorted(entries_by_entity_id.items()):
             state = self._hass.states.get(entity_id)
             snapshots.append(
                 HealthEntitySnapshot(
@@ -73,6 +87,19 @@ class HomeAssistantRuleHealthAdapter:
                 )
             )
         return tuple(snapshots)
+
+
+def _targets_for_rules(rules: tuple[NotificationRule, ...]) -> tuple[TargetRef, ...]:
+    targets = {
+        (target.entity_id, target.registry_id): target
+        for rule in rules
+        for target in (
+            rule.trigger.target,
+            *(condition.target for condition in rule.conditions),
+        )
+        if target is not None
+    }
+    return tuple(targets.values())
 
 
 __all__ = ["HomeAssistantRuleHealthAdapter"]

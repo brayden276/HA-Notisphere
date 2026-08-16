@@ -155,6 +155,12 @@ def test_settings_are_admin_only_versioned_persistent_and_prune_immediately() ->
                 activity_retention_days=0,
                 activity_retention_records=1,
             )
+        with pytest.raises(ValueError):
+            await service.update_settings(
+                admin,
+                activity_retention_days=30,
+                activity_retention_records=1_001,
+            )
 
         settings = await service.update_settings(
             admin,

@@ -90,6 +90,12 @@ Notification Manager is added once; it does not use YAML configuration.
 
 Rules do not copy or generate Home Assistant automations. The integration watches the relevant Home Assistant state changes and owns its notification-specific timers.
 
+## Resource use
+
+Notification Manager is event-driven and does not poll Home Assistant. It subscribes only to entity IDs used by enabled rules, keeps at most one duration timer per active rule, and filters recipient and health events before scheduling work. Changes to rules update those indexes immediately.
+
+Activity history is bounded to 1,000 records, dashboard bootstrap and activity requests default to 100 records, and bursts of activity writes are coalesced through Home Assistant's storage helper. Rules and household settings still use immediate durable writes. Recipient and group discovery also avoids storage writes when the discovered result has not changed.
+
 ## Data, privacy and security
 
 Notification Manager has no separate server, cloud account, database or analytics service. Rules, recipient mappings, groups and bounded activity history are stored through Home Assistant's local storage system under the key `notification_manager.state`. Notification delivery uses Home Assistant's existing Companion App notification services.

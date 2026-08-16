@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -11,6 +12,8 @@ from custom_components.notification_manager.manager import (
     RequestUser,
 )
 from custom_components.notification_manager.models import (
+    ActivityRecord,
+    ActivityStatus,
     Audience,
     AudienceType,
     RecipientProfile,
@@ -129,6 +132,31 @@ def test_bootstrap_is_server_canonical_and_permission_filtered() -> None:
             "is_admin": False,
         }
         assert [rule["id"] for rule in bootstrap["rules"]] == [personal.id]
+
+    run(scenario())
+
+
+def test_bootstrap_activity_payload_is_bounded() -> None:
+    async def scenario() -> None:
+        repository = RuleRepository(InMemoryStorageBackend())
+        manager = NotificationManager(repository)
+        admin = RequestUser("admin-1", True)
+        saved = await manager.create_rule(make_rule(), admin)
+        now = datetime(2026, 8, 16, 12, 0, tzinfo=UTC)
+        for index in range(125):
+            await repository.append_activity(
+                ActivityRecord(
+                    id=f"activity-{index}",
+                    rule_id=saved.id,
+                    occurrence_id=f"occurrence-{index}",
+                    timestamp=now + timedelta(seconds=index),
+                    trigger_summary="Garage Door",
+                    status=ActivityStatus.SENT,
+                )
+            )
+
+        bootstrap = await manager.bootstrap(admin)
+        assert len(bootstrap["activity"]) == 100
 
     run(scenario())
 

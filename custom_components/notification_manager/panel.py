@@ -10,6 +10,7 @@ from .const import (
     DOMAIN,
     PANEL_ELEMENT,
     PANEL_ICON,
+    PANEL_MODULE_URL,
     PANEL_STATIC_URL,
     PANEL_TITLE,
     PANEL_URL_PATH,
@@ -19,10 +20,15 @@ from .const import (
 async def async_register_panel(hass: Any) -> None:
     """Serve and register the bundled ES module."""
 
+    bundle = Path(__file__).parent / "frontend" / "notification-manager-panel.js"
+    if not bundle.is_file():
+        raise FileNotFoundError(
+            "Notification Manager panel bundle is missing from the installed component"
+        )
+
     from homeassistant.components import panel_custom
     from homeassistant.components.http import StaticPathConfig
 
-    bundle = Path(__file__).parent / "frontend" / "notification-manager-panel.js"
     if not hass.data.get(DATA_PANEL_STATIC_REGISTERED):
         await hass.http.async_register_static_paths(
             [StaticPathConfig(PANEL_STATIC_URL, str(bundle), True)]
@@ -34,7 +40,7 @@ async def async_register_panel(hass: Any) -> None:
         webcomponent_name=PANEL_ELEMENT,
         sidebar_title=PANEL_TITLE,
         sidebar_icon=PANEL_ICON,
-        module_url=PANEL_STATIC_URL,
+        module_url=PANEL_MODULE_URL,
         require_admin=False,
         config={"domain": DOMAIN},
         config_panel_domain=DOMAIN,
