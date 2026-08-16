@@ -44,7 +44,7 @@ Use this route for local testing while the project has no published HACS reposit
 3. Copy the complete `custom_components/notification_manager` directory to `<Home Assistant config>/custom_components/notification_manager`.
 4. Restart Home Assistant.
 5. In Home Assistant, open **Settings → Devices & services → Add integration**.
-6. Search for **Notification Manager** and confirm the one-step setup form.
+6. Search for **Notification Manager** and select it. There are no accounts, keys or settings to enter; Home Assistant creates the integration immediately.
 7. Open **Notifications** in the sidebar.
 
 For Home Assistant OS, `/config` is normally the configuration directory, so the installed component path is:
@@ -59,20 +59,19 @@ Do not copy the repository root into `custom_components`; Home Assistant expects
 
 A minimal `hacs.json` is included, and the code is laid out as one integration under `custom_components`. HACS publication is not yet available because this workspace does not define a public GitHub repository, documentation URL, issue tracker, code owner or brand entry.
 
-After those release details are supplied and validation passes, users will be able to add the public GitHub URL as a HACS custom repository of type **Integration**, download **Notification Manager**, restart Home Assistant and add it from **Settings → Devices & services**.
+After those release details are supplied and validation passes, users will be able to add the public GitHub URL as a HACS custom repository of type **Integration**, download **Notification Manager**, restart Home Assistant and select it from **Settings → Devices & services → Add integration**. Setup then completes immediately without YAML, credentials or advanced options.
 
 See [Release readiness](docs/RELEASE.md) for the remaining publication checklist.
 
 ## First setup and test
 
-1. Open **Notifications → People & Groups**.
-2. Review the discovered household members and phones. Confident matches are pre-selected; ambiguous matches require confirmation.
-3. Select your primary phone and send a test notification.
-4. Select **Create notification**.
-5. Choose a door or window, select **Stays open**, enter a short test duration, and choose **Me** or **Everyone**.
-6. Review the generated message and save the notification.
-7. Change the selected entity to its active state. Resolve it before the duration expires to confirm that no notification is sent, then repeat and leave it active through the duration.
-8. Open **Activity** to review the delivery result.
+1. Open **Notifications**. On a new installation, an administrator is taken to the short household setup screen automatically.
+2. Review the discovered household members and phones. Companion App registrations with an explicit Home Assistant owner are assigned automatically; only genuinely ambiguous matches require confirmation.
+3. Optionally send a test notification, then select **Create first notification**.
+4. Choose a door or window, select **Stays open**, enter a short test duration, and choose **Me** or **Everyone**.
+5. Review the generated message and save the notification.
+6. Change the selected entity to its active state. Resolve it before the duration expires to confirm that no notification is sent, then repeat and leave it active through the duration.
+7. Open **Activity** to review the delivery result.
 
 Discovery deliberately avoids guessing when multiple users or devices look alike. An administrator should resolve those mappings in the panel rather than entering notification service names into normal rule screens.
 
@@ -82,7 +81,8 @@ Notification Manager is added once; it does not use YAML configuration.
 
 - Active Home Assistant users become recipient candidates.
 - A `person` directly linked to a Home Assistant user is associated automatically when the relationship is unique.
-- Companion App notification services are associated only when an existing mapping or a unique normalised name match is available.
+- Companion App notification services are associated from their Home Assistant registration owner when available, then from an existing confirmed mapping or a unique normalised name match.
+- New, removed or renamed Companion App notification services and relevant `person` changes refresh recipient discovery automatically; no integration reload is normally required.
 - **Everyone** and **Admins** are system groups resolved from the current household directory at delivery time.
 - Administrators manage custom groups and household notifications.
 - A non-administrator may manage their own recipient mapping and personal notifications, subject to their Home Assistant access.
@@ -137,7 +137,7 @@ Release maintainers must keep the semantic version in `custom_components/notific
 ### A household member has no phone
 
 - Confirm that person has signed in to the Home Assistant Companion App and registered the device with this Home Assistant instance.
-- Restart or reload Notification Manager after the Companion App integration has created its notification service.
+- Wait a moment after Companion App registration; Notification Manager refreshes automatically when Home Assistant publishes the phone's notification service.
 - Review **People & Groups** for an unconfirmed or ambiguous match.
 - Administrators can use Home Assistant developer tools to confirm the expected `notify.mobile_app_*` service exists, but normal users should not need to enter it manually.
 

@@ -4,6 +4,7 @@ const ICONS = {
   error: "mdi:alert-circle-outline",
   offline: "mdi:connection",
   info: "mdi:information-outline",
+  success: "mdi:check-circle-outline",
 } as const;
 
 export class NotificationManagerStatusPanel extends LitElement {
@@ -40,6 +41,10 @@ export class NotificationManagerStatusPanel extends LitElement {
       background: var(--secondary-background-color, #f1f1f1);
     }
 
+    :host([kind="success"]) .panel {
+      border-color: var(--success-color, #2e7d32);
+    }
+
     :host([compact]) .panel {
       border-radius: 0;
       border-inline: 0;
@@ -53,6 +58,10 @@ export class NotificationManagerStatusPanel extends LitElement {
 
     :host([kind="error"]) ha-icon {
       color: var(--error-color, #c62828);
+    }
+
+    :host([kind="success"]) ha-icon {
+      color: var(--success-color, #2e7d32);
     }
 
     strong,

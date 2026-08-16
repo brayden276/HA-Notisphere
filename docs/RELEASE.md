@@ -49,8 +49,10 @@ Use a disposable Home Assistant instance with at least one Companion App notific
 
 - [ ] Copy or install the component and restart Home Assistant.
 - [ ] Add Notification Manager through the config flow without a startup traceback.
+- [ ] Confirm selecting Notification Manager creates the entry without requesting YAML, credentials, service names or advanced options.
 - [ ] Confirm the **Notifications** sidebar panel loads and its WebSocket session connects.
 - [ ] Confirm at least one recipient mapping and send a test notification.
+- [ ] Register or remove a Companion App phone while Notification Manager is loaded and confirm People & Groups refreshes without an integration reload.
 - [ ] Create an immediate binary-state rule, change the entity and observe delivery plus activity.
 - [ ] Create a 30-second duration rule; verify resolving early cancels it and remaining active sends once.
 - [ ] Resolve **Everyone**, **Admins** and an overlapping custom group without duplicate endpoint delivery.
@@ -59,4 +61,3 @@ Use a disposable Home Assistant instance with at least one Companion App notific
 - [ ] Inspect Home Assistant logs and browser console for product-caused unhandled errors.
 
 Record the Home Assistant version, Companion App platform, exact scenarios and observed outcomes in the release notes. Configuration parsing, unit tests or a packaged JavaScript file are not substitutes for this acceptance run.
-

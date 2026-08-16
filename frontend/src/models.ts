@@ -16,6 +16,7 @@ export type ConditionType =
 export type AudienceType = "ME" | "RECIPIENT" | "GROUP" | "EVERYONE" | "ADMINS";
 export type EndpointCapability =
   | "title"
+  | "important"
   | "critical"
   | "image"
   | "actions"
@@ -50,7 +51,7 @@ export interface TriggerSpec {
   parameters: Record<string, JsonValue>;
 }
 
-export interface ResolvedTrigger extends TriggerSpec {}
+export type ResolvedTrigger = TriggerSpec;
 
 export interface ConditionSpec {
   type: ConditionType;

@@ -64,7 +64,9 @@ def required_endpoint_capabilities(
     """Return capabilities that must be present to preserve a rule's intent."""
 
     required: set[EndpointCapability] = set()
-    if rule.delivery_policy.urgency is Urgency.CRITICAL:
+    if rule.delivery_policy.urgency is Urgency.IMPORTANT:
+        required.add(EndpointCapability.IMPORTANT)
+    elif rule.delivery_policy.urgency is Urgency.CRITICAL:
         required.update({EndpointCapability.CRITICAL, EndpointCapability.SOUND})
     elif rule.delivery_policy.sound:
         required.add(EndpointCapability.SOUND)

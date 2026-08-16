@@ -17,6 +17,7 @@ from ..models import (
 MOBILE_APP_CAPABILITIES = frozenset(
     {
         EndpointCapability.TITLE,
+        EndpointCapability.IMPORTANT,
         EndpointCapability.IMAGE,
         EndpointCapability.ACTIONS,
         EndpointCapability.DEEP_LINK,
@@ -37,6 +38,14 @@ class PersonSnapshot:
     entity_id: str
     name: str
     user_id: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MobileAppRegistrationSnapshot:
+    """One Companion App registration with its authoritative HA owner."""
+
+    user_id: str
+    device_name: str
 
 
 class UnconfirmedReason(StrEnum):
@@ -73,6 +82,7 @@ def discover_recipients(
     people: tuple[PersonSnapshot, ...],
     notify_service_names: tuple[str, ...],
     existing: tuple[RecipientProfile, ...] = (),
+    mobile_app_registrations: tuple[MobileAppRegistrationSnapshot, ...] = (),
 ) -> DiscoveryResult:
     """Build mappings only where the user relationship has one confident match."""
 
@@ -152,6 +162,28 @@ def discover_recipients(
                 endpoint_targets_by_user[existing_user_id].append(target)
             continue
         service_key = _match_key(target.removeprefix("notify.mobile_app_"))
+        registered_owners = tuple(
+            sorted(
+                {
+                    registration.user_id
+                    for registration in mobile_app_registrations
+                    if registration.user_id in users_by_id
+                    and service_key == _match_key(registration.device_name)
+                }
+            )
+        )
+        if len(registered_owners) == 1:
+            endpoint_targets_by_user[registered_owners[0]].append(target)
+            continue
+        if len(registered_owners) > 1:
+            unconfirmed.append(
+                UnconfirmedRelationship(
+                    target,
+                    UnconfirmedReason.AMBIGUOUS_MATCH,
+                    registered_owners,
+                )
+            )
+            continue
         candidates = tuple(
             sorted(
                 user.id
@@ -197,7 +229,9 @@ def discover_recipients(
             if prior is not None and endpoint.target.casefold() in visible_targets
         } if prior is not None else {}
         endpoints = tuple(
-            endpoints_by_target.get(target.casefold()) or mobile_app_endpoint(target)
+            _refresh_mobile_app_endpoint(
+                endpoints_by_target.get(target.casefold()), target
+            )
             for target in discovered_targets
         )
         person_for_user = confirmed_person.get(user.id)
@@ -254,6 +288,19 @@ def mobile_app_endpoint(target: str) -> DeliveryEndpoint:
     )
 
 
+def _refresh_mobile_app_endpoint(
+    existing: DeliveryEndpoint | None, target: str
+) -> DeliveryEndpoint:
+    """Keep user settings while adding safe baseline support over upgrades."""
+
+    if existing is None:
+        return mobile_app_endpoint(target)
+    return replace(
+        existing,
+        capabilities=existing.capabilities | {EndpointCapability.IMPORTANT},
+    )
+
+
 def _friendly_source_name(source: str) -> str:
     value = source.removeprefix("notify.mobile_app_").removeprefix("person.")
     words = re.sub(r"[_-]+", " ", value).strip()
@@ -263,6 +310,7 @@ def _friendly_source_name(source: str) -> str:
 __all__ = [
     "MOBILE_APP_CAPABILITIES",
     "DiscoveryResult",
+    "MobileAppRegistrationSnapshot",
     "PersonSnapshot",
     "UnconfirmedReason",
     "UnconfirmedRelationship",

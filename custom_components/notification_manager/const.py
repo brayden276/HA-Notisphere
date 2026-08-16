@@ -5,6 +5,7 @@ from typing import Final
 DOMAIN: Final = "notification_manager"
 INTEGRATION_VERSION: Final = "0.1.0"
 DATA_MANAGER: Final = "manager"
+DATA_RECIPIENT_DISCOVERY: Final = "recipient_discovery"
 DATA_WEBSOCKET_REGISTERED: Final = f"{DOMAIN}_websocket_registered"
 DATA_PANEL_STATIC_REGISTERED: Final = f"{DOMAIN}_panel_static_registered"
 STORAGE_KEY: Final = f"{DOMAIN}.state"

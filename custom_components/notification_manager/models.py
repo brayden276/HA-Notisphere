@@ -54,6 +54,7 @@ class EndpointType(StrEnum):
 
 class EndpointCapability(StrEnum):
     TITLE = "title"
+    IMPORTANT = "important"
     CRITICAL = "critical"
     IMAGE = "image"
     ACTIONS = "actions"

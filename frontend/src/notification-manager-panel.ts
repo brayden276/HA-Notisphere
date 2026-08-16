@@ -38,6 +38,7 @@ export class NotificationManagerPanel extends LitElement {
     _errorMessage: { state: true },
     _loadState: { state: true },
     _notificationView: { state: true },
+    _onboardingActive: { state: true },
     _selectedRuleId: { state: true },
   };
 
@@ -265,6 +266,7 @@ export class NotificationManagerPanel extends LitElement {
   private _boundConnection: HomeAssistantConnection | undefined;
   private _loadGeneration = 0;
   private _notificationView: NotificationView = "list";
+  private _onboardingActive = false;
   private _selectedRuleId = "";
   private _editorDirty = false;
 
@@ -393,6 +395,17 @@ export class NotificationManagerPanel extends LitElement {
       this._bootstrapData = data;
       this._loadState = "ready";
       this._connectedToHomeAssistant = true;
+      const needsHouseholdSetup =
+        !hadData &&
+        data.current_user.is_admin &&
+        data.rules.length === 0 &&
+        !this._onboardingWasCompleted(data.current_user.id);
+      if (needsHouseholdSetup) {
+        this._onboardingActive = true;
+        this._activeRoute = "people";
+        globalThis.history?.replaceState(null, "", hrefForRoute("people"));
+        return;
+      }
       const allowedRoute = routeForUser(this._activeRoute, data.current_user.is_admin);
       if (allowedRoute !== this._activeRoute) {
         this._activeRoute = allowedRoute;
@@ -470,6 +483,31 @@ export class NotificationManagerPanel extends LitElement {
     this._selectedRuleId = ruleId;
     if (view !== "create" && view !== "edit") this._editorDirty = false;
     globalThis.history?.replaceState(null, "", hrefForRoute("notifications"));
+  }
+
+  private _onboardingWasCompleted(userId: string): boolean {
+    try {
+      return globalThis.localStorage?.getItem(this._onboardingStorageKey(userId)) === "complete";
+    } catch {
+      return false;
+    }
+  }
+
+  private _onboardingStorageKey(userId: string): string {
+    return `notification-manager:onboarding:${userId}`;
+  }
+
+  private _completeOnboardingAndCreate(): void {
+    const userId = this._bootstrapData?.current_user.id;
+    if (userId) {
+      try {
+        globalThis.localStorage?.setItem(this._onboardingStorageKey(userId), "complete");
+      } catch {
+        // Private browsing can deny local storage; the current session still proceeds.
+      }
+    }
+    this._onboardingActive = false;
+    this._showNotification("create");
   }
 
   private async _refreshData(): Promise<void> {
@@ -582,8 +620,10 @@ export class NotificationManagerPanel extends LitElement {
             .currentUser=${data.current_user}
             .recipients=${data.recipients}
             .groups=${data.groups}
+            .onboarding=${this._onboardingActive}
             .unconfirmedMappings=${data.unconfirmed_recipient_mappings}
             @data-changed=${() => void this._refreshData()}
+            @create-first-notification=${() => this._completeOnboardingAndCreate()}
           ></notification-manager-people-groups-page>
         `;
       case "activity":

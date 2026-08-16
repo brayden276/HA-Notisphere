@@ -18,10 +18,8 @@ class NotificationManagerConfigFlow(ConfigFlow, domain=DOMAIN):  # type: ignore[
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        """Handle the no-input setup confirmation."""
+        """Create the local entry immediately; there is nothing to configure."""
 
         if self._async_current_entries():
             return self.async_abort(reason="already_configured")
-        if user_input is not None:
-            return self.async_create_entry(title="Notification Manager", data={})
-        return self.async_show_form(step_id="user")
+        return self.async_create_entry(title="Notification Manager", data={})

@@ -11,8 +11,10 @@ import type {
   ResolvedTrigger,
 } from "../src/models";
 import "../src/pages/notifications-page";
+import "../src/pages/people-groups-page";
 import "../src/pages/rule-editor-page";
 import type { NotificationsPage } from "../src/pages/notifications-page";
+import type { PeopleGroupsPage } from "../src/pages/people-groups-page";
 import type { RuleEditorPage } from "../src/pages/rule-editor-page";
 
 const user: CurrentUser = { id: "user-1", name: "Alice", is_admin: true };
@@ -119,6 +121,33 @@ afterEach(() => {
 });
 
 describe("core product screens", () => {
+  it("guides first-run users from an automatically discovered phone to creation", async () => {
+    const page = document.createElement(
+      "notification-manager-people-groups-page",
+    ) as PeopleGroupsPage;
+    page.currentUser = user;
+    page.recipients = [recipient];
+    page.groups = [];
+    page.onboarding = true;
+    const create = vi.fn();
+    page.addEventListener("create-first-notification", create);
+    document.body.append(page);
+    await settle(page);
+
+    const root = page.shadowRoot as ShadowRoot;
+    const status = root.querySelector("notification-manager-status-panel") as HTMLElement & {
+      heading: string;
+      message: string;
+    };
+    expect(status.heading).toBe("Your household is ready");
+    expect(status.message).toContain("1 notification phone is ready");
+    const button = [...root.querySelectorAll("notification-manager-button")].find((item) =>
+      item.textContent?.includes("Create first notification"),
+    ) as HTMLElement;
+    button.click();
+    expect(create).toHaveBeenCalledOnce();
+  });
+
   it("renders the actionable empty state and a human broken-rule state", async () => {
     const page = document.createElement(
       "notification-manager-notifications-page",
@@ -224,5 +253,64 @@ describe("core product screens", () => {
     expect(page.shadowRoot?.textContent).toContain(
       "This notification changed while you were editing it.",
     );
+  });
+
+  it("builds multiple AND conditions including a human device-state condition", async () => {
+    const createRule = vi.fn().mockImplementation(async (draft: NotificationRule) => draft);
+    const api = {
+      resolveTrigger: vi.fn().mockResolvedValue(trigger),
+      createRule,
+    } as unknown as NotificationManagerApi;
+    const page = document.createElement(
+      "notification-manager-rule-editor-page",
+    ) as RuleEditorPage;
+    page.api = api;
+    page.currentUser = user;
+    page.targets = [garage];
+    page.recipients = [recipient];
+    document.body.append(page);
+    await settle(page);
+
+    const root = page.shadowRoot as ShadowRoot;
+    (root.querySelector(".add-condition") as HTMLButtonElement).click();
+    await settle(page);
+    let kind = root.querySelector('[id^="condition-kind-"]') as HTMLSelectElement;
+    kind.value = "ENTITY_STATE";
+    kind.dispatchEvent(new Event("change", { bubbles: true }));
+    await settle(page);
+    const target = root.querySelector('[id^="condition-target-"]') as HTMLSelectElement;
+    target.value = garage.entity_id;
+    target.dispatchEvent(new Event("change", { bubbles: true }));
+    await settle(page);
+    const state = root.querySelector('[id^="condition-state-"]') as HTMLSelectElement;
+    state.value = "off";
+    state.dispatchEvent(new Event("change", { bubbles: true }));
+    (root.querySelector(".add-condition") as HTMLButtonElement).click();
+    await settle(page);
+    const kinds = root.querySelectorAll('[id^="condition-kind-"]');
+    kind = kinds[1] as HTMLSelectElement;
+    kind.value = "TIME_WINDOW";
+    kind.dispatchEvent(new Event("change", { bubbles: true }));
+    await settle(page);
+
+    const save = [...root.querySelectorAll("notification-manager-button")].find((button) =>
+      button.textContent?.includes("Save notification"),
+    ) as HTMLElement;
+    save.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await settle(page);
+
+    const saved = createRule.mock.calls[0]?.[0] as NotificationRule;
+    expect(saved.conditions).toHaveLength(2);
+    expect(saved.conditions[0]).toMatchObject({
+      type: "ENTITY_STATE",
+      parameters: { state: "off" },
+      target: { display_name_snapshot: "Garage Door" },
+    });
+    expect(saved.conditions[1]).toMatchObject({
+      type: "TIME_WINDOW",
+      parameters: { start: "22:00", end: "06:00" },
+    });
+    expect(root.textContent).toContain("All conditions must be met.");
   });
 });

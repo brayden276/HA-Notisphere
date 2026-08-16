@@ -118,3 +118,33 @@ def test_mobile_payload_omits_unconfirmed_optional_features() -> None:
         assert hass.services.calls[0][2] == {"message": "Open"}
 
     run(scenario())
+
+
+def test_important_payload_uses_cross_platform_time_sensitive_hints() -> None:
+    async def scenario() -> None:
+        hass = FakeHass()
+        delivery = HomeAssistantNotificationDelivery(hass)
+        endpoint = DeliveryEndpoint(
+            id="phone",
+            type=EndpointType.HA_NOTIFY,
+            target="notify.mobile_app_alice",
+            platform="mobile_app",
+            capabilities=frozenset({EndpointCapability.IMPORTANT}),
+        )
+
+        await delivery.async_send(
+            endpoint,
+            NotificationContent("Garage door", "Still open"),
+            DeliveryPolicy(Urgency.IMPORTANT),
+        )
+
+        assert hass.services.calls[0][2] == {
+            "message": "Still open",
+            "data": {
+                "ttl": 0,
+                "priority": "high",
+                "push": {"interruption-level": "time-sensitive"},
+            },
+        }
+
+    run(scenario())

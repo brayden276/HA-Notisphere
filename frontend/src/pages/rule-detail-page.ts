@@ -2,6 +2,7 @@ import { LitElement, css, html, nothing } from "lit";
 
 import type { NotificationManagerApi } from "../api";
 import { normaliseApiError } from "../api";
+import { activityOutcome } from "../activity-format";
 import "../components/nm-button";
 import "../components/nm-status-panel";
 import type {
@@ -144,6 +145,27 @@ export class RuleDetailPage extends LitElement {
     return names.join(", ");
   }
 
+  private _resolvedRecipients(rule: NotificationRule): RecipientProfile[] {
+    const ids = new Set<string>();
+    for (const audience of rule.audiences) {
+      if (audience.type === "ME") {
+        const owner = this.recipients.find(
+          (recipient) => recipient.ha_user_id === rule.owner_user_id,
+        );
+        if (owner) ids.add(owner.id);
+      } else if (audience.type === "EVERYONE") {
+        this.recipients.forEach((recipient) => ids.add(recipient.id));
+      } else if (audience.type === "RECIPIENT" && audience.recipient_id) {
+        ids.add(audience.recipient_id);
+      } else if (audience.type === "GROUP" && audience.group_id) {
+        this.groups
+          .find((group) => group.id === audience.group_id)
+          ?.member_recipient_ids.forEach((recipientId) => ids.add(recipientId));
+      }
+    }
+    return this.recipients.filter((recipient) => ids.has(recipient.id));
+  }
+
   private _summary(): string {
     if (!this.rule?.trigger.target) return "This notification needs a replacement device.";
     const target = this.targets.find(
@@ -159,6 +181,28 @@ export class RuleDetailPage extends LitElement {
       minutes,
       this._audienceLabel(this.rule.audiences),
     );
+  }
+
+  private _conditionSummary(rule: NotificationRule): string {
+    if (rule.conditions.length === 0) return "No additional conditions";
+    return rule.conditions
+      .map((condition) => {
+        if (condition.type === "TIME_WINDOW") {
+          return `between ${String(condition.parameters.start)} and ${String(condition.parameters.end)}`;
+        }
+        const name = condition.target?.display_name_snapshot ?? "the selected device";
+        if (condition.type === "PERSON_HOME") return `${name} is home`;
+        if (condition.type === "PERSON_AWAY") return `${name} is away`;
+        const target = this.targets.find(
+          (candidate) => candidate.entity_id === condition.target?.entity_id,
+        );
+        const expected = condition.parameters.state;
+        if (target?.category === "motion") {
+          return `${name} is ${expected === "on" ? "detecting activity" : "clear"}`;
+        }
+        return `${name} is ${expected === "on" ? "open or active" : "closed or inactive"}`;
+      })
+      .join(" and ");
   }
 
   private async _test(): Promise<void> {
@@ -217,6 +261,10 @@ export class RuleDetailPage extends LitElement {
     }
     const recent = this.activity.filter((item) => item.rule_id === rule.id).slice(0, 5);
     const last = recent[0];
+    const resolvedRecipients = this._resolvedRecipients(rule);
+    const phoneCount = resolvedRecipients.filter((recipient) =>
+      recipient.endpoints.some((endpoint) => endpoint.enabled),
+    ).length;
     return html`
       <button
         class="back"
@@ -256,7 +304,7 @@ export class RuleDetailPage extends LitElement {
           @click=${() =>
             this.dispatchEvent(new CustomEvent("rule-edit", { bubbles: true, composed: true }))}
         >
-          Edit
+          ${rule.health.status === "NEEDS_ATTENTION" ? "Choose replacement" : "Edit"}
         </notification-manager-button>
         <notification-manager-button .disabled=${this._busy} @click=${this._test}>
           Send test
@@ -271,17 +319,20 @@ export class RuleDetailPage extends LitElement {
         <h3 id="details-heading">Details</h3>
         <dl class="definition-list">
           <dt>Recipients</dt>
-          <dd>${this._audienceLabel(rule.audiences)}</dd>
-          <dt>Conditions</dt>
           <dd>
-            ${rule.conditions.length
-              ? `${rule.conditions.length} additional ${rule.conditions.length === 1 ? "condition" : "conditions"}`
-              : "No additional conditions"}
+            ${this._audienceLabel(rule.audiences)}
+            ${resolvedRecipients.length
+              ? html`<br />${resolvedRecipients.length}
+                  ${resolvedRecipients.length === 1 ? "person" : "people"} · ${phoneCount}
+                  ${phoneCount === 1 ? "phone" : "phones"}`
+              : nothing}
           </dd>
+          <dt>Conditions</dt>
+          <dd>${this._conditionSummary(rule)}</dd>
           <dt>Last triggered</dt>
           <dd>${last ? new Date(last.timestamp).toLocaleString() : "Not yet"}</dd>
           <dt>Last result</dt>
-          <dd>${last?.reason ?? (last ? last.status.toLowerCase() : "No activity yet")}</dd>
+          <dd>${last ? activityOutcome(last) : "No activity yet"}</dd>
         </dl>
       </section>
 
@@ -295,7 +346,9 @@ export class RuleDetailPage extends LitElement {
                     <div class="data-row">
                       <div>
                         <span class="row-primary">${record.trigger_summary}</span>
-                        <span class="row-secondary">${new Date(record.timestamp).toLocaleString()}</span>
+                        <span class="row-secondary">
+                          ${new Date(record.timestamp).toLocaleString()}<br />${activityOutcome(record)}
+                        </span>
                       </div>
                       <span class="status" data-status=${record.status}>${record.status.toLowerCase()}</span>
                     </div>

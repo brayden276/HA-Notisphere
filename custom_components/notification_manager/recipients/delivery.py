@@ -59,7 +59,14 @@ class HomeAssistantNotificationDelivery:
         if replacement_key and EndpointCapability.REPLACEMENT in endpoint.capabilities:
             data["tag"] = replacement_key
         if policy is not None:
-            if policy.urgency is Urgency.CRITICAL:
+            if (
+                policy.urgency is Urgency.IMPORTANT
+                and EndpointCapability.IMPORTANT in endpoint.capabilities
+            ):
+                data["ttl"] = 0
+                data["priority"] = "high"
+                data["push"] = {"interruption-level": "time-sensitive"}
+            elif policy.urgency is Urgency.CRITICAL:
                 if EndpointCapability.CRITICAL in endpoint.capabilities:
                     data["ttl"] = 0
                     data["priority"] = "high"

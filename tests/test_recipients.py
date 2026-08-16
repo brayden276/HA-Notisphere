@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, replace
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -10,6 +11,7 @@ from custom_components.notification_manager.models import (
     Audience,
     AudienceType,
     DeliveryEndpoint,
+    DeliveryPolicy,
     EndpointCapability,
     EndpointType,
     GroupType,
@@ -19,15 +21,20 @@ from custom_components.notification_manager.models import (
     RecipientPreferences,
     RecipientProfile,
     RecipientResultStatus,
+    Urgency,
 )
 from custom_components.notification_manager.recipients.delivery import (
     HomeAssistantNotificationDelivery,
 )
 from custom_components.notification_manager.recipients.discovery import (
+    MobileAppRegistrationSnapshot,
     PersonSnapshot,
     UnconfirmedReason,
     UserSnapshot,
     discover_recipients,
+)
+from custom_components.notification_manager.recipients.ha import (
+    HomeAssistantRecipientDiscovery,
 )
 from custom_components.notification_manager.recipients.manager import (
     SYSTEM_ADMINS_GROUP_ID,
@@ -35,8 +42,13 @@ from custom_components.notification_manager.recipients.manager import (
     RecipientManager,
     RecipientPermissionDeniedError,
 )
-from custom_components.notification_manager.recipients.resolver import DeliverySkipReason
+from custom_components.notification_manager.recipients.resolver import (
+    DeliverySkipReason,
+    required_endpoint_capabilities,
+)
 from custom_components.notification_manager.storage import InMemoryStorageBackend, RuleRepository
+
+from .factories import make_rule
 
 
 @dataclass(frozen=True, slots=True)
@@ -237,6 +249,17 @@ def test_primary_endpoint_and_capability_filtering_have_explicit_skip_reasons() 
     run(scenario())
 
 
+def test_important_urgency_requires_confirmed_endpoint_support() -> None:
+    rule = replace(
+        make_rule(),
+        delivery_policy=DeliveryPolicy(urgency=Urgency.IMPORTANT),
+    )
+
+    assert required_endpoint_capabilities(rule) == frozenset(
+        {EndpointCapability.IMPORTANT}
+    )
+
+
 def test_discovery_confirms_unique_relationships_and_leaves_ambiguity_unmapped() -> None:
     users = (
         UserSnapshot("user-a", "Alice", True),
@@ -283,9 +306,72 @@ def test_existing_confirmed_endpoint_mapping_is_preserved_by_discovery() -> None
         ("notify.mobile_app_kitchen_tablet", "mobile_app_kitchen_tablet"),
         (prior,),
     )
-    assert result.recipients[0].endpoints == prior.endpoints
+    refreshed = result.recipients[0].endpoints[0]
+    assert replace(refreshed, capabilities=frozenset()) == prior.endpoints[0]
+    assert EndpointCapability.IMPORTANT in refreshed.capabilities
     assert result.recipients[0].preferences == prior.preferences
     assert result.unconfirmed == ()
+
+
+def test_companion_app_registration_maps_phone_to_its_authoritative_user() -> None:
+    result = discover_recipients(
+        (
+            UserSnapshot("user-a", "Alice"),
+            UserSnapshot("user-b", "Bob"),
+        ),
+        (),
+        ("notify.mobile_app_pixel_9_pro",),
+        mobile_app_registrations=(
+            MobileAppRegistrationSnapshot("user-b", "Pixel 9 Pro"),
+        ),
+    )
+
+    by_user = {item.ha_user_id: item for item in result.recipients}
+    assert by_user["user-a"].endpoints == ()
+    assert [item.target for item in by_user["user-b"].endpoints] == [
+        "notify.mobile_app_pixel_9_pro"
+    ]
+    assert result.unconfirmed == ()
+
+
+def test_home_assistant_discovery_reads_companion_app_owner_metadata() -> None:
+    class Auth:
+        async def async_get_users(self):  # type: ignore[no-untyped-def]
+            return (
+                SimpleNamespace(id="user-a", name="Alice", is_admin=True, is_active=True),
+            )
+
+    class States:
+        @staticmethod
+        def async_all(domain):  # type: ignore[no-untyped-def]
+            assert domain == "person"
+            return ()
+
+    class Services:
+        @staticmethod
+        def async_services():  # type: ignore[no-untyped-def]
+            return {"notify": {"mobile_app_pixel_9": object()}}
+
+    class ConfigEntries:
+        @staticmethod
+        def async_entries(domain):  # type: ignore[no-untyped-def]
+            assert domain == "mobile_app"
+            return (
+                SimpleNamespace(data={"user_id": "user-a", "device_name": "Pixel 9"}),
+            )
+
+    hass = SimpleNamespace(
+        auth=Auth(),
+        states=States(),
+        services=Services(),
+        config_entries=ConfigEntries(),
+    )
+
+    result = run(HomeAssistantRecipientDiscovery(hass).async_discover(()))
+
+    assert [endpoint.target for endpoint in result.recipients[0].endpoints] == [
+        "notify.mobile_app_pixel_9"
+    ]
 
 
 def test_confirmed_unlinked_person_mapping_is_preserved_by_discovery() -> None:

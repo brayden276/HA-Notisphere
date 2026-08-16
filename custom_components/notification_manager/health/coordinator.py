@@ -15,6 +15,8 @@ from .models import HealthReconciliationReport, HealthUserSnapshot
 from .service import RuleHealthReconciliationService
 
 _LOGGER = logging.getLogger(__name__)
+_UNAVAILABLE_STATES = frozenset({"unknown", "unavailable"})
+_CAPABILITY_ATTRIBUTES = ("friendly_name", "device_class", "unit_of_measurement")
 
 
 class HealthRuntime(Protocol):
@@ -123,16 +125,41 @@ class HomeAssistantRuleHealthCoordinator:
                 _LOGGER.exception("Rule health reconciliation failed")
 
     def _state_changed(self, event: Any) -> None:
-        if self._invalidate_capabilities is not None:
-            self._invalidate_capabilities()
         entity_id = event.data.get("entity_id")
-        if isinstance(entity_id, str) and entity_id in self._tracked_entity_ids:
+        if not isinstance(entity_id, str):
+            return
+        old_state = event.data.get("old_state")
+        new_state = event.data.get("new_state")
+        if (
+            self._invalidate_capabilities is not None
+            and _capability_signature(old_state) != _capability_signature(new_state)
+        ):
+            self._invalidate_capabilities()
+        if (
+            entity_id in self._tracked_entity_ids
+            and _state_is_available(old_state) != _state_is_available(new_state)
+        ):
             self.request_reconciliation()
 
     def _registry_changed(self, _event: Any) -> None:
         if self._invalidate_capabilities is not None:
             self._invalidate_capabilities()
         self.request_reconciliation()
+
+
+def _state_is_available(state: Any) -> bool:
+    value = getattr(state, "state", None)
+    return isinstance(value, str) and value.casefold() not in _UNAVAILABLE_STATES
+
+
+def _capability_signature(state: Any) -> tuple[object, ...] | None:
+    if state is None:
+        return None
+    attributes = getattr(state, "attributes", {})
+    return (
+        _state_is_available(state),
+        *(attributes.get(name) for name in _CAPABILITY_ATTRIBUTES),
+    )
 
 
 __all__ = ["HealthRuntime", "HomeAssistantRuleHealthCoordinator"]

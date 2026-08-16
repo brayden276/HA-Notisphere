@@ -2,6 +2,7 @@ import { LitElement, css, html, nothing } from "lit";
 
 import type { NotificationManagerApi } from "../api";
 import { normaliseApiError } from "../api";
+import { activityOutcome, recipientOutcome } from "../activity-format";
 import "../components/nm-button";
 import "../components/nm-empty-state";
 import type {
@@ -63,6 +64,16 @@ export class ActivityPage extends LitElement {
       }
 
       .error { margin-bottom: 12px; color: var(--error-color, #c62828); }
+
+      .delivery-results {
+        display: grid;
+        gap: 2px;
+        margin: 6px 0 0;
+        padding: 0;
+        color: var(--secondary-text-color, #616161);
+        font-size: 13px;
+        list-style: none;
+      }
 
       @media (max-width: 760px) {
         .filters { grid-template-columns: 1fr; }
@@ -184,8 +195,17 @@ export class ActivityPage extends LitElement {
                       <span class="row-primary">${record.trigger_summary}</span>
                       <span class="row-secondary">
                         ${this.formatTimestamp(record.timestamp)}
-                        ${record.reason ? html`<br />${record.reason}` : null}
+                        <br />${activityOutcome(record)}
                       </span>
+                      ${record.recipient_results.length > 1 || record.status === "PARTIAL"
+                        ? html`
+                            <ul class="delivery-results" aria-label="Recipient results">
+                              ${record.recipient_results.map(
+                                (result) => html`<li>${recipientOutcome(result)}</li>`,
+                              )}
+                            </ul>
+                          `
+                        : nothing}
                     </div>
                     <div class="row-meta">
                       <span class="status" data-status=${record.status}>

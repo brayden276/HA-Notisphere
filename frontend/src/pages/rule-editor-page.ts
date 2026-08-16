@@ -28,7 +28,16 @@ import {
 import { pageStyles } from "./page-styles";
 
 type AudienceMode = "ME" | "EVERYONE" | "ADMINS" | "CHOOSE";
-type ConditionMode = "NONE" | "PERSON_HOME" | "PERSON_AWAY" | "TIME_WINDOW";
+type ConditionMode = "PERSON_HOME" | "PERSON_AWAY" | "TIME_WINDOW" | "ENTITY_STATE";
+
+interface ConditionDraft {
+  key: string;
+  mode: ConditionMode;
+  targetId: string;
+  start: string;
+  end: string;
+  expectedState: "on" | "off";
+}
 
 const CATEGORY_LABELS: Record<string, string> = {
   opening: "Doors & windows",
@@ -48,7 +57,7 @@ export class RuleEditorPage extends LitElement {
     recipients: { attribute: false },
     groups: { attribute: false },
     _audienceMode: { state: true },
-    _conditionMode: { state: true },
+    _conditionDrafts: { state: true },
     _durationMinutes: { state: true },
     _error: { state: true },
     _groupIds: { state: true },
@@ -176,6 +185,50 @@ export class RuleEditorPage extends LitElement {
         font-size: 13px;
       }
 
+      .condition-list {
+        display: grid;
+        grid-column: 1 / -1;
+        gap: 12px;
+      }
+
+      .condition-card {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.35));
+        border-radius: 8px;
+        padding: 14px;
+      }
+
+      .condition-card .condition-kind,
+      .condition-card .condition-target {
+        grid-column: 1 / -1;
+      }
+
+      .condition-actions {
+        grid-column: 1 / -1;
+        text-align: end;
+      }
+
+      .condition-actions button,
+      .add-condition {
+        min-block-size: 40px;
+        border: 0;
+        border-radius: 6px;
+        padding: 0 10px;
+        background: transparent;
+        color: var(--primary-color, #3f6f58);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .condition-actions button:focus-visible,
+      .add-condition:focus-visible {
+        outline: 3px solid var(--primary-color, #3f6f58);
+        outline-offset: 2px;
+      }
+
       fieldset {
         min-inline-size: 0;
         margin: 16px 0 0;
@@ -266,7 +319,8 @@ export class RuleEditorPage extends LitElement {
 
       @media (max-width: 640px) {
         .field-grid,
-        .choice-list {
+        .choice-list,
+        .condition-card {
           grid-template-columns: 1fr;
         }
 
@@ -304,10 +358,7 @@ export class RuleEditorPage extends LitElement {
   private _title = "";
   private _message = "";
   private _contentEdited = false;
-  private _conditionMode: ConditionMode = "NONE";
-  private _conditionTargetId = "";
-  private _conditionStart = "22:00";
-  private _conditionEnd = "06:00";
+  private _conditionDrafts: ConditionDraft[] = [];
   private _urgency: Urgency = "NORMAL";
   private _sound = "default";
   private _cooldownMinutes = 0;
@@ -352,7 +403,7 @@ export class RuleEditorPage extends LitElement {
       this._cooldownMinutes = Math.round((this.rule.behaviour.cooldown_seconds ?? 0) / 60);
       this._replacePrevious = this.rule.behaviour.replace_previous;
       this._initialiseAudience(this.rule.audiences);
-      this._initialiseCondition(this.rule.conditions);
+      this._initialiseConditions(this.rule.conditions);
     } else {
       this._applyGeneratedContent();
     }
@@ -373,17 +424,44 @@ export class RuleEditorPage extends LitElement {
     }
   }
 
-  private _initialiseCondition(conditions: ConditionSpec[]): void {
-    const condition = conditions[0];
-    if (!condition) return;
-    if (["PERSON_HOME", "PERSON_AWAY"].includes(condition.type)) {
-      this._conditionMode = condition.type as ConditionMode;
-      this._conditionTargetId = condition.target?.entity_id ?? "";
-    } else if (condition.type === "TIME_WINDOW") {
-      this._conditionMode = "TIME_WINDOW";
-      this._conditionStart = String(condition.parameters.start ?? "22:00");
-      this._conditionEnd = String(condition.parameters.end ?? "06:00");
-    }
+  private _initialiseConditions(conditions: ConditionSpec[]): void {
+    this._conditionDrafts = conditions.map((condition) => ({
+      key: newRuleId(),
+      mode: condition.type,
+      targetId: condition.target?.entity_id ?? "",
+      start: String(condition.parameters.start ?? "22:00"),
+      end: String(condition.parameters.end ?? "06:00"),
+      expectedState: condition.parameters.state === "off" ? "off" : "on",
+    }));
+  }
+
+  private _addCondition(): void {
+    this._conditionDrafts = [
+      ...this._conditionDrafts,
+      {
+        key: newRuleId(),
+        mode: "PERSON_HOME",
+        targetId: "",
+        start: "22:00",
+        end: "06:00",
+        expectedState: "on",
+      },
+    ];
+    this._markDirty();
+  }
+
+  private _updateCondition(index: number, values: Partial<ConditionDraft>): void {
+    this._conditionDrafts = this._conditionDrafts.map((condition, conditionIndex) =>
+      conditionIndex === index ? { ...condition, ...values } : condition,
+    );
+    this._markDirty();
+  }
+
+  private _removeCondition(index: number): void {
+    this._conditionDrafts = this._conditionDrafts.filter(
+      (_condition, conditionIndex) => conditionIndex !== index,
+    );
+    this._markDirty();
   }
 
   private get _selectedTarget(): CapabilityTarget | undefined {
@@ -509,32 +587,36 @@ export class RuleEditorPage extends LitElement {
   }
 
   private _conditions(): ConditionSpec[] {
-    if (this._conditionMode === "NONE") return [];
-    if (this._conditionMode === "TIME_WINDOW") {
+    return this._conditionDrafts.flatMap((condition): ConditionSpec[] => {
+      if (condition.mode === "TIME_WINDOW") {
+        return [
+          {
+            type: "TIME_WINDOW",
+            target: null,
+            parameters: { start: condition.start, end: condition.end },
+          },
+        ];
+      }
+      const target = this.targets.find((item) => item.entity_id === condition.targetId);
+      if (!target) return [];
       return [
         {
-          type: "TIME_WINDOW",
-          target: null,
-          parameters: { start: this._conditionStart, end: this._conditionEnd },
+          type: condition.mode,
+          target: {
+            entity_id: target.entity_id,
+            registry_id: target.registry_id,
+            device_id: target.device_id,
+            domain: target.domain,
+            device_class: target.device_class,
+            display_name_snapshot: target.display_name,
+          },
+          parameters:
+            condition.mode === "ENTITY_STATE"
+              ? { state: condition.expectedState }
+              : {},
         },
       ];
-    }
-    const target = this.targets.find((item) => item.entity_id === this._conditionTargetId);
-    if (!target) return [];
-    return [
-      {
-        type: this._conditionMode,
-        target: {
-          entity_id: target.entity_id,
-          registry_id: target.registry_id,
-          device_id: target.device_id,
-          domain: target.domain,
-          device_class: target.device_class,
-          display_name_snapshot: target.display_name,
-        },
-        parameters: {},
-      },
-    ];
+    });
   }
 
   private async _draft(): Promise<NotificationRule> {
@@ -546,11 +628,14 @@ export class RuleEditorPage extends LitElement {
     if (!this._name.trim() || !this._title.trim() || !this._message.trim()) {
       throw new Error("Add a notification name, title and message.");
     }
-    if (
-      ["PERSON_HOME", "PERSON_AWAY"].includes(this._conditionMode) &&
-      !this._conditionTargetId
-    ) {
-      throw new Error("Choose a person for the condition.");
+    for (const condition of this._conditionDrafts) {
+      if (condition.mode !== "TIME_WINDOW" && !condition.targetId) {
+        throw new Error(
+          condition.mode === "ENTITY_STATE"
+            ? "Choose a device for each condition."
+            : "Choose a person for each condition.",
+        );
+      }
     }
     const parameters = this._selectedSemantic.startsWith("REMAINS_")
       ? { duration_seconds: Math.round(this._durationMinutes * 60) }
@@ -712,10 +797,15 @@ export class RuleEditorPage extends LitElement {
     const semantics = supportedSemantics(this._selectedTarget);
     const personTargets = this.targets.filter((target) => target.category === "person");
     const showDuration = this._selectedSemantic.startsWith("REMAINS_");
+    const canImportant = this._supports("important");
     const canCritical = this._supports("critical") && this._supports("sound");
     const canImage = this._supports("image");
     const canDeepLink = this._supports("deep_link");
     const canReplace = this._supports("replacement");
+    const resolvedRecipients = this._resolvedRecipients();
+    const resolvedPhones = resolvedRecipients.filter((recipient) =>
+      recipient.endpoints.some((endpoint) => endpoint.enabled),
+    ).length;
     const review =
       this._selectedTarget && this._selectedSemantic
         ? reviewSentence(
@@ -828,9 +918,9 @@ export class RuleEditorPage extends LitElement {
               </div>
               ${this._renderAudienceChoices()}
               <p class="hint">
-                ${this._resolvedRecipients().length}
-                ${this._resolvedRecipients().length === 1 ? "person" : "people"} currently
-                resolved.
+                ${resolvedRecipients.length}
+                ${resolvedRecipients.length === 1 ? "person" : "people"} ·
+                ${resolvedPhones} ${resolvedPhones === 1 ? "phone" : "phones"} currently ready
               </p>
             </section>
 
@@ -872,71 +962,131 @@ export class RuleEditorPage extends LitElement {
                 <summary id="options-heading">More options</summary>
                 <div class="field-grid">
                   <div class="field full">
-                    <label for="condition">Only notify when</label>
-                    <select
-                      id="condition"
-                      .value=${this._conditionMode}
-                      @change=${(event: Event) => {
-                        this._conditionMode = valueFrom(event) as ConditionMode;
-                        this._markDirty();
-                      }}
-                    >
-                      <option value="NONE">No additional condition</option>
-                      <option value="PERSON_HOME">A selected person is home</option>
-                      <option value="PERSON_AWAY">A selected person is away</option>
-                      <option value="TIME_WINDOW">Between two times</option>
-                    </select>
+                    <label>Only notify when</label>
+                    ${this._conditionDrafts.length === 0
+                      ? html`<p class="hint">No additional conditions</p>`
+                      : nothing}
                   </div>
-                  ${["PERSON_HOME", "PERSON_AWAY"].includes(this._conditionMode)
-                    ? html`
-                        <div class="field full">
-                          <label for="condition-person">Person</label>
-                          <select
-                            id="condition-person"
-                            .value=${this._conditionTargetId}
-                            @change=${(event: Event) => {
-                              this._conditionTargetId = valueFrom(event);
-                              this._markDirty();
-                            }}
-                          >
-                            <option value="">Choose a person</option>
-                            ${personTargets.map(
-                              (target) => html`
-                                <option value=${target.entity_id}>${target.display_name}</option>
-                              `,
-                            )}
-                          </select>
+                  <div class="condition-list">
+                    ${this._conditionDrafts.map((condition, index) => {
+                      const conditionTarget = this.targets.find(
+                        (target) => target.entity_id === condition.targetId,
+                      );
+                      const conditionTargets =
+                        condition.mode === "ENTITY_STATE"
+                          ? this.targets.filter((target) =>
+                              ["opening", "motion"].includes(target.category),
+                            )
+                          : personTargets;
+                      const activeLabel =
+                        conditionTarget?.category === "motion" ? "Activity detected" : "Open";
+                      const inactiveLabel =
+                        conditionTarget?.category === "motion" ? "Clear" : "Closed";
+                      return html`
+                        <div class="condition-card">
+                          <div class="field condition-kind">
+                            <label for=${`condition-kind-${condition.key}`}>Condition</label>
+                            <select
+                              id=${`condition-kind-${condition.key}`}
+                              .value=${condition.mode}
+                              @change=${(event: Event) =>
+                                this._updateCondition(index, {
+                                  mode: valueFrom(event) as ConditionMode,
+                                  targetId: "",
+                                })}
+                            >
+                              <option value="PERSON_HOME">A selected person is home</option>
+                              <option value="PERSON_AWAY">A selected person is away</option>
+                              <option value="TIME_WINDOW">Between two times</option>
+                              <option value="ENTITY_STATE">Another device is in a selected state</option>
+                            </select>
+                          </div>
+                          ${condition.mode === "TIME_WINDOW"
+                            ? html`
+                                <div class="field">
+                                  <label for=${`condition-start-${condition.key}`}>From</label>
+                                  <input
+                                    id=${`condition-start-${condition.key}`}
+                                    type="time"
+                                    .value=${condition.start}
+                                    @input=${(event: Event) =>
+                                      this._updateCondition(index, { start: valueFrom(event) })}
+                                  />
+                                </div>
+                                <div class="field">
+                                  <label for=${`condition-end-${condition.key}`}>Until</label>
+                                  <input
+                                    id=${`condition-end-${condition.key}`}
+                                    type="time"
+                                    .value=${condition.end}
+                                    @input=${(event: Event) =>
+                                      this._updateCondition(index, { end: valueFrom(event) })}
+                                  />
+                                </div>
+                              `
+                            : html`
+                                <div class="field condition-target">
+                                  <label for=${`condition-target-${condition.key}`}>
+                                    ${condition.mode === "ENTITY_STATE" ? "Device" : "Person"}
+                                  </label>
+                                  <select
+                                    id=${`condition-target-${condition.key}`}
+                                    .value=${condition.targetId}
+                                    @change=${(event: Event) =>
+                                      this._updateCondition(index, {
+                                        targetId: valueFrom(event),
+                                      })}
+                                  >
+                                    <option value="">
+                                      ${condition.mode === "ENTITY_STATE"
+                                        ? "Choose a device"
+                                        : "Choose a person"}
+                                    </option>
+                                    ${conditionTargets.map(
+                                      (target) => html`
+                                        <option value=${target.entity_id} ?disabled=${!target.available}>
+                                          ${target.display_name}
+                                        </option>
+                                      `,
+                                    )}
+                                  </select>
+                                </div>
+                                ${condition.mode === "ENTITY_STATE"
+                                  ? html`
+                                      <div class="field condition-target">
+                                        <label for=${`condition-state-${condition.key}`}>State</label>
+                                        <select
+                                          id=${`condition-state-${condition.key}`}
+                                          .value=${condition.expectedState}
+                                          @change=${(event: Event) =>
+                                            this._updateCondition(index, {
+                                              expectedState: valueFrom(event) as "on" | "off",
+                                            })}
+                                        >
+                                          <option value="on">${activeLabel}</option>
+                                          <option value="off">${inactiveLabel}</option>
+                                        </select>
+                                      </div>
+                                    `
+                                  : nothing}
+                              `}
+                          <div class="condition-actions">
+                            <button type="button" @click=${() => this._removeCondition(index)}>
+                              Remove condition
+                            </button>
+                          </div>
                         </div>
-                      `
-                    : nothing}
-                  ${this._conditionMode === "TIME_WINDOW"
-                    ? html`
-                        <div class="field">
-                          <label for="start">From</label>
-                          <input
-                            id="start"
-                            type="time"
-                            .value=${this._conditionStart}
-                            @input=${(event: Event) => {
-                              this._conditionStart = valueFrom(event);
-                              this._markDirty();
-                            }}
-                          />
-                        </div>
-                        <div class="field">
-                          <label for="end">Until</label>
-                          <input
-                            id="end"
-                            type="time"
-                            .value=${this._conditionEnd}
-                            @input=${(event: Event) => {
-                              this._conditionEnd = valueFrom(event);
-                              this._markDirty();
-                            }}
-                          />
-                        </div>
-                      `
-                    : nothing}
+                      `;
+                    })}
+                  </div>
+                  <div class="field full">
+                    <button class="add-condition" type="button" @click=${this._addCondition}>
+                      + Add condition
+                    </button>
+                    ${this._conditionDrafts.length > 1
+                      ? html`<p class="hint">All conditions must be met.</p>`
+                      : nothing}
+                  </div>
                   <div class="field">
                     <label for="urgency">Urgency</label>
                     <select
@@ -948,9 +1098,12 @@ export class RuleEditorPage extends LitElement {
                       }}
                     >
                       <option value="NORMAL">Normal</option>
-                      <option value="IMPORTANT">Important</option>
+                      <option value="IMPORTANT" ?disabled=${!canImportant}>Important</option>
                       <option value="CRITICAL" ?disabled=${!canCritical}>Critical</option>
                     </select>
+                    ${!canImportant
+                      ? html`<p class="hint">Important alerts are not confirmed for every selected phone.</p>`
+                      : nothing}
                     ${!canCritical
                       ? html`<p class="hint">Critical alerts are not confirmed for every selected phone.</p>`
                       : nothing}

@@ -20,6 +20,7 @@ export class PeopleGroupsPage extends LitElement {
     currentUser: { attribute: false },
     recipients: { attribute: false },
     groups: { attribute: false },
+    onboarding: { type: Boolean },
     unconfirmedMappings: { attribute: false },
     _busy: { state: true },
     _editingGroupId: { state: true },
@@ -184,6 +185,7 @@ export class PeopleGroupsPage extends LitElement {
   currentUser: CurrentUser | undefined;
   recipients: RecipientProfile[] = [];
   groups: RecipientGroup[] = [];
+  onboarding = false;
   unconfirmedMappings: UnconfirmedRecipientMapping[] = [];
   private _openRecipientId = "";
   private _busy = false;
@@ -204,6 +206,12 @@ export class PeopleGroupsPage extends LitElement {
 
   private _changed(): void {
     this.dispatchEvent(new CustomEvent("data-changed", { bubbles: true, composed: true }));
+  }
+
+  private _createFirstNotification(): void {
+    this.dispatchEvent(
+      new CustomEvent("create-first-notification", { bubbles: true, composed: true }),
+    );
   }
 
   private async _setPrimary(recipient: RecipientProfile, endpointId: string): Promise<void> {
@@ -356,11 +364,49 @@ export class PeopleGroupsPage extends LitElement {
   render() {
     const customGroups = this.groups.filter((group) => group.type === "CUSTOM");
     const systemGroups = this.groups.filter((group) => group.type === "SYSTEM");
+    const readyPhoneCount = this.recipients.reduce(
+      (count, recipient) => count + this._activeEndpointCount(recipient),
+      0,
+    );
+    const defaultOpenRecipientId = this.onboarding
+      ? (this.recipients.find(
+          (recipient) => recipient.ha_user_id === this.currentUser?.id,
+        )?.id ?? this.recipients[0]?.id ?? "")
+      : "";
+    const openRecipientId = this._openRecipientId || defaultOpenRecipientId;
     return html`
       <div class="page-heading">
         <h2>People &amp; Groups</h2>
         <p>Choose each person's primary phone and organise household audiences.</p>
       </div>
+
+      ${this.onboarding
+        ? html`
+            <notification-manager-status-panel
+              kind=${readyPhoneCount > 0 ? "success" : "info"}
+              heading=${readyPhoneCount > 0
+                ? "Your household is ready"
+                : "Let's connect your first phone"}
+              message=${readyPhoneCount > 0
+                ? `${readyPhoneCount} notification ${
+                    readyPhoneCount === 1 ? "phone is" : "phones are"
+                  } ready. You can send a test below, then create your first notification.`
+                : "Notification Manager checks Home Assistant for Companion App phones automatically. If no phone appears, sign in to this Home Assistant from the Companion App and return here."}
+            >
+              ${readyPhoneCount > 0
+                ? html`
+                    <notification-manager-button
+                      slot="actions"
+                      icon="mdi:plus"
+                      @click=${this._createFirstNotification}
+                    >
+                      Create first notification
+                    </notification-manager-button>
+                  `
+                : nothing}
+            </notification-manager-status-panel>
+          `
+        : nothing}
 
       ${this.unconfirmedMappings.length > 0
         ? html`
@@ -440,7 +486,7 @@ export class PeopleGroupsPage extends LitElement {
           : html`
               <div aria-label="Household recipients">
                 ${this.recipients.map((recipient) => {
-                  const open = this._openRecipientId === recipient.id;
+                  const open = openRecipientId === recipient.id;
                   const active = this._activeEndpointCount(recipient);
                   return html`
                     <article class="person">
@@ -449,7 +495,8 @@ export class PeopleGroupsPage extends LitElement {
                           class="person-main"
                           type="button"
                           aria-expanded=${open}
-                          @click=${() => (this._openRecipientId = open ? "" : recipient.id)}
+                          @click=${() =>
+                            (this._openRecipientId = open ? "__closed__" : recipient.id)}
                         >
                           <span class="person-name">${recipient.display_name}</span>
                           <span class="person-device">

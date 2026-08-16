@@ -7,6 +7,7 @@ from typing import Any
 from ..models import RecipientProfile
 from .discovery import (
     DiscoveryResult,
+    MobileAppRegistrationSnapshot,
     PersonSnapshot,
     UserSnapshot,
     discover_recipients,
@@ -37,7 +38,19 @@ class HomeAssistantRecipientDiscovery:
             f"notify.{service_name}"
             for service_name in self._hass.services.async_services().get("notify", {})
         )
-        return discover_recipients(users, people, notify_services, existing)
+        mobile_app_registrations = tuple(
+            MobileAppRegistrationSnapshot(user_id, device_name)
+            for entry in self._hass.config_entries.async_entries("mobile_app")
+            if (user_id := _optional_string(entry.data.get("user_id"))) is not None
+            and (device_name := _optional_string(entry.data.get("device_name"))) is not None
+        )
+        return discover_recipients(
+            users,
+            people,
+            notify_services,
+            existing,
+            mobile_app_registrations,
+        )
 
 
 def _optional_string(value: object) -> str | None:

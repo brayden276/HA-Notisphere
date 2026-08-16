@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import replace
+from types import SimpleNamespace
 
 from custom_components.notification_manager.health import (
     HealthEntitySnapshot,
@@ -10,6 +11,9 @@ from custom_components.notification_manager.health import (
     RuleHealthReconciler,
     RuleHealthReconciliationService,
     RuleHealthSnapshot,
+)
+from custom_components.notification_manager.health.coordinator import (
+    HomeAssistantRuleHealthCoordinator,
 )
 from custom_components.notification_manager.models import (
     Audience,
@@ -235,3 +239,63 @@ def test_home_assistant_adapter_cache_requires_explicit_invalidation() -> None:
         assert adapter.calls == 2
 
     run(scenario())
+
+
+def test_health_events_ignore_normal_state_changes_and_reconcile_availability() -> None:
+    class RecordingCoordinator(HomeAssistantRuleHealthCoordinator):
+        def __init__(self) -> None:
+            self.invalidations = 0
+            self.requests = 0
+            super().__init__(
+                object(),
+                RuleRepository(InMemoryStorageBackend()),
+                SimpleNamespace(),
+                invalidate_capabilities=self._invalidate,
+            )
+            self._tracked_entity_ids = frozenset({"binary_sensor.garage_door"})
+
+        def _invalidate(self) -> None:
+            self.invalidations += 1
+
+        def request_reconciliation(self) -> None:
+            self.requests += 1
+
+    def state(value: str, **attributes: object) -> SimpleNamespace:
+        return SimpleNamespace(state=value, attributes=attributes)
+
+    coordinator = RecordingCoordinator()
+    coordinator._state_changed(
+        SimpleNamespace(
+            data={
+                "entity_id": "binary_sensor.garage_door",
+                "old_state": state("off", friendly_name="Garage Door"),
+                "new_state": state("on", friendly_name="Garage Door"),
+            }
+        )
+    )
+    assert coordinator.requests == 0
+    assert coordinator.invalidations == 0
+
+    coordinator._state_changed(
+        SimpleNamespace(
+            data={
+                "entity_id": "binary_sensor.garage_door",
+                "old_state": state("on", friendly_name="Garage Door"),
+                "new_state": state("unavailable", friendly_name="Garage Door"),
+            }
+        )
+    )
+    assert coordinator.requests == 1
+    assert coordinator.invalidations == 1
+
+    coordinator._state_changed(
+        SimpleNamespace(
+            data={
+                "entity_id": "binary_sensor.garage_door",
+                "old_state": state("unavailable", friendly_name="Garage Door"),
+                "new_state": state("unavailable", friendly_name="Main Garage Door"),
+            }
+        )
+    )
+    assert coordinator.requests == 1
+    assert coordinator.invalidations == 2
