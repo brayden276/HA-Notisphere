@@ -288,6 +288,87 @@ def test_existing_confirmed_endpoint_mapping_is_preserved_by_discovery() -> None
     assert result.unconfirmed == ()
 
 
+def test_confirmed_unlinked_person_mapping_is_preserved_by_discovery() -> None:
+    prior = replace(
+        recipient("recipient-a", "user-a"),
+        person_entity_id="person.household_alice",
+    )
+
+    result = discover_recipients(
+        (UserSnapshot("user-a", "Alice"),),
+        (PersonSnapshot("person.household_alice", "Household Alice"),),
+        (),
+        (prior,),
+    )
+
+    assert result.recipients[0].person_entity_id == "person.household_alice"
+    assert result.unconfirmed == ()
+
+
+def test_admin_can_confirm_discovered_phone_without_exposing_it_as_manual_input() -> None:
+    async def scenario() -> None:
+        repository = RuleRepository(InMemoryStorageBackend())
+        manager = RecipientManager(repository)
+        alice = recipient("alice", "user-a")
+        bob = recipient("bob", "user-b")
+        await manager.replace_discovered_recipients((alice, bob))
+
+        with pytest.raises(RecipientPermissionDeniedError):
+            await manager.confirm_discovery_mapping(
+                "notify.mobile_app_alice_phone", alice.id, Identity("user-a", False)
+            )
+
+        saved = await manager.confirm_discovery_mapping(
+            "notify.mobile_app_alice_phone", alice.id, Identity("admin", True)
+        )
+        assert [item.target for item in saved.endpoints] == [
+            "notify.mobile_app_alice_phone"
+        ]
+        assert EndpointCapability.TITLE in saved.endpoints[0].capabilities
+
+    run(scenario())
+
+
+def test_non_admin_recipient_update_can_only_change_preferences() -> None:
+    async def scenario() -> None:
+        repository = RuleRepository(InMemoryStorageBackend())
+        manager = RecipientManager(repository)
+        original = recipient(
+            "alice",
+            "user-a",
+            endpoint("alice-phone", "notify.mobile_app_alice"),
+        )
+        await manager.replace_discovered_recipients((original,))
+        tampered = replace(
+            original,
+            display_name="Changed name",
+            person_entity_id="person.someone_else",
+            endpoints=(endpoint("alice-phone", "notify.mobile_app_someone_else"),),
+            preferences=RecipientPreferences("alice-phone", allow_critical=False),
+        )
+
+        saved = await manager.update_recipient(tampered, Identity("user-a", False))
+
+        assert saved.display_name == original.display_name
+        assert saved.person_entity_id == original.person_entity_id
+        assert saved.endpoints == original.endpoints
+        assert saved.preferences == tampered.preferences
+
+    run(scenario())
+
+
+def test_unconfirmed_relationship_serialises_a_human_display_name() -> None:
+    result = discover_recipients(
+        (UserSnapshot("user-a", "Alice"),),
+        (),
+        ("notify.mobile_app_alice_pixel_9",),
+    )
+
+    issue = result.unconfirmed[0].to_dict()
+    assert issue["display_name"] == "Alice Pixel 9"
+    assert issue["source_type"] == "phone"
+
+
 def test_test_notification_uses_primary_endpoint_and_reports_delivery_result() -> None:
     class RecordingDelivery:
         def __init__(self) -> None:

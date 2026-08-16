@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 from ..models import (
     Audience,
     DeliveryEndpoint,
@@ -17,6 +19,7 @@ from ..models import (
 from ..storage import RuleRepository
 from ..validation import require_valid_group, require_valid_recipient
 from .delivery import NotificationDelivery
+from .discovery import mobile_app_endpoint
 from .resolver import (
     AudienceResolution,
     RequestIdentity,
@@ -44,7 +47,7 @@ class RecipientNotFoundError(RecipientServiceError):
 
     def __init__(self, recipient_id: str) -> None:
         self.recipient_id = recipient_id
-        super().__init__(f"Recipient {recipient_id!r} does not exist")
+        super().__init__("That household member is no longer available.")
 
 
 class RecipientConflictError(RecipientServiceError):
@@ -56,7 +59,7 @@ class GroupNotFoundError(RecipientServiceError):
 
     def __init__(self, group_id: str) -> None:
         self.group_id = group_id
-        super().__init__(f"Recipient group {group_id!r} does not exist")
+        super().__init__("That notification group is no longer available.")
 
 
 class GroupConflictError(RecipientServiceError):
@@ -114,6 +117,9 @@ class RecipientManager:
             raise RecipientPermissionDeniedError("You can only change your own recipient mapping.")
         if not user.is_admin and recipient.ha_user_id != existing.ha_user_id:
             raise RecipientPermissionDeniedError("You cannot reassign a recipient mapping.")
+        if not user.is_admin:
+            recipient = replace(existing, preferences=recipient.preferences)
+            require_valid_recipient(recipient)
 
         recipients = tuple(
             recipient if item.id == recipient.id else item for item in snapshot.recipients
@@ -133,6 +139,53 @@ class RecipientManager:
             self._require_mobile_app_targets(recipient)
         await self._repository.replace_recipients(recipients)
 
+    async def confirm_discovery_mapping(
+        self, source: str, recipient_id: str, user: RequestIdentity
+    ) -> RecipientProfile:
+        """Confirm one server-discovered phone or person relationship."""
+
+        self._require_admin(user)
+        snapshot = await self._repository.snapshot()
+        recipient = next(
+            (item for item in snapshot.recipients if item.id == recipient_id), None
+        )
+        if recipient is None:
+            raise RecipientNotFoundError(recipient_id)
+        if source.startswith("notify."):
+            endpoint = mobile_app_endpoint(source)
+            if any(
+                existing.target.casefold() == endpoint.target.casefold()
+                for item in snapshot.recipients
+                if item.id != recipient.id
+                for existing in item.endpoints
+            ):
+                raise RecipientConflictError(
+                    "That phone is already assigned to another household member."
+                )
+            endpoints = tuple(
+                existing
+                for existing in recipient.endpoints
+                if existing.target.casefold() != endpoint.target.casefold()
+            )
+            updated = replace(recipient, endpoints=(*endpoints, endpoint))
+        elif source.startswith("person."):
+            if any(
+                item.person_entity_id == source and item.id != recipient.id
+                for item in snapshot.recipients
+            ):
+                raise RecipientConflictError(
+                    "That person is already assigned to another household member."
+                )
+            updated = replace(recipient, person_entity_id=source)
+        else:
+            raise RecipientConflictError("This discovery relationship is not supported.")
+        recipients = tuple(
+            updated if item.id == recipient.id else item for item in snapshot.recipients
+        )
+        self._require_unique_recipients(recipients)
+        await self._repository.replace_recipients(recipients)
+        return updated
+
     async def list_groups(self) -> tuple[RecipientGroup, ...]:
         custom = tuple(
             group
@@ -148,7 +201,7 @@ class RecipientManager:
         self._require_custom_group(group)
         snapshot = await self._repository.snapshot()
         if any(existing.id == group.id for existing in (*SYSTEM_GROUPS, *snapshot.groups)):
-            raise GroupConflictError(f"Recipient group {group.id!r} already exists")
+            raise GroupConflictError("A notification group with that identity already exists.")
         self._validate_group_members(group, snapshot.recipients)
         await self._repository.replace_groups((*snapshot.groups, group))
         return group
@@ -218,14 +271,14 @@ class RecipientManager:
                     message="Your notification endpoint is working.",
                 ),
             )
-        except Exception as err:
+        except Exception:
             return RecipientResult(
                 recipient.id,
                 recipient.display_name,
                 endpoint.id,
                 endpoint.target,
                 RecipientResultStatus.FAILED,
-                str(err) or type(err).__name__,
+                "The test notification could not be delivered.",
             )
         return RecipientResult(
             recipient.id,

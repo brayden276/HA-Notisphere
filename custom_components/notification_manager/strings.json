@@ -1,0 +1,14 @@
+{
+  "title": "Notification Manager",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Notification Manager",
+        "description": "Create reliable household phone notifications without writing automations."
+      }
+    },
+    "abort": {
+      "already_configured": "Notification Manager is already set up."
+    }
+  }
+}

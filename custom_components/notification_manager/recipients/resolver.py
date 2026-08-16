@@ -113,10 +113,12 @@ def primary_endpoint(
         if required_capabilities.issubset(endpoint.capabilities)
     )
     if not compatible:
-        required = ", ".join(sorted(item.value for item in required_capabilities))
+        required = ", ".join(
+            sorted(item.value.replace("_", " ") for item in required_capabilities)
+        )
         return None, SkippedDelivery(
             DeliverySkipReason.UNSUPPORTED_CAPABILITIES,
-            f"Enabled endpoints do not support required capabilities: {required}.",
+            f"This phone does not support all selected notification options ({required}).",
             recipient.id,
         )
 
@@ -149,7 +151,7 @@ def resolve_audiences(
             skipped.append(
                 SkippedDelivery(
                     DeliverySkipReason.RECIPIENT_NOT_FOUND,
-                    f"Recipient {recipient_id!r} does not exist.",
+                    "A selected household member no longer exists.",
                     recipient_id,
                 )
             )
@@ -188,7 +190,7 @@ def resolve_audiences(
                 skipped.append(
                     SkippedDelivery(
                         DeliverySkipReason.GROUP_NOT_FOUND,
-                        f"Recipient group {audience.group_id!r} does not exist.",
+                        "A selected notification group no longer exists.",
                     )
                 )
             elif group.type is GroupType.SYSTEM and group.system_type is not None:

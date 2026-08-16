@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from collections.abc import Awaitable, Callable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass, replace
@@ -34,6 +35,8 @@ from ..storage import RevisionConflictError, RuleNotFoundError, RuleRepository
 from .evaluator import ConditionEvaluator, StateProvider, _state_is_available
 from .timer_manager import TimerManager
 from .watcher_registry import WatcherRegistry
+
+_LOGGER = logging.getLogger(__name__)
 
 DirectoryUsers: TypeAlias = Callable[[], Awaitable[tuple[RequestIdentity, ...]]]
 IdFactory: TypeAlias = Callable[[], str]
@@ -161,7 +164,9 @@ class RuntimeManager:
         self._rules.pop(rule_id, None)
         self._last_delivery_at.pop(rule_id, None)
 
-    async def async_test_rule(self, rule: NotificationRule) -> ActivityRecord:
+    async def async_test_rule(
+        self, rule: NotificationRule, *, persist_activity: bool = True
+    ) -> ActivityRecord:
         """Deliver one explicit test without evaluating trigger or conditions."""
 
         directory = await self._directory_users()
@@ -185,6 +190,7 @@ class RuntimeManager:
             outcome.results,
             reason,
             trigger_summary=f"Test: {rule.name}",
+            persist=persist_activity,
         )
 
     async def async_state_changed(
@@ -326,14 +332,14 @@ class RuntimeManager:
                         if rule.behaviour.replace_previous
                         else None,
                     )
-            except Exception as err:
+            except Exception:
                 return RecipientResult(
                     item.recipient.id,
                     item.recipient.display_name,
                     item.endpoint.id,
                     item.endpoint.target,
                     RecipientResultStatus.FAILED,
-                    str(err) or type(err).__name__,
+                    "This phone could not be reached.",
                 )
             return RecipientResult(
                 item.recipient.id,
@@ -376,6 +382,7 @@ class RuntimeManager:
         reason: str | None,
         *,
         trigger_summary: str | None = None,
+        persist: bool = True,
     ) -> ActivityRecord:
         now = self._now()
         occurrence_id = self._id_factory()
@@ -389,11 +396,17 @@ class RuntimeManager:
             recipient_results=results,
             reason=reason,
         )
-        await self._repository.append_activity(record)
+        if persist:
+            await self._repository.append_activity(record)
         return record
 
     async def _record_runtime_failure(self, rule_id: str, err: Exception) -> None:
-        reason = f"Runtime error: {str(err) or type(err).__name__}"
+        _LOGGER.error(
+            "Notification rule %s failed during runtime evaluation",
+            rule_id,
+            exc_info=err,
+        )
+        reason = "Notification Manager could not evaluate this rule. See Home Assistant logs."
         try:
             rule = self._rules.get(rule_id) or await self._repository.get(rule_id)
         except Exception:

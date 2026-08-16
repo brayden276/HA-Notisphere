@@ -50,6 +50,8 @@ export interface TriggerSpec {
   parameters: Record<string, JsonValue>;
 }
 
+export interface ResolvedTrigger extends TriggerSpec {}
+
 export interface ConditionSpec {
   type: ConditionType;
   target: TargetRef | null;
@@ -226,7 +228,11 @@ export interface CapabilityTarget {
 }
 
 export interface UnconfirmedRecipientMapping {
-  [key: string]: JsonValue;
+  source: string;
+  display_name: string;
+  source_type: "phone" | "person";
+  reason: "no_match" | "unverified_match" | "ambiguous_match" | "duplicate_person_mapping";
+  candidate_user_ids: string[];
 }
 
 export interface BootstrapData {
@@ -237,4 +243,47 @@ export interface BootstrapData {
   activity: ActivityRecord[];
   unconfirmed_recipient_mappings: UnconfirmedRecipientMapping[];
   capability_targets: CapabilityTarget[];
+}
+
+export interface ActivityRetentionSettings {
+  schema_version: number;
+  days: number;
+  records: number;
+}
+
+export interface RuntimeDiagnostics {
+  attached: boolean;
+  watched_rules: number;
+  watched_entities: number;
+  pending_timers: number;
+}
+
+export interface DiagnosticsSnapshot {
+  version: string;
+  rules: {
+    total: number;
+    enabled: number;
+    health: Record<RuleHealthStatus, number>;
+  };
+  discovery: {
+    recipients: number;
+    endpoints: number;
+    enabled_endpoints: number;
+  };
+  activity: {
+    records: number;
+    retention: ActivityRetentionSettings;
+  };
+  runtime: RuntimeDiagnostics;
+}
+
+export interface SettingsData {
+  activity_retention: ActivityRetentionSettings;
+  diagnostics: DiagnosticsSnapshot;
+}
+
+export interface ActivityFilters {
+  ruleId?: string | undefined;
+  recipientId?: string | undefined;
+  status?: ActivityStatus | undefined;
 }

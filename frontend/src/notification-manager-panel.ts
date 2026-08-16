@@ -15,9 +15,12 @@ import {
 import "./pages/activity-page";
 import "./pages/notifications-page";
 import "./pages/people-groups-page";
+import "./pages/rule-detail-page";
+import "./pages/rule-editor-page";
 import "./pages/settings-page";
 
 type LoadState = "idle" | "loading" | "ready" | "error";
+type NotificationView = "list" | "create" | "detail" | "edit";
 
 export interface HomeAssistantPanelInfo {
   config?: PanelConfig;
@@ -34,6 +37,8 @@ export class NotificationManagerPanel extends LitElement {
     _connectedToHomeAssistant: { state: true },
     _errorMessage: { state: true },
     _loadState: { state: true },
+    _notificationView: { state: true },
+    _selectedRuleId: { state: true },
   };
 
   static styles = css`
@@ -259,6 +264,9 @@ export class NotificationManagerPanel extends LitElement {
   private _api: NotificationManagerApi | undefined;
   private _boundConnection: HomeAssistantConnection | undefined;
   private _loadGeneration = 0;
+  private _notificationView: NotificationView = "list";
+  private _selectedRuleId = "";
+  private _editorDirty = false;
 
   private readonly _handleHashChange = (): void => {
     const requested = routeFromHash(globalThis.location?.hash ?? "");
@@ -267,7 +275,15 @@ export class NotificationManagerPanel extends LitElement {
       return;
     }
     const route = routeForUser(requested, this._bootstrapData.current_user.is_admin);
+    if (route !== "notifications" && this._editorDirty && !this._confirmDiscard()) {
+      globalThis.history?.replaceState(null, "", hrefForRoute("notifications"));
+      return;
+    }
     this._activeRoute = route;
+    if (route !== "notifications") {
+      this._notificationView = "list";
+      this._selectedRuleId = "";
+    }
     if (route !== requested) {
       globalThis.history?.replaceState(null, "", hrefForRoute(route));
     }
@@ -292,11 +308,19 @@ export class NotificationManagerPanel extends LitElement {
     this._connectedToHomeAssistant = false;
   };
 
+  private readonly _handleBeforeUnload = (event: BeforeUnloadEvent): void => {
+    if (!this._editorDirty) return;
+    event.preventDefault();
+    event.returnValue = "";
+  };
+
   connectedCallback(): void {
     super.connectedCallback();
     globalThis.addEventListener?.("hashchange", this._handleHashChange);
+    globalThis.addEventListener?.("popstate", this._handleHashChange);
     globalThis.addEventListener?.("online", this._handleOnline);
     globalThis.addEventListener?.("offline", this._handleOffline);
+    globalThis.addEventListener?.("beforeunload", this._handleBeforeUnload);
     if (this.hass?.connection && this._boundConnection !== this.hass.connection) {
       this._bindConnection(this.hass.connection);
       this._api = new NotificationManagerApi(this.hass);
@@ -306,8 +330,10 @@ export class NotificationManagerPanel extends LitElement {
 
   disconnectedCallback(): void {
     globalThis.removeEventListener?.("hashchange", this._handleHashChange);
+    globalThis.removeEventListener?.("popstate", this._handleHashChange);
     globalThis.removeEventListener?.("online", this._handleOnline);
     globalThis.removeEventListener?.("offline", this._handleOffline);
+    globalThis.removeEventListener?.("beforeunload", this._handleBeforeUnload);
     this._unbindConnection();
     this._api = undefined;
     super.disconnectedCallback();
@@ -407,6 +433,10 @@ export class NotificationManagerPanel extends LitElement {
             (item) => html`
               <a
                 href=${hrefForRoute(item.route)}
+                @click=${(event: Event) => {
+                  event.preventDefault();
+                  this._goToRoute(item.route);
+                }}
                 aria-current=${this._activeRoute === item.route ? "page" : nothing}
               >
                 <ha-icon icon=${item.icon} aria-hidden="true"></ha-icon>
@@ -416,6 +446,94 @@ export class NotificationManagerPanel extends LitElement {
           )}
         </div>
       </nav>
+    `;
+  }
+
+  private _confirmDiscard(): boolean {
+    if (!this._editorDirty) return true;
+    const discard = globalThis.confirm?.("Discard your unsaved notification changes?") ?? false;
+    if (discard) this._editorDirty = false;
+    return discard;
+  }
+
+  private _goToRoute(route: AppRoute): void {
+    if (route !== "notifications" && !this._confirmDiscard()) return;
+    this._activeRoute = route;
+    if (route !== "notifications") this._notificationView = "list";
+    globalThis.history?.pushState(null, "", hrefForRoute(route));
+  }
+
+  private _showNotification(view: NotificationView, ruleId = ""): void {
+    if (this._editorDirty && !this._confirmDiscard()) return;
+    this._activeRoute = "notifications";
+    this._notificationView = view;
+    this._selectedRuleId = ruleId;
+    if (view !== "create" && view !== "edit") this._editorDirty = false;
+    globalThis.history?.replaceState(null, "", hrefForRoute("notifications"));
+  }
+
+  private async _refreshData(): Promise<void> {
+    await this._loadBootstrap();
+  }
+
+  private async _handleRuleSaved(event: CustomEvent<{ rule: { id: string } }>): Promise<void> {
+    this._editorDirty = false;
+    this._selectedRuleId = event.detail.rule.id;
+    await this._refreshData();
+    this._notificationView = "detail";
+  }
+
+  private _renderNotifications(data: BootstrapData) {
+    const selected = data.rules.find((rule) => rule.id === this._selectedRuleId);
+    if (this._notificationView === "create" || this._notificationView === "edit") {
+      return html`
+        <notification-manager-rule-editor-page
+          .api=${this._api}
+          .currentUser=${data.current_user}
+          .rule=${this._notificationView === "edit" ? selected : undefined}
+          .targets=${data.capability_targets}
+          .recipients=${data.recipients}
+          .groups=${data.groups}
+          @editor-dirty=${(event: CustomEvent<{ dirty: boolean }>) =>
+            (this._editorDirty = event.detail.dirty)}
+          @editor-cancel=${() => this._showNotification("list")}
+          @rule-saved=${(event: CustomEvent<{ rule: { id: string } }>) =>
+            void this._handleRuleSaved(event)}
+        ></notification-manager-rule-editor-page>
+      `;
+    }
+    if (this._notificationView === "detail") {
+      return html`
+        <notification-manager-rule-detail-page
+          .api=${this._api}
+          .rule=${selected}
+          .activity=${data.activity}
+          .targets=${data.capability_targets}
+          .recipients=${data.recipients}
+          .groups=${data.groups}
+          @detail-close=${() => this._showNotification("list")}
+          @rule-edit=${() => this._showNotification("edit", this._selectedRuleId)}
+          @rule-deleted=${() => {
+            this._showNotification("list");
+            void this._refreshData();
+          }}
+          @data-changed=${() => void this._refreshData()}
+        ></notification-manager-rule-detail-page>
+      `;
+    }
+    return html`
+      <notification-manager-notifications-page
+        .api=${this._api}
+        .currentUser=${data.current_user}
+        .rules=${data.rules}
+        .targets=${data.capability_targets}
+        .recipients=${data.recipients}
+        .groups=${data.groups}
+        @rule-create=${() => this._showNotification("create")}
+        @rule-open=${(event: CustomEvent<{ ruleId: string }>) =>
+          this._showNotification("detail", event.detail.ruleId)}
+        @data-changed=${() => void this._refreshData()}
+      ></notification-manager-notifications-page>
     `;
   }
 
@@ -460,21 +578,28 @@ export class NotificationManagerPanel extends LitElement {
       case "people":
         return html`
           <notification-manager-people-groups-page
+            .api=${this._api}
+            .currentUser=${data.current_user}
             .recipients=${data.recipients}
             .groups=${data.groups}
             .unconfirmedMappings=${data.unconfirmed_recipient_mappings}
+            @data-changed=${() => void this._refreshData()}
           ></notification-manager-people-groups-page>
         `;
       case "activity":
         return html`
           <notification-manager-activity-page
+            .api=${this._api}
             .activity=${data.activity}
+            .rules=${data.rules}
+            .recipients=${data.recipients}
           ></notification-manager-activity-page>
         `;
       case "settings":
         return data.current_user.is_admin
           ? html`
               <notification-manager-settings-page
+                .api=${this._api}
                 .currentUser=${data.current_user}
                 .capabilityTargets=${data.capability_targets}
                 .unconfirmedMappings=${data.unconfirmed_recipient_mappings}
@@ -482,16 +607,17 @@ export class NotificationManagerPanel extends LitElement {
             `
           : html`
               <notification-manager-notifications-page
+                .api=${this._api}
+                .currentUser=${data.current_user}
                 .rules=${data.rules}
+                .targets=${data.capability_targets}
+                .recipients=${data.recipients}
+                .groups=${data.groups}
               ></notification-manager-notifications-page>
             `;
       case "notifications":
       default:
-        return html`
-          <notification-manager-notifications-page
-            .rules=${data.rules}
-          ></notification-manager-notifications-page>
-        `;
+        return this._renderNotifications(data);
     }
   }
 

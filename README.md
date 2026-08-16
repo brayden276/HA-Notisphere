@@ -171,15 +171,18 @@ The local storage record may remain so an accidental removal does not silently e
 
 ## Development checks
 
-The repository's Python checks are:
+The repository's source checks are:
 
 ```text
 python -m pytest -q -p no:cacheprovider
 ruff check custom_components tests
 mypy custom_components/notification_manager
+cd frontend
+npm run typecheck
+npm test
 ```
 
-The checked-in validation workflow runs these checks and validates the JSON descriptors. It intentionally does not run a frontend production build. Release validation must separately confirm that the packaged panel matches its source and then complete the real Home Assistant acceptance scenarios in [Release readiness](docs/RELEASE.md).
+The checked-in validation workflow runs these checks and validates the JSON descriptors. It intentionally does not run a frontend production build. Release validation must separately create and verify the packaged panel, then complete the real Home Assistant acceptance scenarios in [Release readiness](docs/RELEASE.md).
 
 ## Support and contributing
 

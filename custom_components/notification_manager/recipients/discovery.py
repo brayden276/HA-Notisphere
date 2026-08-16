@@ -55,6 +55,8 @@ class UnconfirmedRelationship:
     def to_dict(self) -> dict[str, object]:
         return {
             "source": self.source,
+            "display_name": _friendly_source_name(self.source),
+            "source_type": "phone" if self.source.startswith("notify.") else "person",
             "reason": self.reason.value,
             "candidate_user_ids": list(self.candidate_user_ids),
         }
@@ -96,8 +98,19 @@ def discover_recipients(
                     )
                 )
 
+    people_by_entity_id = {person.entity_id: person for person in people}
+    for user_id, existing_recipient in existing_by_user.items():
+        if user_id in confirmed_person or not existing_recipient.person_entity_id:
+            continue
+        existing_person = people_by_entity_id.get(existing_recipient.person_entity_id)
+        if existing_person is not None and existing_person.user_id in {None, user_id}:
+            confirmed_person[user_id] = existing_person
+
     for person in people:
-        if person.user_id in users_by_id:
+        if person.user_id in users_by_id or any(
+            confirmed.entity_id == person.entity_id
+            for confirmed in confirmed_person.values()
+        ):
             continue
         candidates = tuple(
             sorted(user.id for user in users if _match_key(user.name) == _match_key(person.name))
@@ -184,7 +197,7 @@ def discover_recipients(
             if prior is not None and endpoint.target.casefold() in visible_targets
         } if prior is not None else {}
         endpoints = tuple(
-            endpoints_by_target.get(target.casefold()) or _endpoint_for_target(target)
+            endpoints_by_target.get(target.casefold()) or mobile_app_endpoint(target)
             for target in discovered_targets
         )
         person_for_user = confirmed_person.get(user.id)
@@ -224,7 +237,13 @@ def _match_key(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "", value.casefold())
 
 
-def _endpoint_for_target(target: str) -> DeliveryEndpoint:
+def mobile_app_endpoint(target: str) -> DeliveryEndpoint:
+    """Build the conservative baseline endpoint for one validated mobile-app target."""
+
+    normalised = _normalise_notify_target(target)
+    if normalised is None:
+        raise ValueError("Only Home Assistant mobile app notification targets are supported")
+    target = normalised
     service_name = target.removeprefix("notify.")
     return DeliveryEndpoint(
         id=f"ha-notify:{service_name}",
@@ -235,6 +254,12 @@ def _endpoint_for_target(target: str) -> DeliveryEndpoint:
     )
 
 
+def _friendly_source_name(source: str) -> str:
+    value = source.removeprefix("notify.mobile_app_").removeprefix("person.")
+    words = re.sub(r"[_-]+", " ", value).strip()
+    return words.title() or "Unidentified device"
+
+
 __all__ = [
     "MOBILE_APP_CAPABILITIES",
     "DiscoveryResult",
@@ -243,4 +268,5 @@ __all__ = [
     "UnconfirmedRelationship",
     "UserSnapshot",
     "discover_recipients",
+    "mobile_app_endpoint",
 ]

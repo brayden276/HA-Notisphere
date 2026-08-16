@@ -2,13 +2,21 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from collections.abc import Callable
+from dataclasses import dataclass, field, replace
 from typing import Any, Protocol
 
-from .models import ActivityRecord, NotificationRule, RuleScope
+from .models import (
+    ActivityRecord,
+    AudienceType,
+    NotificationRule,
+    RecipientProfile,
+    RuleScope,
+)
 from .recipients.delivery import NotificationDelivery
 from .recipients.manager import RecipientManager
 from .storage import RevisionConflictError, RuleNotFoundError, RuleRepository
+from .validation import require_valid_rule
 
 
 @dataclass(frozen=True, slots=True)
@@ -18,6 +26,16 @@ class RequestUser:
     id: str
     is_admin: bool
     name: str = ""
+    entity_permission: Callable[[str], bool] | None = field(
+        default=None, repr=False, compare=False
+    )
+
+    def can_read_entity(self, entity_id: str) -> bool:
+        """Return whether this request may use one Home Assistant entity."""
+
+        return self.is_admin or self.entity_permission is None or self.entity_permission(
+            entity_id
+        )
 
 
 class PermissionDeniedError(PermissionError):
@@ -37,7 +55,9 @@ class RuntimeController(Protocol):
 
     async def async_remove_rule(self, rule_id: str) -> None: ...
 
-    async def async_test_rule(self, rule: NotificationRule) -> ActivityRecord: ...
+    async def async_test_rule(
+        self, rule: NotificationRule, *, persist_activity: bool = True
+    ) -> ActivityRecord: ...
 
 
 class HealthController(Protocol):
@@ -104,18 +124,26 @@ class NotificationManager:
     async def bootstrap(self, user: RequestUser) -> dict[str, Any]:
         snapshot = await self.repository.snapshot()
         rules = tuple(rule for rule in snapshot.rules if self._can_read(rule, user))
+        recipients = self._visible_recipients(snapshot.recipients, user)
         groups = await self.recipients.list_groups()
         capability_targets = (
             await self.capability_discovery.async_targets()
             if self.capability_discovery is not None
             else ()
         )
+        capability_targets = tuple(
+            target
+            for target in capability_targets
+            if target.synthetic or user.can_read_entity(target.entity_id)
+        )
         return {
             "current_user": {"id": user.id, "name": user.name, "is_admin": user.is_admin},
             "rules": [rule.to_dict() for rule in rules],
-            "recipients": [item.to_dict() for item in snapshot.recipients],
+            "recipients": [item.to_dict() for item in recipients],
             "groups": [item.to_dict() for item in groups],
-            "unconfirmed_recipient_mappings": list(self.discovery_issues),
+            "unconfirmed_recipient_mappings": (
+                list(self.discovery_issues) if user.is_admin else []
+            ),
             "capability_targets": [item.to_dict() for item in capability_targets],
             "activity": [
                 item.to_dict()
@@ -129,8 +157,35 @@ class NotificationManager:
 
         self.discovery_issues = tuple(dict(issue) for issue in issues)
 
+    async def confirm_discovery_mapping(
+        self, source: str, recipient_id: str, user: RequestUser
+    ) -> RecipientProfile:
+        """Apply an explicitly confirmed relationship from the current discovery set."""
+
+        if not any(issue.get("source") == source for issue in self.discovery_issues):
+            raise PermissionDeniedError(
+                "This phone or person is not awaiting confirmation. Reload setup and try again."
+            )
+        saved = await self.recipients.confirm_discovery_mapping(
+            source, recipient_id, user
+        )
+        self.discovery_issues = tuple(
+            issue for issue in self.discovery_issues if issue.get("source") != source
+        )
+        await self.async_reconcile_health()
+        return saved
+
     async def list_rules(self, user: RequestUser) -> tuple[NotificationRule, ...]:
         return tuple(rule for rule in await self.repository.list() if self._can_read(rule, user))
+
+    async def list_recipients(
+        self, user: RequestUser
+    ) -> tuple[RecipientProfile, ...]:
+        """Return only recipient profiles visible to the authenticated user."""
+
+        return self._visible_recipients(
+            (await self.repository.snapshot()).recipients, user
+        )
 
     async def get_rule(self, rule_id: str, user: RequestUser) -> NotificationRule:
         rule = await self.repository.get(rule_id)
@@ -143,6 +198,7 @@ class NotificationManager:
     async def create_rule(self, rule: NotificationRule, user: RequestUser) -> NotificationRule:
         rule = replace(rule, owner_user_id=user.id)
         self._require_write(rule, user)
+        self._require_entity_access(rule, user)
         saved = await self.repository.create(rule)
         if self.runtime is not None:
             await self.runtime.async_upsert_rule(saved)
@@ -154,6 +210,8 @@ class NotificationManager:
         current = await self.get_rule(rule.id, user)
         self._require_write(current, user)
         safe_rule = replace(rule, owner_user_id=current.owner_user_id, scope=current.scope)
+        self._require_write(safe_rule, user)
+        self._require_entity_access(safe_rule, user)
         saved = await self.repository.update(
             safe_rule, expected_revision=expected_revision
         )
@@ -186,9 +244,23 @@ class NotificationManager:
         """Send a rule's current message without waiting for its trigger or conditions."""
 
         rule = await self.get_rule(rule_id, user)
+        self._require_entity_access(rule, user)
         if self.runtime is None:
             raise RuntimeUnavailableError("Notification delivery is unavailable.")
         return await self.runtime.async_test_rule(rule)
+
+    async def test_rule_draft(
+        self, rule: NotificationRule, user: RequestUser
+    ) -> ActivityRecord:
+        """Test a complete unsaved draft through the same permission boundary."""
+
+        safe_rule = replace(rule, owner_user_id=user.id)
+        self._require_write(safe_rule, user)
+        self._require_entity_access(safe_rule, user)
+        require_valid_rule(safe_rule)
+        if self.runtime is None:
+            raise RuntimeUnavailableError("Notification delivery is unavailable.")
+        return await self.runtime.async_test_rule(safe_rule, persist_activity=False)
 
     async def async_reconcile_health(self) -> None:
         """Refresh health after recipient/group or other explicit changes."""
@@ -220,6 +292,39 @@ class NotificationManager:
             return
         if rule.owner_user_id != user.id and not user.is_admin:
             raise PermissionDeniedError("You can only change your own notifications.")
+        if not user.is_admin and any(
+            audience.type is not AudienceType.ME for audience in rule.audiences
+        ):
+            raise PermissionDeniedError(
+                "Personal notifications can only be sent to your own phone."
+            )
+
+    @staticmethod
+    def _require_entity_access(rule: NotificationRule, user: RequestUser) -> None:
+        targets = (
+            rule.trigger.target,
+            *(condition.target for condition in rule.conditions),
+        )
+        if any(
+            target is not None and not user.can_read_entity(target.entity_id)
+            for target in targets
+        ):
+            raise PermissionDeniedError(
+                "You do not have access to one of this notification's devices."
+            )
+
+    @staticmethod
+    def _visible_recipients(
+        recipients: tuple[RecipientProfile, ...], user: RequestUser
+    ) -> tuple[RecipientProfile, ...]:
+        visible = (
+            recipients
+            if user.is_admin
+            else tuple(item for item in recipients if item.ha_user_id == user.id)
+        )
+        return tuple(
+            sorted(visible, key=lambda item: (item.display_name.casefold(), item.id))
+        )
 
 
 __all__ = [

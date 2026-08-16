@@ -381,6 +381,22 @@ def test_explicit_rule_test_bypasses_trigger_and_conditions_and_records_test() -
     run(scenario())
 
 
+def test_unsaved_rule_test_returns_result_without_persisting_activity() -> None:
+    async def scenario() -> None:
+        rule = replace(make_rule(), owner_user_id="user-alice")
+        states = States({"binary_sensor.garage_door": "off"})
+        delivery = RecordingDelivery()
+        repository, saved, runtime = await _runtime(rule, states, delivery)
+
+        record = await runtime.async_test_rule(saved, persist_activity=False)
+
+        assert record.status is ActivityStatus.TEST
+        assert delivery.calls == ["notify.mobile_app_alice"]
+        assert await repository.list_activity() == ()
+
+    run(scenario())
+
+
 def test_reload_rebuilds_shared_index_and_restarts_duration_timing() -> None:
     async def scenario() -> None:
         states = States({"binary_sensor.garage_door": "on"})

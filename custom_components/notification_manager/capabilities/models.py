@@ -149,6 +149,13 @@ class ResolvedTrigger:
     target: TargetRef | None
     parameters: dict[str, JsonValue]
 
+    def to_dict(self) -> dict[str, JsonValue]:
+        return {
+            "type": self.type.value,
+            "target": self.target.to_dict() if self.target else None,
+            "parameters": dict(self.parameters),
+        }
+
 
 __all__ = [
     "CapabilityTarget",

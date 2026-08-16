@@ -37,15 +37,24 @@ describe("NotificationManagerApi", () => {
     await api.updateRule(rule, 4);
     await api.deleteRule("rule-1", 4);
     await api.setRuleEnabled("rule-1", true, 4);
+    await api.testRule("rule-1");
+    await api.testRule(rule);
     await api.listRecipients();
     await api.updateRecipient(recipient);
     await api.testRecipient("recipient-1");
+    await api.confirmRecipientMapping("notify.mobile_app_phone", "recipient-1");
     await api.listGroups();
     await api.createGroup(group);
     await api.updateGroup(group);
     await api.deleteGroup("group-1");
     await api.listCapabilityTargets();
     await api.getCapabilitiesForTarget("binary_sensor.front_door");
+    await api.resolveTrigger("binary_sensor.front_door", "REMAINS_OPEN", {
+      duration_seconds: 300,
+    });
+    await api.listActivity({ ruleId: "rule-1", status: "FAILED" });
+    await api.getSettings();
+    await api.updateSettings(30, 1000);
 
     expect(connection.calls).toEqual([
       { type: COMMANDS.bootstrap },
@@ -60,9 +69,16 @@ describe("NotificationManagerApi", () => {
         enabled: true,
         expected_revision: 4,
       },
+      { type: COMMANDS.rulesTest, rule_id: "rule-1" },
+      { type: COMMANDS.rulesTest, rule },
       { type: COMMANDS.recipientsList },
       { type: COMMANDS.recipientsUpdate, recipient },
       { type: COMMANDS.recipientsTest, recipient_id: "recipient-1" },
+      {
+        type: COMMANDS.recipientsConfirm,
+        source: "notify.mobile_app_phone",
+        recipient_id: "recipient-1",
+      },
       { type: COMMANDS.groupsList },
       { type: COMMANDS.groupsCreate, group },
       { type: COMMANDS.groupsUpdate, group },
@@ -71,6 +87,19 @@ describe("NotificationManagerApi", () => {
       {
         type: COMMANDS.capabilityForTarget,
         entity_id: "binary_sensor.front_door",
+      },
+      {
+        type: COMMANDS.capabilityResolve,
+        entity_id: "binary_sensor.front_door",
+        semantic: "REMAINS_OPEN",
+        parameters: { duration_seconds: 300 },
+      },
+      { type: COMMANDS.activityList, rule_id: "rule-1", status: "FAILED" },
+      { type: COMMANDS.settingsGet },
+      {
+        type: COMMANDS.settingsUpdate,
+        activity_retention_days: 30,
+        activity_retention_records: 1000,
       },
     ]);
   });

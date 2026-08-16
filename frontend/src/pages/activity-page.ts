@@ -1,7 +1,15 @@
-import { LitElement, html } from "lit";
+import { LitElement, css, html, nothing } from "lit";
 
+import type { NotificationManagerApi } from "../api";
+import { normaliseApiError } from "../api";
+import "../components/nm-button";
 import "../components/nm-empty-state";
-import type { ActivityRecord } from "../models";
+import type {
+  ActivityRecord,
+  ActivityStatus,
+  NotificationRule,
+  RecipientProfile,
+} from "../models";
 import { pageStyles } from "./page-styles";
 
 const STATUS_LABELS = {
@@ -14,12 +22,81 @@ const STATUS_LABELS = {
 
 export class ActivityPage extends LitElement {
   static properties = {
+    api: { attribute: false },
     activity: { attribute: false },
+    rules: { attribute: false },
+    recipients: { attribute: false },
+    _error: { state: true },
+    _records: { state: true },
+    _refreshing: { state: true },
+    _recipientId: { state: true },
+    _ruleId: { state: true },
+    _status: { state: true },
   };
 
-  static styles = [pageStyles];
+  static styles = [
+    pageStyles,
+    css`
+      .filters {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+        align-items: end;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
 
+      label { display: grid; gap: 5px; font-weight: 600; }
+
+      select {
+        min-block-size: 44px;
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
+        border-radius: 6px;
+        padding: 0 10px;
+        background: var(--card-background-color, #fafafa);
+        color: inherit;
+        font: inherit;
+      }
+
+      select:focus-visible {
+        outline: 3px solid var(--primary-color, #3f6f58);
+        outline-offset: 2px;
+      }
+
+      .error { margin-bottom: 12px; color: var(--error-color, #c62828); }
+
+      @media (max-width: 760px) {
+        .filters { grid-template-columns: 1fr; }
+      }
+    `,
+  ];
+
+  api: NotificationManagerApi | undefined;
   activity: ActivityRecord[] = [];
+  rules: NotificationRule[] = [];
+  recipients: RecipientProfile[] = [];
+  private _records: ActivityRecord[] | undefined;
+  private _ruleId = "";
+  private _recipientId = "";
+  private _status: ActivityStatus | "" = "";
+  private _refreshing = false;
+  private _error = "";
+
+  private async _refresh(): Promise<void> {
+    if (!this.api || this._refreshing) return;
+    this._refreshing = true;
+    this._error = "";
+    try {
+      this._records = await this.api.listActivity({
+        ruleId: this._ruleId || undefined,
+        recipientId: this._recipientId || undefined,
+        status: this._status || undefined,
+      });
+    } catch (error) {
+      this._error = normaliseApiError(error).message;
+    } finally {
+      this._refreshing = false;
+    }
+  }
 
   private formatTimestamp(timestamp: string): string {
     const date = new Date(timestamp);
@@ -33,14 +110,63 @@ export class ActivityPage extends LitElement {
   }
 
   render() {
-    const records = [...this.activity].sort(
+    const records = [...(this._records ?? this.activity)].sort(
       (left, right) => Date.parse(right.timestamp) - Date.parse(left.timestamp),
     );
     return html`
       <div class="page-heading">
         <h2>Activity</h2>
-        <p>Recent delivery results for notifications you can access.</p>
+        <p>See why a notification was sent, skipped or could not reach someone.</p>
       </div>
+      <div class="filters" aria-label="Activity filters">
+        <label>
+          Notification
+          <select
+            .value=${this._ruleId}
+            @change=${(event: Event) => {
+              this._ruleId = (event.currentTarget as HTMLSelectElement).value;
+              void this._refresh();
+            }}
+          >
+            <option value="">All notifications</option>
+            ${this.rules.map((rule) => html`<option value=${rule.id}>${rule.name}</option>`)}
+          </select>
+        </label>
+        <label>
+          Person
+          <select
+            .value=${this._recipientId}
+            @change=${(event: Event) => {
+              this._recipientId = (event.currentTarget as HTMLSelectElement).value;
+              void this._refresh();
+            }}
+          >
+            <option value="">Everyone</option>
+            ${this.recipients.map(
+              (recipient) => html`<option value=${recipient.id}>${recipient.display_name}</option>`,
+            )}
+          </select>
+        </label>
+        <label>
+          Result
+          <select
+            .value=${this._status}
+            @change=${(event: Event) => {
+              this._status = (event.currentTarget as HTMLSelectElement).value as ActivityStatus | "";
+              void this._refresh();
+            }}
+          >
+            <option value="">All results</option>
+            ${Object.entries(STATUS_LABELS).map(
+              ([status, label]) => html`<option value=${status}>${label}</option>`,
+            )}
+          </select>
+        </label>
+        <notification-manager-button .disabled=${this._refreshing} @click=${this._refresh}>
+          Refresh
+        </notification-manager-button>
+      </div>
+      ${this._error ? html`<p class="error" role="alert">${this._error}</p>` : nothing}
       ${records.length === 0
         ? html`
             <notification-manager-empty-state

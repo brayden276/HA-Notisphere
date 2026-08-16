@@ -5,9 +5,11 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
+from homeassistant.auth.permissions.const import POLICY_READ
 from homeassistant.components import websocket_api
 
 from .capabilities import CapabilityRegistryError
+from .capabilities.registry import SYNTHETIC_TIME_TARGET
 from .const import DATA_MANAGER, DATA_WEBSOCKET_REGISTERED, DOMAIN
 from .manager import (
     NotificationManager,
@@ -33,6 +35,9 @@ def _user(connection: Any) -> RequestUser:
         id=connection.user.id,
         name=connection.user.name or "",
         is_admin=connection.user.is_admin,
+        entity_permission=lambda entity_id: connection.user.permissions.check_entity(
+            entity_id, POLICY_READ
+        ),
     )
 
 
@@ -205,21 +210,40 @@ async def ws_rules_set_enabled(hass: Any, connection: Any, msg: dict[str, Any]) 
 
 
 @websocket_api.websocket_command(
-    {vol.Required("type"): f"{DOMAIN}/rules/test", vol.Required("rule_id"): str}
+    {
+        vol.Required("type"): f"{DOMAIN}/rules/test",
+        vol.Exclusive("rule_id", "test_target"): str,
+        vol.Exclusive("rule", "test_target"): dict,
+    }
 )
 @websocket_api.async_response
 async def ws_rules_test(hass: Any, connection: Any, msg: dict[str, Any]) -> None:
     try:
-        record = await _manager(hass).test_rule(msg["rule_id"], _user(connection))
+        manager = _manager(hass)
+        if "rule" in msg:
+            record = await manager.test_rule_draft(
+                _parse_rule(msg["rule"]), _user(connection)
+            )
+        elif "rule_id" in msg:
+            record = await manager.test_rule(msg["rule_id"], _user(connection))
+        else:
+            raise DomainValidationError(
+                (ValidationIssue("rule", "required", "A notification is required."),)
+            )
         connection.send_result(msg["id"], record.to_dict())
-    except (PermissionDeniedError, RuleNotFoundError, RuntimeUnavailableError) as err:
+    except (
+        DomainValidationError,
+        PermissionDeniedError,
+        RuleNotFoundError,
+        RuntimeUnavailableError,
+    ) as err:
         _send_error(connection, msg["id"], err)
 
 
 @websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/recipients/list"})
 @websocket_api.async_response
 async def ws_recipients_list(hass: Any, connection: Any, msg: dict[str, Any]) -> None:
-    recipients = await _manager(hass).recipients.list_recipients()
+    recipients = await _manager(hass).list_recipients(_user(connection))
     connection.send_result(msg["id"], [item.to_dict() for item in recipients])
 
 
@@ -253,6 +277,24 @@ async def ws_recipients_test(hass: Any, connection: Any, msg: dict[str, Any]) ->
         )
         connection.send_result(msg["id"], result.to_dict())
     except RecipientServiceError as err:
+        _send_error(connection, msg["id"], err)
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/recipients/confirm",
+        vol.Required("source"): str,
+        vol.Required("recipient_id"): str,
+    }
+)
+@websocket_api.async_response
+async def ws_recipients_confirm(hass: Any, connection: Any, msg: dict[str, Any]) -> None:
+    try:
+        saved = await _manager(hass).confirm_discovery_mapping(
+            msg["source"], msg["recipient_id"], _user(connection)
+        )
+        connection.send_result(msg["id"], saved.to_dict())
+    except (PermissionDeniedError, RecipientServiceError) as err:
         _send_error(connection, msg["id"], err)
 
 
@@ -318,6 +360,12 @@ async def ws_groups_delete(hass: Any, connection: Any, msg: dict[str, Any]) -> N
 async def ws_capability_targets(hass: Any, connection: Any, msg: dict[str, Any]) -> None:
     discovery = _manager(hass).capability_discovery
     targets = await discovery.async_targets() if discovery is not None else ()
+    user = _user(connection)
+    targets = tuple(
+        target
+        for target in targets
+        if target.synthetic or user.can_read_entity(target.entity_id)
+    )
     connection.send_result(msg["id"], [item.to_dict() for item in targets])
 
 
@@ -338,9 +386,48 @@ async def ws_capability_for_target(
         )
         return
     try:
+        if (
+            msg["entity_id"] != SYNTHETIC_TIME_TARGET
+            and not _user(connection).can_read_entity(msg["entity_id"])
+        ):
+            raise PermissionDeniedError(
+                "You do not have access to that Home Assistant device."
+            )
         target = await discovery.async_for_target(msg["entity_id"])
         connection.send_result(msg["id"], target.to_dict())
-    except CapabilityRegistryError as err:
+    except (CapabilityRegistryError, PermissionDeniedError) as err:
+        _send_error(connection, msg["id"], err)
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/capabilities/resolve",
+        vol.Required("entity_id"): str,
+        vol.Required("semantic"): str,
+        vol.Optional("parameters", default={}): dict,
+    }
+)
+@websocket_api.async_response
+async def ws_capability_resolve(hass: Any, connection: Any, msg: dict[str, Any]) -> None:
+    discovery = _manager(hass).capability_discovery
+    if discovery is None:
+        connection.send_error(
+            msg["id"], "capabilities_unavailable", "Capabilities are unavailable."
+        )
+        return
+    try:
+        if (
+            msg["entity_id"] != SYNTHETIC_TIME_TARGET
+            and not _user(connection).can_read_entity(msg["entity_id"])
+        ):
+            raise PermissionDeniedError(
+                "You do not have access to that Home Assistant device."
+            )
+        trigger = await discovery.async_resolve(
+            msg["entity_id"], msg["semantic"], msg["parameters"]
+        )
+        connection.send_result(msg["id"], trigger.to_dict())
+    except (CapabilityRegistryError, PermissionDeniedError) as err:
         _send_error(connection, msg["id"], err)
 
 
@@ -434,12 +521,14 @@ COMMANDS = (
     ws_recipients_list,
     ws_recipients_update,
     ws_recipients_test,
+    ws_recipients_confirm,
     ws_groups_list,
     ws_groups_create,
     ws_groups_update,
     ws_groups_delete,
     ws_capability_targets,
     ws_capability_for_target,
+    ws_capability_resolve,
     ws_activity_list,
     ws_settings_get,
     ws_settings_update,

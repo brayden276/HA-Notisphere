@@ -15,6 +15,3 @@ PANEL_ELEMENT: Final = "notification-manager-panel"
 PANEL_TITLE: Final = "Notifications"
 PANEL_ICON: Final = "mdi:bell-outline"
 PANEL_STATIC_URL: Final = f"/api/{DOMAIN}/frontend/notification-manager-panel.js"
-
-WS_PREFIX: Final = f"{DOMAIN}/"
-SIGNAL_UPDATED: Final = f"{DOMAIN}_updated"

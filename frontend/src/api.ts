@@ -1,11 +1,17 @@
 import type { HomeAssistantWebSocketClient, WebSocketMessage } from "./ha";
 import type {
+  ActivityFilters,
+  ActivityRecord,
+  ActivityRetentionSettings,
   BootstrapData,
   CapabilityTarget,
   NotificationRule,
   RecipientGroup,
   RecipientProfile,
   RecipientResult,
+  ResolvedTrigger,
+  Semantic,
+  SettingsData,
 } from "./models";
 
 export const COMMANDS = {
@@ -16,15 +22,21 @@ export const COMMANDS = {
   rulesUpdate: "notification_manager/rules/update",
   rulesDelete: "notification_manager/rules/delete",
   rulesSetEnabled: "notification_manager/rules/set_enabled",
+  rulesTest: "notification_manager/rules/test",
   recipientsList: "notification_manager/recipients/list",
   recipientsUpdate: "notification_manager/recipients/update",
   recipientsTest: "notification_manager/recipients/test",
+  recipientsConfirm: "notification_manager/recipients/confirm",
   groupsList: "notification_manager/groups/list",
   groupsCreate: "notification_manager/groups/create",
   groupsUpdate: "notification_manager/groups/update",
   groupsDelete: "notification_manager/groups/delete",
   capabilityTargets: "notification_manager/capabilities/targets",
   capabilityForTarget: "notification_manager/capabilities/for_target",
+  capabilityResolve: "notification_manager/capabilities/resolve",
+  activityList: "notification_manager/activity/list",
+  settingsGet: "notification_manager/settings/get",
+  settingsUpdate: "notification_manager/settings/update",
 } as const;
 
 export class NotificationManagerApiError extends Error {
@@ -120,6 +132,14 @@ export class NotificationManagerApi {
     });
   }
 
+  testRule(rule: NotificationRule | string): Promise<ActivityRecord> {
+    return this.call(
+      typeof rule === "string"
+        ? { type: COMMANDS.rulesTest, rule_id: rule }
+        : { type: COMMANDS.rulesTest, rule },
+    );
+  }
+
   listRecipients(): Promise<RecipientProfile[]> {
     return this.call({ type: COMMANDS.recipientsList });
   }
@@ -131,6 +151,14 @@ export class NotificationManagerApi {
   testRecipient(recipientId: string): Promise<RecipientResult> {
     return this.call({
       type: COMMANDS.recipientsTest,
+      recipient_id: recipientId,
+    });
+  }
+
+  confirmRecipientMapping(source: string, recipientId: string): Promise<RecipientProfile> {
+    return this.call({
+      type: COMMANDS.recipientsConfirm,
+      source,
       recipient_id: recipientId,
     });
   }
@@ -159,6 +187,40 @@ export class NotificationManagerApi {
     return this.call({
       type: COMMANDS.capabilityForTarget,
       entity_id: entityId,
+    });
+  }
+
+  resolveTrigger(
+    entityId: string,
+    semantic: Semantic,
+    parameters: Record<string, number | string>,
+  ): Promise<ResolvedTrigger> {
+    return this.call({
+      type: COMMANDS.capabilityResolve,
+      entity_id: entityId,
+      semantic,
+      parameters,
+    });
+  }
+
+  listActivity(filters: ActivityFilters = {}): Promise<ActivityRecord[]> {
+    return this.call({
+      type: COMMANDS.activityList,
+      ...(filters.ruleId ? { rule_id: filters.ruleId } : {}),
+      ...(filters.recipientId ? { recipient_id: filters.recipientId } : {}),
+      ...(filters.status ? { status: filters.status } : {}),
+    });
+  }
+
+  getSettings(): Promise<SettingsData> {
+    return this.call({ type: COMMANDS.settingsGet });
+  }
+
+  updateSettings(days: number, records: number): Promise<ActivityRetentionSettings> {
+    return this.call({
+      type: COMMANDS.settingsUpdate,
+      activity_retention_days: days,
+      activity_retention_records: records,
     });
   }
 }
