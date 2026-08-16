@@ -16,4 +16,5 @@ def test_packaged_panel_bundle_exists() -> None:
 
 
 def test_panel_module_url_is_versioned() -> None:
-    assert f"{PANEL_STATIC_URL}?v={INTEGRATION_VERSION}" == PANEL_MODULE_URL
+    assert f"/{INTEGRATION_VERSION}/" in PANEL_MODULE_URL
+    assert PANEL_STATIC_URL == PANEL_MODULE_URL

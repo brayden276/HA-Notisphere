@@ -17,5 +17,7 @@ PANEL_URL_PATH: Final = "notification-manager"
 PANEL_ELEMENT: Final = "notification-manager-panel"
 PANEL_TITLE: Final = "Notifications"
 PANEL_ICON: Final = "mdi:bell-outline"
-PANEL_STATIC_URL: Final = f"/api/{DOMAIN}/frontend/notification-manager-panel.js"
-PANEL_MODULE_URL: Final = f"{PANEL_STATIC_URL}?v={INTEGRATION_VERSION}"
+PANEL_STATIC_URL: Final = (
+    f"/api/{DOMAIN}/frontend/{INTEGRATION_VERSION}/notification-manager-panel.js"
+)
+PANEL_MODULE_URL: Final = PANEL_STATIC_URL
