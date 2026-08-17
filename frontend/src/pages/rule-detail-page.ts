@@ -36,14 +36,14 @@ export class RuleDetailPage extends LitElement {
         margin-inline: auto;
       }
 
-      .back-row { margin-bottom: 14px; }
+      .back-row { margin-bottom: var(--nm-space-3); }
 
       .title-row,
       .actions {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: var(--nm-space-3);
       }
 
       .title-row h2 {
@@ -52,7 +52,7 @@ export class RuleDetailPage extends LitElement {
 
       .summary {
         max-inline-size: 65ch;
-        margin: 12px 0 22px;
+        margin: var(--nm-space-3) 0 var(--nm-space-5);
         color: var(--primary-text-color, #212121);
         font-size: 17px;
         line-height: 1.55;
@@ -61,11 +61,11 @@ export class RuleDetailPage extends LitElement {
       .actions {
         justify-content: flex-start;
         flex-wrap: wrap;
-        margin-bottom: 28px;
+        margin-bottom: var(--nm-space-5);
       }
 
       .section {
-        padding-top: 24px;
+        padding-top: var(--nm-space-4);
         border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
       }
 
@@ -75,7 +75,7 @@ export class RuleDetailPage extends LitElement {
       }
 
       .danger {
-        margin-top: 28px;
+        margin-top: var(--nm-space-5);
       }
 
       @media (max-width: 600px) {

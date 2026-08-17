@@ -4,6 +4,7 @@ import type { CapabilityTarget, CurrentUser, ResolvedTrigger } from "../src/mode
 import {
   createNotificationRule,
   generatedMessage,
+  groupTargetsBySource,
   reviewSentence,
   semanticFromTrigger,
   supportedSemantics,
@@ -72,6 +73,35 @@ describe("rule composer domain helpers", () => {
     expect(supportedSemantics(garage).map((item) => item.semantic)).toEqual([
       "OPENED",
       "REMAINS_OPEN",
+    ]);
+  });
+
+  it("groups a device's signals while keeping standalone entities selectable", () => {
+    const motion: CapabilityTarget = {
+      ...garage,
+      entity_id: "binary_sensor.garage_motion",
+      display_name: "Garage Motion",
+      device_class: "motion",
+      category: "motion",
+    };
+    const standalone: CapabilityTarget = {
+      ...garage,
+      entity_id: "binary_sensor.side_gate",
+      display_name: "Side Gate",
+      registry_id: "registry-side-gate",
+      device_id: null,
+      device_name: null,
+    };
+
+    const sources = groupTargetsBySource([standalone, motion, garage]);
+
+    expect(sources.map((source) => [source.name, source.kind, source.targets.length])).toEqual([
+      ["Garage", "device", 2],
+      ["Side Gate", "entity", 1],
+    ]);
+    expect(sources[0]?.targets.map((target) => target.display_name)).toEqual([
+      "Garage Door",
+      "Garage Motion",
     ]);
   });
 

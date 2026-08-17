@@ -48,6 +48,18 @@ const garage: CapabilityTarget = {
     },
   ],
 };
+const garageMotion: CapabilityTarget = {
+  ...garage,
+  entity_id: "binary_sensor.garage_motion",
+  display_name: "Garage Motion",
+  registry_id: "registry-garage-motion",
+  device_class: "motion",
+  category: "motion",
+  semantics: [
+    { semantic: "DETECTED", label: "Detects activity", parameters: [] },
+    { semantic: "CLEARED", label: "Clears", parameters: [] },
+  ],
+};
 const recipient: RecipientProfile = {
   id: "recipient-1",
   ha_user_id: "user-1",
@@ -199,14 +211,15 @@ describe("core product screens", () => {
     expect(root.querySelector(".review-panel")).not.toBeNull();
     expect(root.querySelector(".section-number")).toBeNull();
     expect([...root.querySelectorAll("h3")].map((heading) => heading.textContent?.trim())).toEqual(
-      ["Device", "Trigger", "Recipients", "Message", "Review"],
+      ["Device", "Signal", "Behaviour", "Recipients", "Message", "Review"],
     );
     const moreOptions = root.querySelector("details") as HTMLDetailsElement;
     expect(moreOptions.open).toBe(false);
 
-    const semantic = root.querySelector("#semantic") as HTMLSelectElement;
-    semantic.value = "REMAINS_OPEN";
-    semantic.dispatchEvent(new Event("change", { bubbles: true }));
+    const semantic = [...root.querySelectorAll<HTMLButtonElement>(".behaviour-option")].find(
+      (button) => button.textContent?.includes("Stays open"),
+    ) as HTMLButtonElement;
+    semantic.click();
     await settle(page);
 
     const everyone = root.querySelector(
@@ -231,6 +244,49 @@ describe("core product screens", () => {
     expect(root.textContent).toContain("Alice");
   });
 
+  it("moves from a device to one of its signals and then adapts the behaviours", async () => {
+    const page = document.createElement(
+      "notification-manager-rule-editor-page",
+    ) as RuleEditorPage;
+    page.api = { resolveTrigger: vi.fn() } as unknown as NotificationManagerApi;
+    page.currentUser = user;
+    page.targets = [garage, garageMotion];
+    page.recipients = [recipient];
+    document.body.append(page);
+    await settle(page);
+
+    const root = page.shadowRoot as ShadowRoot;
+    const device = root.querySelector(".source-option") as HTMLButtonElement;
+    expect(device.textContent).toContain("Garage");
+    expect(device.querySelector(".option-count")?.textContent).toMatch(/2\s+signals/);
+    expect(root.querySelectorAll(".source-option")).toHaveLength(1);
+    expect(root.querySelectorAll(".signal-option")).toHaveLength(2);
+
+    device.click();
+    await settle(page);
+    expect(root.querySelector("#source-search")).toBeNull();
+    const selectedDevice = root.querySelector(".source-summary") as HTMLButtonElement;
+    expect(selectedDevice.textContent).toContain("Change");
+
+    selectedDevice.click();
+    await settle(page);
+    expect(root.querySelector("#source-search")).not.toBeNull();
+    expect(root.activeElement).toBe(root.querySelector("#source-search"));
+
+    const motion = [...root.querySelectorAll<HTMLButtonElement>(".signal-option")].find(
+      (button) => button.textContent?.includes("Garage Motion"),
+    ) as HTMLButtonElement;
+    motion.click();
+    await settle(page);
+
+    expect(motion.getAttribute("aria-pressed")).toBe("true");
+    expect(root.textContent).toContain("Detects activity");
+    expect(root.textContent).toContain("Clears");
+    expect(root.textContent).not.toContain("Stays open");
+    expect(root.textContent).toContain("When Garage Motion detects activity, notify me.");
+    expect(root.querySelectorAll(".mobile-actions notification-manager-button")).toHaveLength(2);
+  });
+
   it("turns an optimistic concurrency error into product language", async () => {
     const api = {
       resolveTrigger: vi.fn().mockResolvedValue(trigger),
@@ -249,6 +305,9 @@ describe("core product screens", () => {
     page.recipients = [recipient];
     document.body.append(page);
     await settle(page);
+
+    expect(page.shadowRoot?.querySelector("#source-search")).toBeNull();
+    expect(page.shadowRoot?.querySelector(".source-summary")?.textContent).toContain("Garage");
 
     const save = [...(page.shadowRoot?.querySelectorAll("notification-manager-button") ?? [])]
       .find((button) => button.textContent?.includes("Save notification")) as HTMLElement;

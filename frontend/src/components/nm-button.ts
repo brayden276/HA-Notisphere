@@ -17,14 +17,14 @@ export class NotificationManagerButton extends LitElement {
 
     button {
       box-sizing: border-box;
-      min-block-size: 44px;
+      min-block-size: var(--nm-control-height, 44px);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: var(--nm-space-2, 8px);
       border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-      border-radius: 8px;
-      padding: 0 16px;
+      border-radius: var(--nm-radius, 8px);
+      padding: 0 var(--nm-space-4, 16px);
       background: var(--card-background-color, #fafafa);
       color: var(--primary-text-color, #212121);
       font: inherit;

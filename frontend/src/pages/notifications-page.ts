@@ -38,25 +38,25 @@ export class NotificationsPage extends LitElement {
       .rule-actions {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: var(--nm-space-3);
       }
 
       .page-heading-row {
         justify-content: space-between;
-        margin-bottom: 20px;
+        margin-bottom: var(--nm-space-5);
       }
 
       .page-heading { margin: 0; }
 
       .filters {
         overflow-x: auto;
-        gap: 2px;
-        margin-bottom: 4px;
+        gap: var(--nm-space-1);
+        margin-bottom: var(--nm-space-1);
         border-bottom: 1px solid var(--nm-border);
       }
 
       .filter {
-        min-block-size: 44px;
+        min-block-size: var(--nm-control-height);
         border: 0;
         border-bottom: 2px solid transparent;
         border-radius: 0;
@@ -90,7 +90,7 @@ export class NotificationsPage extends LitElement {
 
       .rule-row {
         justify-content: space-between;
-        min-block-size: 76px;
+        min-block-size: var(--nm-row-height-comfortable);
         border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
       }
 
@@ -140,7 +140,7 @@ export class NotificationsPage extends LitElement {
         place-items: center;
         inline-size: 44px;
         block-size: 44px;
-        border-radius: 8px;
+        border-radius: var(--nm-radius);
         cursor: pointer;
         list-style: none;
       }
@@ -153,7 +153,7 @@ export class NotificationsPage extends LitElement {
         inset-inline-end: 0;
         min-inline-size: 160px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.4));
-        border-radius: 8px;
+        border-radius: var(--nm-radius);
         padding: 4px;
         background: var(--card-background-color, #fafafa);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
@@ -161,9 +161,9 @@ export class NotificationsPage extends LitElement {
 
       .menu button {
         inline-size: 100%;
-        min-block-size: 40px;
+        min-block-size: var(--nm-control-height);
         border: 0;
-        border-radius: 5px;
+        border-radius: var(--nm-radius-compact);
         padding-inline: 10px;
         background: transparent;
         color: inherit;

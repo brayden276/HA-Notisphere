@@ -7,13 +7,24 @@ export const pageStyles = css`
     --nm-control-border: var(--input-idle-line-color, rgba(127, 127, 127, 0.5));
     --nm-surface: var(--card-background-color, #fafafa);
     --nm-muted-surface: var(--secondary-background-color, #f1f1f1);
+    --nm-space-1: 4px;
+    --nm-space-2: 8px;
+    --nm-space-3: 12px;
+    --nm-space-4: 16px;
+    --nm-space-5: 24px;
+    --nm-space-6: 32px;
+    --nm-control-height: 44px;
+    --nm-option-height: 52px;
+    --nm-row-height: 64px;
+    --nm-row-height-comfortable: 72px;
     --nm-radius: 8px;
+    --nm-radius-compact: 6px;
     color: var(--primary-text-color, #212121);
     font: inherit;
   }
 
   .page-heading {
-    margin-bottom: 24px;
+    margin-bottom: var(--nm-space-5);
   }
 
   h2,
@@ -45,13 +56,13 @@ export const pageStyles = css`
   }
 
   .section + .section {
-    margin-top: 32px;
+    margin-top: var(--nm-space-4);
     border-top: 1px solid var(--nm-border);
-    padding-top: 32px;
+    padding-top: var(--nm-space-4);
   }
 
   .section-heading {
-    margin-bottom: 14px;
+    margin-bottom: var(--nm-space-3);
   }
 
   .data-list {
@@ -62,8 +73,8 @@ export const pageStyles = css`
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 16px;
-    min-block-size: 64px;
+    gap: var(--nm-space-4);
+    min-block-size: var(--nm-row-height);
     border-bottom: 1px solid var(--nm-border);
     padding: 10px 0;
   }
@@ -97,7 +108,7 @@ export const pageStyles = css`
   .status {
     display: inline-block;
     border: 1px solid var(--nm-border);
-    border-radius: 6px;
+    border-radius: var(--nm-radius-compact);
     padding: 3px 7px;
     background: var(--nm-muted-surface);
     color: var(--primary-text-color, #212121);
@@ -145,7 +156,7 @@ export const pageStyles = css`
   select,
   textarea {
     box-sizing: border-box;
-    min-block-size: 44px;
+    min-block-size: var(--nm-control-height);
     border: 1px solid var(--nm-control-border);
     border-radius: var(--nm-radius);
     padding: 9px 11px;
@@ -175,13 +186,13 @@ export const pageStyles = css`
 
   @media (max-width: 600px) {
     .page-heading {
-      margin-bottom: 20px;
+      margin-bottom: var(--nm-space-5);
     }
 
     .data-row {
       grid-template-columns: 1fr;
       gap: 6px;
-      min-block-size: 72px;
+      min-block-size: var(--nm-row-height-comfortable);
     }
 
     .row-meta {

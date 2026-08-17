@@ -42,26 +42,11 @@ export class ActivityPage extends LitElement {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
         align-items: end;
-        gap: 10px;
-        margin-bottom: 18px;
+        gap: var(--nm-space-3);
+        margin-bottom: var(--nm-space-4);
       }
 
-      label { display: grid; gap: 5px; font-weight: 600; }
-
-      select {
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 8px;
-        padding: 0 10px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
-
-      select:focus-visible {
-        outline: 2px solid var(--primary-color, #3f6f58);
-        outline-offset: 2px;
-      }
+      label { display: grid; gap: var(--nm-space-2); font-weight: 600; }
 
       .error { margin-bottom: 12px; color: var(--error-color, #c62828); }
 

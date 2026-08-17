@@ -18,6 +18,49 @@ export const RUNTIME_SEMANTICS = new Set<Semantic>([
   "REMAINS_DETECTED",
 ]);
 
+export interface TargetSource {
+  key: string;
+  name: string;
+  kind: "device" | "entity";
+  targets: CapabilityTarget[];
+}
+
+export function targetSourceKey(target: CapabilityTarget): string {
+  return target.device_id ? `device:${target.device_id}` : `entity:${target.entity_id}`;
+}
+
+export function groupTargetsBySource(targets: CapabilityTarget[]): TargetSource[] {
+  const sources = new Map<string, TargetSource>();
+  for (const target of targets) {
+    const key = targetSourceKey(target);
+    const existing = sources.get(key);
+    if (existing) {
+      existing.targets.push(target);
+      continue;
+    }
+    sources.set(key, {
+      key,
+      name: target.device_name?.trim() || target.display_name,
+      kind: target.device_id ? "device" : "entity",
+      targets: [target],
+    });
+  }
+
+  return [...sources.values()]
+    .map((source) => ({
+      ...source,
+      targets: [...source.targets].sort(
+        (left, right) =>
+          left.display_name.localeCompare(right.display_name) ||
+          left.entity_id.localeCompare(right.entity_id),
+      ),
+    }))
+    .sort(
+      (left, right) =>
+        left.name.localeCompare(right.name) || left.key.localeCompare(right.key),
+    );
+}
+
 export function supportedTargets(targets: CapabilityTarget[]): CapabilityTarget[] {
   return targets.filter(
     (target) =>

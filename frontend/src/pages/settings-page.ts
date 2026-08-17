@@ -33,26 +33,11 @@ export class SettingsPage extends LitElement {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 180px)) auto;
         align-items: end;
-        gap: 12px;
-        margin-top: 14px;
+        gap: var(--nm-space-3);
+        margin-top: var(--nm-space-3);
       }
 
-      label { display: grid; gap: 5px; font-weight: 600; }
-
-      input {
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 8px;
-        padding: 0 10px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
-
-      input:focus-visible {
-        outline: 2px solid var(--primary-color, #3f6f58);
-        outline-offset: 2px;
-      }
+      label { display: grid; gap: var(--nm-space-2); font-weight: 600; }
 
       .feedback { margin-top: 10px; color: var(--secondary-text-color, #616161); }
       .error { color: var(--error-color, #c62828); }

@@ -19,11 +19,13 @@ import type {
 import {
   createNotificationRule,
   generatedMessage,
+  groupTargetsBySource,
   newRuleId,
   reviewSentence,
   semanticFromTrigger,
   supportedSemantics,
   supportedTargets,
+  targetSourceKey,
 } from "../rule-draft";
 import { pageStyles } from "./page-styles";
 
@@ -39,9 +41,9 @@ interface ConditionDraft {
   expectedState: "on" | "off";
 }
 
-const CATEGORY_LABELS: Record<string, string> = {
-  opening: "Doors & windows",
-  motion: "Motion",
+const SIGNAL_LABELS: Record<string, string> = {
+  opening: "Door or window state",
+  motion: "Motion state",
 };
 
 function valueFrom(event: Event): string {
@@ -64,7 +66,10 @@ export class RuleEditorPage extends LitElement {
     _name: { state: true },
     _recipientIds: { state: true },
     _saving: { state: true },
+    _sourcePickerOpen: { state: true },
+    _sourceSearch: { state: true },
     _selectedSemantic: { state: true },
+    _selectedSourceKey: { state: true },
     _selectedTargetId: { state: true },
     _status: { state: true },
     _title: { state: true },
@@ -83,11 +88,8 @@ export class RuleEditorPage extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
-      }
-
-      .editor-header {
-        margin-bottom: 8px;
+        gap: var(--nm-space-4);
+        margin-bottom: var(--nm-space-2);
       }
 
       input:focus-visible,
@@ -100,14 +102,14 @@ export class RuleEditorPage extends LitElement {
 
       .composer-section {
         border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        padding-block: 24px;
+        padding-block: var(--nm-space-4);
       }
 
       .editor-layout {
         display: grid;
         grid-template-columns: minmax(0, 1fr) 300px;
         align-items: start;
-        gap: 32px;
+        gap: var(--nm-space-6);
       }
 
       .editor-form {
@@ -122,14 +124,14 @@ export class RuleEditorPage extends LitElement {
       .field-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-        margin-top: 16px;
+        gap: var(--nm-space-4);
+        margin-top: var(--nm-space-4);
       }
 
       .field,
       .choice-group {
         display: grid;
-        gap: 7px;
+        gap: var(--nm-space-2);
       }
 
       .field.full,
@@ -144,17 +146,10 @@ export class RuleEditorPage extends LitElement {
         font-weight: 600;
       }
 
-      input,
+      input:not([type="checkbox"]):not([type="radio"]),
       select,
       textarea {
         inline-size: 100%;
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.5));
-        border-radius: 8px;
-        padding: 9px 11px;
-        background: var(--card-background-color, #fafafa);
-        color: var(--primary-text-color, #212121);
-        font: inherit;
       }
 
       textarea {
@@ -168,19 +163,124 @@ export class RuleEditorPage extends LitElement {
         font-size: 13px;
       }
 
+      .source-search {
+        margin-top: var(--nm-space-4);
+      }
+
+      .source-list,
+      .signal-list,
+      .behaviour-list {
+        display: grid;
+        gap: var(--nm-space-2);
+        margin-top: var(--nm-space-3);
+      }
+
+      .source-list {
+        max-block-size: 320px;
+        overflow-y: auto;
+        padding-inline-end: var(--nm-space-1);
+        scrollbar-gutter: stable;
+      }
+
+      .source-option,
+      .signal-option,
+      .behaviour-option {
+        inline-size: 100%;
+        min-block-size: var(--nm-option-height);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--nm-space-3);
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.4));
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-2) var(--nm-space-3);
+        background: var(--card-background-color, #fafafa);
+        color: var(--primary-text-color, #212121);
+        text-align: start;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .behaviour-option {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .source-summary {
+        margin-top: var(--nm-space-3);
+      }
+
+      .change-label {
+        color: var(--primary-color, #3f6f58);
+        font-weight: 600;
+      }
+
+      .source-option:hover,
+      .signal-option:hover,
+      .behaviour-option:hover {
+        border-color: var(--primary-color, #3f6f58);
+      }
+
+      .source-option[aria-pressed="true"],
+      .signal-option[aria-pressed="true"],
+      .behaviour-option[aria-pressed="true"] {
+        border-color: var(--primary-color, #3f6f58);
+        background: color-mix(in srgb, var(--primary-color, #3f6f58) 8%, transparent);
+      }
+
+      .source-option:focus-visible,
+      .signal-option:focus-visible,
+      .behaviour-option:focus-visible {
+        outline: 2px solid var(--primary-color, #3f6f58);
+        outline-offset: 2px;
+      }
+
+      .signal-option:disabled {
+        cursor: not-allowed;
+        opacity: 0.62;
+      }
+
+      .option-copy {
+        display: grid;
+        gap: 2px;
+        min-inline-size: 0;
+      }
+
+      .option-title {
+        overflow-wrap: anywhere;
+        font-weight: 600;
+      }
+
+      .option-meta,
+      .option-count {
+        color: var(--secondary-text-color, #616161);
+        font-size: 13px;
+        font-weight: 400;
+      }
+
+      .selection-path {
+        margin: 8px 0 0;
+        color: var(--secondary-text-color, #616161);
+        font-size: 14px;
+      }
+
+      .no-results {
+        margin: 12px 0 0;
+        color: var(--secondary-text-color, #616161);
+      }
+
       .condition-list {
         display: grid;
         grid-column: 1 / -1;
-        gap: 12px;
+        gap: var(--nm-space-3);
       }
 
       .condition-card {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: var(--nm-space-3);
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.35));
-        border-radius: 8px;
-        padding: 14px;
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-3);
       }
 
       .condition-card .condition-kind,
@@ -195,10 +295,10 @@ export class RuleEditorPage extends LitElement {
 
       .condition-actions button,
       .add-condition {
-        min-block-size: 40px;
+        min-block-size: var(--nm-control-height);
         border: 0;
-        border-radius: 6px;
-        padding: 0 10px;
+        border-radius: var(--nm-radius-compact);
+        padding: 0 var(--nm-space-3);
         background: transparent;
         color: var(--primary-color, #3f6f58);
         font: inherit;
@@ -214,7 +314,7 @@ export class RuleEditorPage extends LitElement {
 
       fieldset {
         min-inline-size: 0;
-        margin: 16px 0 0;
+        margin: var(--nm-space-4) 0 0;
         border: 0;
         padding: 0;
       }
@@ -222,18 +322,18 @@ export class RuleEditorPage extends LitElement {
       .choice-list {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-        margin-top: 8px;
+        gap: var(--nm-space-2);
+        margin-top: var(--nm-space-2);
       }
 
       .choice {
         display: flex;
         align-items: flex-start;
-        gap: 9px;
-        min-block-size: 44px;
+        gap: var(--nm-space-2);
+        min-block-size: var(--nm-control-height);
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.35));
-        border-radius: 6px;
-        padding: 10px;
+        border-radius: var(--nm-radius-compact);
+        padding: var(--nm-space-2);
         font-weight: 500;
         cursor: pointer;
       }
@@ -252,9 +352,9 @@ export class RuleEditorPage extends LitElement {
       }
 
       .expanded-choice {
-        margin-top: 12px;
+        margin-top: var(--nm-space-3);
         border-inline-start: 3px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        padding-inline-start: 16px;
+        padding-inline-start: var(--nm-space-4);
       }
 
       details {
@@ -263,7 +363,7 @@ export class RuleEditorPage extends LitElement {
       }
 
       summary {
-        min-block-size: 48px;
+        min-block-size: var(--nm-option-height);
         display: flex;
         align-items: center;
         font-weight: 600;
@@ -281,8 +381,8 @@ export class RuleEditorPage extends LitElement {
         position: sticky;
         inset-block-start: 24px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        border-radius: 8px;
-        padding: 18px;
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-4);
         background: var(--card-background-color, #fafafa);
       }
 
@@ -290,16 +390,24 @@ export class RuleEditorPage extends LitElement {
         display: grid;
         align-items: stretch;
         justify-content: stretch;
-        gap: 16px;
-        margin-top: 18px;
+        gap: var(--nm-space-4);
+        margin-top: var(--nm-space-4);
       }
 
       .button-row {
-        display: flex;
-        flex-wrap: wrap;
         display: grid;
         justify-content: stretch;
-        gap: 8px;
+        gap: var(--nm-space-2);
+      }
+
+      .mobile-actions {
+        display: none;
+      }
+
+      .mobile-feedback {
+        grid-column: 1 / -1;
+        color: var(--secondary-text-color, #616161);
+        font-size: 13px;
       }
 
       .feedback {
@@ -322,8 +430,31 @@ export class RuleEditorPage extends LitElement {
       }
 
       @media (max-width: 840px) {
-        .editor-layout { grid-template-columns: 1fr; gap: 8px; }
+        :host { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+        .editor-layout { grid-template-columns: 1fr; gap: var(--nm-space-2); }
         .review-panel { position: static; }
+
+        .review-panel .review-actions {
+          display: none;
+        }
+
+        .mobile-actions {
+          position: fixed;
+          z-index: 5;
+          inset-inline: 0;
+          inset-block-end: 0;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: var(--nm-space-2);
+          border-top: 1px solid var(--nm-border);
+          padding:
+            var(--nm-space-3)
+            max(var(--nm-space-4), env(safe-area-inset-right))
+            max(var(--nm-space-3), env(safe-area-inset-bottom))
+            max(var(--nm-space-4), env(safe-area-inset-left));
+          background: var(--card-background-color, #fafafa);
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
       }
 
       @media (max-width: 640px) {
@@ -333,7 +464,7 @@ export class RuleEditorPage extends LitElement {
           grid-template-columns: 1fr;
         }
 
-        .choice-list { gap: 6px; }
+        .choice-list { gap: var(--nm-space-2); }
       }
     `,
   ];
@@ -347,8 +478,11 @@ export class RuleEditorPage extends LitElement {
 
   private _initialisedFor = "";
   private _draftId = newRuleId();
+  private _selectedSourceKey = "";
   private _selectedTargetId = "";
   private _selectedSemantic: Semantic | "" = "";
+  private _sourcePickerOpen = true;
+  private _sourceSearch = "";
   private _durationMinutes = 5;
   private _audienceMode: AudienceMode = "ME";
   private _recipientIds: string[] = [];
@@ -378,10 +512,13 @@ export class RuleEditorPage extends LitElement {
     const key = this.rule?.id ?? "new";
     if (this._initialisedFor === key || this.targets.length === 0) return;
     this._initialisedFor = key;
+    this._sourcePickerOpen = !this.rule;
+    this._sourceSearch = "";
     const available = supportedTargets(this.targets);
     const target = this.rule?.trigger.target
       ? available.find((item) => item.entity_id === this.rule?.trigger.target?.entity_id)
       : available.find((item) => item.available) ?? available[0];
+    this._selectedSourceKey = target ? targetSourceKey(target) : "";
     this._selectedTargetId = target?.entity_id ?? "";
     this._selectedSemantic = this.rule
       ? semanticFromTrigger(this.rule.trigger, target) ?? ""
@@ -491,19 +628,46 @@ export class RuleEditorPage extends LitElement {
     );
   }
 
-  private _changeTarget(event: Event): void {
-    this._selectedTargetId = valueFrom(event);
+  private _selectSource(sourceKey: string): void {
+    const source = groupTargetsBySource(supportedTargets(this.targets)).find(
+      (item) => item.key === sourceKey,
+    );
+    if (!source) return;
+    const target = source.targets.find((item) => item.available) ?? source.targets[0];
+    if (!target) return;
+    this._selectedSourceKey = source.key;
+    this._sourcePickerOpen = false;
+    this._sourceSearch = "";
+    this._selectTarget(target.entity_id);
+  }
+
+  private _selectTarget(targetId: string): void {
+    this._sourcePickerOpen = false;
+    this._sourceSearch = "";
+    if (targetId === this._selectedTargetId) return;
+    this._selectedTargetId = targetId;
     this._selectedSemantic = supportedSemantics(this._selectedTarget)[0]?.semantic ?? "";
     this._contentEdited = false;
     this._applyGeneratedContent();
     this._markDirty();
   }
 
-  private _changeSemantic(event: Event): void {
-    this._selectedSemantic = valueFrom(event) as Semantic;
+  private _selectSemantic(semantic: Semantic): void {
+    if (semantic === this._selectedSemantic) return;
+    this._selectedSemantic = semantic;
     this._contentEdited = false;
     this._applyGeneratedContent();
     this._markDirty();
+  }
+
+  private _changeSourceSearch(event: Event): void {
+    this._sourceSearch = valueFrom(event);
+  }
+
+  private async _openSourcePicker(): Promise<void> {
+    this._sourcePickerOpen = true;
+    await this.updateComplete;
+    this.shadowRoot?.querySelector<HTMLInputElement>("#source-search")?.focus();
   }
 
   private _changeDuration(event: Event): void {
@@ -793,6 +957,20 @@ export class RuleEditorPage extends LitElement {
 
   render() {
     const targets = supportedTargets(this.targets);
+    const sources = groupTargetsBySource(targets);
+    const selectedSource = sources.find((source) => source.key === this._selectedSourceKey);
+    const query = this._sourceSearch.trim().toLocaleLowerCase();
+    const visibleSources = query
+      ? sources.filter(
+          (source) =>
+            source.name.toLocaleLowerCase().includes(query) ||
+            source.targets.some(
+              (target) =>
+                target.display_name.toLocaleLowerCase().includes(query) ||
+                target.entity_id.toLocaleLowerCase().includes(query),
+            ),
+        )
+      : sources;
     const semantics = supportedSemantics(this._selectedTarget);
     const personTargets = this.targets.filter((target) => target.category === "person");
     const showDuration = this._selectedSemantic.startsWith("REMAINS_");
@@ -813,7 +991,7 @@ export class RuleEditorPage extends LitElement {
             this._durationMinutes,
             this._audienceName(),
           )
-        : "Choose a device, event and audience to review this notification.";
+        : "Choose a device, signal, behaviour and audience to review this notification.";
 
     return html`
       <div class="editor-header">
@@ -828,15 +1006,15 @@ export class RuleEditorPage extends LitElement {
       </div>
       <div class="page-heading">
         <h2>${this.rule ? "Edit notification" : "Create notification"}</h2>
-        <p>Choose the event, recipients and message. Advanced delivery options are optional.</p>
+        <p>Choose what to monitor, what should happen and who should be notified.</p>
       </div>
 
       ${targets.length === 0
         ? html`
             <notification-manager-status-panel
               kind="error"
-              heading="No supported devices found"
-              message="Add a door, window or motion sensor in Home Assistant, then reload this page."
+              heading="No notification-ready signals found"
+              message="Add a supported device or entity in Home Assistant, then reload this page."
             ></notification-manager-status-panel>
           `
         : html`
@@ -844,46 +1022,110 @@ export class RuleEditorPage extends LitElement {
               <div class="editor-form">
             <section class="composer-section" aria-labelledby="what-heading">
               <h3 id="what-heading">Device</h3>
-              <div class="field-grid">
-                <div class="field full">
-                  <label for="target">Door, window or motion sensor</label>
-                  <select id="target" @change=${this._changeTarget} .value=${this._selectedTargetId}>
-                    ${Object.entries(CATEGORY_LABELS).map(([category, label]) => {
-                      const items = targets.filter((target) => target.category === category);
-                      return items.length
-                        ? html`
-                            <optgroup label=${label}>
-                              ${items.map(
-                                (target) => html`
-                                  <option value=${target.entity_id} ?disabled=${!target.available}>
-                                    ${target.display_name}${target.available ? "" : " (unavailable)"}
-                                  </option>
-                                `,
-                              )}
-                            </optgroup>
-                          `
-                        : nothing;
-                    })}
-                  </select>
-                </div>
+              ${this._sourcePickerOpen
+                ? html`
+                    <div class="field source-search">
+                      <label for="source-search">Find a device or entity</label>
+                      <input
+                        id="source-search"
+                        type="search"
+                        placeholder="Search by device, signal or entity ID"
+                        autocomplete="off"
+                        .value=${this._sourceSearch}
+                        @input=${this._changeSourceSearch}
+                      />
+                    </div>
+                    <div class="source-list" aria-label="Devices and entities">
+                      ${visibleSources.map(
+                        (source) => html`
+                          <button
+                            class="source-option"
+                            type="button"
+                            aria-pressed=${source.key === this._selectedSourceKey ? "true" : "false"}
+                            @click=${() => this._selectSource(source.key)}
+                          >
+                            <span class="option-copy">
+                              <span class="option-title">${source.name}</span>
+                              <span class="option-meta">
+                                ${source.kind === "device" ? "Device" : "Individual entity"}
+                              </span>
+                            </span>
+                            <span class="option-count">
+                              ${source.targets.length}
+                              ${source.targets.length === 1 ? "signal" : "signals"}
+                            </span>
+                          </button>
+                        `,
+                      )}
+                    </div>
+                    ${visibleSources.length === 0
+                      ? html`<p class="no-results">No matching devices or entities.</p>`
+                      : nothing}
+                  `
+                : html`
+                    <button
+                      class="source-option source-summary"
+                      type="button"
+                      @click=${this._openSourcePicker}
+                    >
+                      <span class="option-copy">
+                        <span class="option-title">${selectedSource?.name ?? "Selected entity"}</span>
+                        <span class="option-meta">
+                          ${selectedSource?.kind === "device" ? "Device" : "Individual entity"}
+                        </span>
+                      </span>
+                      <span class="change-label">Change</span>
+                    </button>
+                  `}
+            </section>
+
+            <section class="composer-section" aria-labelledby="signal-heading">
+              <h3 id="signal-heading">Signal</h3>
+              <p class="selection-path">
+                Choose what on ${selectedSource?.name ?? "this device"} should be monitored.
+              </p>
+              <div class="signal-list" aria-label="Signals">
+                ${selectedSource?.targets.map(
+                  (target) => html`
+                    <button
+                      class="signal-option"
+                      type="button"
+                      aria-pressed=${target.entity_id === this._selectedTargetId ? "true" : "false"}
+                      ?disabled=${!target.available}
+                      @click=${() => this._selectTarget(target.entity_id)}
+                    >
+                      <span class="option-copy">
+                        <span class="option-title">${target.display_name}</span>
+                        <span class="option-meta">
+                          ${SIGNAL_LABELS[target.category] ?? "Entity state"}${target.available
+                            ? ""
+                            : " · Unavailable"}
+                        </span>
+                      </span>
+                    </button>
+                  `,
+                )}
               </div>
             </section>
 
             <section class="composer-section" aria-labelledby="when-heading">
-              <h3 id="when-heading">Trigger</h3>
+              <h3 id="when-heading">Behaviour</h3>
+              <p class="selection-path">When ${this._selectedTarget?.display_name ?? "the signal"}…</p>
+              <div class="behaviour-list" aria-label="Behaviours">
+                ${semantics.map(
+                  (choice) => html`
+                    <button
+                      class="behaviour-option"
+                      type="button"
+                      aria-pressed=${choice.semantic === this._selectedSemantic ? "true" : "false"}
+                      @click=${() => this._selectSemantic(choice.semantic)}
+                    >
+                      <span class="option-title">${choice.label}</span>
+                    </button>
+                  `,
+                )}
+              </div>
               <div class="field-grid">
-                <div class="field ${showDuration ? "" : "full"}">
-                  <label for="semantic">When ${this._selectedTarget?.display_name ?? "it"}</label>
-                  <select
-                    id="semantic"
-                    @change=${this._changeSemantic}
-                    .value=${this._selectedSemantic}
-                  >
-                    ${semantics.map(
-                      (choice) => html`<option value=${choice.semantic}>${choice.label}</option>`,
-                    )}
-                  </select>
-                </div>
                 ${showDuration
                   ? html`
                       <div class="field">
@@ -1188,6 +1430,30 @@ export class RuleEditorPage extends LitElement {
                 </div>
               </div>
             </aside>
+            </div>
+            <div class="mobile-actions" aria-label="Notification actions">
+              ${this._error || this._status
+                ? html`
+                    <div class="mobile-feedback" aria-live="polite">
+                      ${this._error ? html`<span class="error">${this._error}</span>` : this._status}
+                    </div>
+                  `
+                : nothing}
+              <notification-manager-button
+                .fullWidth=${true}
+                .disabled=${this._saving}
+                @click=${this._sendTest}
+              >
+                Send test
+              </notification-manager-button>
+              <notification-manager-button
+                variant="primary"
+                .fullWidth=${true}
+                .disabled=${this._saving}
+                @click=${this._save}
+              >
+                ${this._saving ? "Saving…" : "Save notification"}
+              </notification-manager-button>
             </div>
           `}
     `;

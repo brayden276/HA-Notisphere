@@ -234,7 +234,8 @@ export class NotificationManagerPanel extends LitElement {
 
       main {
         padding-block-start: 24px;
-        padding-inline: max(16px, env(safe-area-inset-left));
+        padding-inline-start: max(16px, env(safe-area-inset-left));
+        padding-inline-end: max(16px, env(safe-area-inset-right));
       }
     }
 

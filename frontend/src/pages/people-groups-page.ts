@@ -42,10 +42,10 @@ export class PeopleGroupsPage extends LitElement {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: var(--nm-space-3);
       }
 
-      .section-heading-row { margin-bottom: 12px; }
+      .section-heading-row { margin-bottom: var(--nm-space-3); }
       .section-heading { margin: 0; }
 
       .person,
@@ -57,7 +57,7 @@ export class PeopleGroupsPage extends LitElement {
       .group:first-child { border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3)); }
 
       .person-row,
-      .group-row { min-block-size: 68px; }
+      .group-row { min-block-size: var(--nm-row-height-comfortable); }
 
       .person-main {
         min-inline-size: 0;
@@ -87,20 +87,20 @@ export class PeopleGroupsPage extends LitElement {
       .group-form {
         margin-bottom: 14px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        border-radius: 8px;
-        padding: 16px;
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-4);
         background: var(--secondary-background-color, #f1f1f1);
       }
 
-      .group-form > label { display: grid; gap: 6px; font-weight: 600; }
+      .group-form > label { display: grid; gap: var(--nm-space-2); font-weight: 600; }
 
-      .endpoint-list { display: grid; gap: 6px; margin-block: 10px; }
+      .endpoint-list { display: grid; gap: var(--nm-space-2); margin-block: var(--nm-space-2); }
 
       .endpoint {
         display: flex;
         align-items: center;
-        gap: 9px;
-        min-block-size: 40px;
+        gap: var(--nm-space-2);
+        min-block-size: var(--nm-control-height);
         font-weight: 500;
       }
 
@@ -113,54 +113,37 @@ export class PeopleGroupsPage extends LitElement {
 
       .group-form {
         display: grid;
-        gap: 12px;
+        gap: var(--nm-space-3);
         max-inline-size: 620px;
         margin-top: 12px;
       }
 
-      .group-form input[type="text"] {
-        inline-size: 100%;
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.5));
-        border-radius: 8px;
-        padding: 9px 11px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
+      .group-form input[type="text"] { inline-size: 100%; }
 
-      .mapping-list { display: grid; gap: 10px; margin-top: 14px; }
+      .mapping-list { display: grid; gap: var(--nm-space-3); margin-top: var(--nm-space-3); }
 
       .mapping-row {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(180px, 0.7fr) auto;
         align-items: center;
-        gap: 10px;
+        gap: var(--nm-space-3);
         border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        padding-bottom: 10px;
+        padding-bottom: var(--nm-space-3);
       }
 
-      .mapping-row select {
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 8px;
-        padding-inline: 10px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
+      .mapping-row select { inline-size: 100%; }
 
       .member-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px 14px;
+        gap: var(--nm-space-2) var(--nm-space-4);
       }
 
       .member-grid label {
         display: flex;
         align-items: center;
         gap: 8px;
-        min-block-size: 40px;
+        min-block-size: var(--nm-control-height);
       }
 
       .group-actions { display: flex; align-items: center; gap: 4px; }
