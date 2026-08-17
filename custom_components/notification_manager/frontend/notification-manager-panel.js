@@ -254,34 +254,34 @@ var _ = class extends HTMLElement {
 _.elementStyles = [], _.shadowRootOptions = { mode: "open" }, _[h("elementProperties")] = /* @__PURE__ */ new Map(), _[h("finalized")] = /* @__PURE__ */ new Map(), re?.({ ReactiveElement: _ }), (m.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var v = globalThis, oe = (e) => e, y = v.trustedTypes, se = y ? y.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ce = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, x = "?" + b, le = `<${x}>`, S = document, C = () => S.createComment(""), w = (e) => e === null || typeof e != "object" && typeof e != "function", T = Array.isArray, ue = (e) => T(e) || typeof e?.[Symbol.iterator] == "function", E = "[ 	\n\f\r]", D = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, de = /-->/g, fe = />/g, O = RegExp(`>|${E}(?:([^\\s"'>=/]+)(${E}*=${E}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), pe = /'/g, me = /"/g, he = /^(?:script|style|textarea|title)$/i, k = ((e) => (t, ...n) => ({
+var v = globalThis, oe = (e) => e, y = v.trustedTypes, se = y ? y.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ce = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, le = "?" + b, ue = `<${le}>`, x = document, S = () => x.createComment(""), C = (e) => e === null || typeof e != "object" && typeof e != "function", w = Array.isArray, de = (e) => w(e) || typeof e?.[Symbol.iterator] == "function", T = "[ 	\n\f\r]", E = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, fe = /-->/g, pe = />/g, D = RegExp(`>|${T}(?:([^\\s"'>=/]+)(${T}*=${T}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), me = /'/g, he = /"/g, ge = /^(?:script|style|textarea|title)$/i, O = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), A = Symbol.for("lit-noChange"), j = Symbol.for("lit-nothing"), ge = /* @__PURE__ */ new WeakMap(), M = S.createTreeWalker(S, 129);
-function _e(e, t) {
-	if (!T(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+}))(1), k = Symbol.for("lit-noChange"), A = Symbol.for("lit-nothing"), _e = /* @__PURE__ */ new WeakMap(), j = x.createTreeWalker(x, 129);
+function ve(e, t) {
+	if (!w(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
 	return se === void 0 ? t : se.createHTML(t);
 }
-var ve = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = D;
+var ye = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = E;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === D ? c[1] === "!--" ? o = de : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = O) : (he.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = O) : o = fe : o === O ? c[0] === ">" ? (o = i ?? D, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? O : c[3] === "\"" ? me : pe) : o === me || o === pe ? o = O : o === de || o === fe ? o = D : (o = O, i = void 0);
-		let d = o === O && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === D ? n + le : l >= 0 ? (r.push(s), n.slice(0, l) + ce + n.slice(l) + b + d) : n + b + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === E ? c[1] === "!--" ? o = fe : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = D) : (ge.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = D) : o = pe : o === D ? c[0] === ">" ? (o = i ?? E, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? D : c[3] === "\"" ? he : me) : o === he || o === me ? o = D : o === fe || o === pe ? o = E : (o = D, i = void 0);
+		let d = o === D && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === E ? n + ue : l >= 0 ? (r.push(s), n.slice(0, l) + ce + n.slice(l) + b + d) : n + b + (l === -2 ? t : d);
 	}
-	return [_e(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, N = class e {
+	return [ve(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, M = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = ve(t, n);
-		if (this.el = e.createElement(l, r), M.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = ye(t, n);
+		if (this.el = e.createElement(l, r), j.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = M.nextNode()) !== null && c.length < s;) {
+		for (; (i = j.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
 				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(ce)) {
 					let t = u[o++], n = i.getAttribute(e).split(b), r = /([.?@])?(.*)/.exec(t);
@@ -290,25 +290,25 @@ var ve = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? be : r[1] === "?" ? xe : r[1] === "@" ? Se : I
+						ctor: r[1] === "." ? xe : r[1] === "?" ? Se : r[1] === "@" ? Ce : F
 					}), i.removeAttribute(e);
 				} else e.startsWith(b) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (he.test(i.tagName)) {
+				if (ge.test(i.tagName)) {
 					let e = i.textContent.split(b), t = e.length - 1;
 					if (t > 0) {
 						i.textContent = y ? y.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], C()), M.nextNode(), c.push({
+						for (let n = 0; n < t; n++) i.append(e[n], S()), j.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], C());
+						i.append(e[t], S());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === x) c.push({
+				if (i.data === le) c.push({
 					type: 2,
 					index: a
 				});
@@ -324,16 +324,16 @@ var ve = (e, t) => {
 		}
 	}
 	static createElement(e, t) {
-		let n = S.createElement("template");
+		let n = x.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function P(e, t, n = e, r) {
-	if (t === A) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = w(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = P(e, i._$AS(e, t.values), i, r)), t;
+function N(e, t, n = e, r) {
+	if (t === k) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = C(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = N(e, i._$AS(e, t.values), i, r)), t;
 }
-var ye = class {
+var be = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var ye = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? S).importNode(t, !0);
-		M.currentNode = r;
-		let i = M.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? x).importNode(t, !0);
+		j.currentNode = r;
+		let i = j.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new F(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Ce(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new P(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new we(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = M.nextNode(), a++);
+			a !== s?.index && (i = j.nextNode(), a++);
 		}
-		return M.currentNode = S, r;
+		return j.currentNode = x, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, F = class e {
+}, P = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = j, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = A, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var ye = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = P(this, e, t), w(e) ? e === j || e == null || e === "" ? (this._$AH !== j && this._$AR(), this._$AH = j) : e !== this._$AH && e !== A && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ue(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = N(this, e, t), C(e) ? e === A || e == null || e === "" ? (this._$AH !== A && this._$AR(), this._$AH = A) : e !== this._$AH && e !== k && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? de(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,24 +387,24 @@ var ye = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== j && w(this._$AH) ? this._$AA.nextSibling.data = e : this.T(S.createTextNode(e)), this._$AH = e;
+		this._$AH !== A && C(this._$AH) ? this._$AA.nextSibling.data = e : this.T(x.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = N.createElement(_e(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = M.createElement(ve(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new ye(r, this), n = e.u(this.options);
+			let e = new be(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = ge.get(e.strings);
-		return t === void 0 && ge.set(e.strings, t = new N(e)), t;
+		let t = _e.get(e.strings);
+		return t === void 0 && _e.set(e.strings, t = new M(e)), t;
 	}
 	k(t) {
-		T(this._$AH) || (this._$AH = [], this._$AR());
+		w(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(C()), this.O(C()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(S()), this.O(S()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
@@ -416,7 +416,7 @@ var ye = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, I = class {
+}, F = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var ye = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = j, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = j;
+		this.type = 1, this._$AH = A, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = A;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = P(this, e, t, 0), a = !w(e) || e !== this._$AH && e !== A, a && (this._$AH = e);
+		if (i === void 0) e = N(this, e, t, 0), a = !C(e) || e !== this._$AH && e !== k, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = P(this, r[n + o], t, o), s === A && (s = this._$AH[o]), a ||= !w(s) || s !== this._$AH[o], s === j ? e = j : e !== j && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = N(this, r[n + o], t, o), s === k && (s = this._$AH[o]), a ||= !C(s) || s !== this._$AH[o], s === A ? e = A : e !== A && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === j ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === A ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, be = class extends I {
+}, xe = class extends F {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === j ? void 0 : e;
+		this.element[this.name] = e === A ? void 0 : e;
 	}
-}, xe = class extends I {
+}, Se = class extends F {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== j);
+		this.element.toggleAttribute(this.name, !!e && e !== A);
 	}
-}, Se = class extends I {
+}, Ce = class extends F {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = P(this, e, t, 0) ?? j) === A) return;
-		let n = this._$AH, r = e === j && n !== j || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== j && (n === j || r);
+		if ((e = N(this, e, t, 0) ?? A) === k) return;
+		let n = this._$AH, r = e === A && n !== A || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== A && (n === A || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, Ce = class {
+}, we = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var ye = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		P(this, e);
+		N(this, e);
 	}
-}, we = v.litHtmlPolyfillSupport;
-we?.(N, F), (v.litHtmlVersions ??= []).push("3.3.3");
-var Te = (e, t, n) => {
+}, Te = v.litHtmlPolyfillSupport;
+Te?.(M, P), (v.litHtmlVersions ??= []).push("3.3.3");
+var Ee = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new F(t.insertBefore(C(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new P(t.insertBefore(S(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, L = globalThis, R = class extends _ {
+}, I = globalThis, L = class extends _ {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var Te = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Te(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Ee(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,15 +502,15 @@ var Te = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return A;
+		return k;
 	}
 };
-R._$litElement$ = !0, R.finalized = !0, L.litElementHydrateSupport?.({ LitElement: R });
-var Ee = L.litElementPolyfillSupport;
-Ee?.({ LitElement: R }), (L.litElementVersions ??= []).push("4.2.2");
+L._$litElement$ = !0, L.finalized = !0, I.litElementHydrateSupport?.({ LitElement: L });
+var De = I.litElementPolyfillSupport;
+De?.({ LitElement: L }), (I.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/api.ts
-var z = {
+var R = {
 	bootstrap: "notification_manager/bootstrap",
 	rulesList: "notification_manager/rules/list",
 	rulesGet: "notification_manager/rules/get",
@@ -533,18 +533,18 @@ var z = {
 	activityList: "notification_manager/activity/list",
 	settingsGet: "notification_manager/settings/get",
 	settingsUpdate: "notification_manager/settings/update"
-}, B = class extends Error {
+}, z = class extends Error {
 	constructor(e, t, n) {
 		super(t), this.name = "NotificationManagerApiError", this.code = e, this.details = n;
 	}
 };
-function De(e) {
+function Oe(e) {
 	return typeof e == "object" && !!e;
 }
-function V(e) {
-	return e instanceof B ? e : De(e) ? new B(typeof e.code == "string" ? e.code : "unknown_error", typeof e.message == "string" && e.message.trim().length > 0 ? e.message : "Notification Manager could not complete the request.", e.error) : e instanceof Error && e.message.trim().length > 0 ? new B("unknown_error", e.message) : new B("unknown_error", "Notification Manager could not complete the request.");
+function B(e) {
+	return e instanceof z ? e : Oe(e) ? new z(typeof e.code == "string" ? e.code : "unknown_error", typeof e.message == "string" && e.message.trim().length > 0 ? e.message : "Notification Manager could not complete the request.", e.error) : e instanceof Error && e.message.trim().length > 0 ? new z("unknown_error", e.message) : new z("unknown_error", "Notification Manager could not complete the request.");
 }
-var H = class {
+var V = class {
 	constructor(e) {
 		this.client = e;
 	}
@@ -552,44 +552,44 @@ var H = class {
 		try {
 			return await this.client.callWS(e);
 		} catch (e) {
-			throw V(e);
+			throw B(e);
 		}
 	}
 	bootstrap() {
-		return this.call({ type: z.bootstrap });
+		return this.call({ type: R.bootstrap });
 	}
 	listRules() {
-		return this.call({ type: z.rulesList });
+		return this.call({ type: R.rulesList });
 	}
 	getRule(e) {
 		return this.call({
-			type: z.rulesGet,
+			type: R.rulesGet,
 			rule_id: e
 		});
 	}
 	createRule(e) {
 		return this.call({
-			type: z.rulesCreate,
+			type: R.rulesCreate,
 			rule: e
 		});
 	}
 	updateRule(e, t) {
 		return this.call({
-			type: z.rulesUpdate,
+			type: R.rulesUpdate,
 			rule: e,
 			expected_revision: t
 		});
 	}
 	deleteRule(e, t) {
 		return this.call({
-			type: z.rulesDelete,
+			type: R.rulesDelete,
 			rule_id: e,
 			expected_revision: t
 		});
 	}
 	setRuleEnabled(e, t, n) {
 		return this.call({
-			type: z.rulesSetEnabled,
+			type: R.rulesSetEnabled,
 			rule_id: e,
 			enabled: t,
 			expected_revision: n
@@ -597,68 +597,68 @@ var H = class {
 	}
 	testRule(e) {
 		return this.call(typeof e == "string" ? {
-			type: z.rulesTest,
+			type: R.rulesTest,
 			rule_id: e
 		} : {
-			type: z.rulesTest,
+			type: R.rulesTest,
 			rule: e
 		});
 	}
 	listRecipients() {
-		return this.call({ type: z.recipientsList });
+		return this.call({ type: R.recipientsList });
 	}
 	updateRecipient(e) {
 		return this.call({
-			type: z.recipientsUpdate,
+			type: R.recipientsUpdate,
 			recipient: e
 		});
 	}
 	testRecipient(e) {
 		return this.call({
-			type: z.recipientsTest,
+			type: R.recipientsTest,
 			recipient_id: e
 		});
 	}
 	confirmRecipientMapping(e, t) {
 		return this.call({
-			type: z.recipientsConfirm,
+			type: R.recipientsConfirm,
 			source: e,
 			recipient_id: t
 		});
 	}
 	listGroups() {
-		return this.call({ type: z.groupsList });
+		return this.call({ type: R.groupsList });
 	}
 	createGroup(e) {
 		return this.call({
-			type: z.groupsCreate,
+			type: R.groupsCreate,
 			group: e
 		});
 	}
 	updateGroup(e) {
 		return this.call({
-			type: z.groupsUpdate,
+			type: R.groupsUpdate,
 			group: e
 		});
 	}
 	deleteGroup(e) {
 		return this.call({
-			type: z.groupsDelete,
+			type: R.groupsDelete,
 			group_id: e
 		});
 	}
 	listCapabilityTargets() {
-		return this.call({ type: z.capabilityTargets });
+		return this.call({ type: R.capabilityTargets });
 	}
 	getCapabilitiesForTarget(e) {
 		return this.call({
-			type: z.capabilityForTarget,
+			type: R.capabilityForTarget,
 			entity_id: e
 		});
 	}
 	resolveTrigger(e, t, n) {
 		return this.call({
-			type: z.capabilityResolve,
+			type: R.capabilityResolve,
 			entity_id: e,
 			semantic: t,
 			parameters: n
@@ -666,23 +666,23 @@ var H = class {
 	}
 	listActivity(e = {}) {
 		return this.call({
-			type: z.activityList,
+			type: R.activityList,
 			...e.ruleId ? { rule_id: e.ruleId } : {},
 			...e.recipientId ? { recipient_id: e.recipientId } : {},
 			...e.status ? { status: e.status } : {}
 		});
 	}
 	getSettings() {
-		return this.call({ type: z.settingsGet });
+		return this.call({ type: R.settingsGet });
 	}
 	updateSettings(e, t) {
 		return this.call({
-			type: z.settingsUpdate,
+			type: R.settingsUpdate,
 			activity_retention_days: e,
 			activity_retention_records: t
 		});
 	}
-}, Oe = class extends R {
+}, ke = class extends L {
 	constructor(...e) {
 		super(...e), this.variant = "secondary", this.icon = "", this.disabled = !1, this.fullWidth = !1, this.buttonType = "button";
 	}
@@ -801,23 +801,23 @@ var H = class {
   `;
 	}
 	render() {
-		return k`
+		return O`
       <button type=${this.buttonType} ?disabled=${this.disabled}>
-        ${this.icon ? k`<ha-icon icon=${this.icon} aria-hidden="true"></ha-icon>` : null}
+        ${this.icon ? O`<ha-icon icon=${this.icon} aria-hidden="true"></ha-icon>` : null}
         <slot></slot>
       </button>
     `;
 	}
 };
-customElements.get("notification-manager-button") || customElements.define("notification-manager-button", Oe);
+customElements.get("notification-manager-button") || customElements.define("notification-manager-button", ke);
 //#endregion
 //#region src/components/nm-status-panel.ts
-var ke = {
+var Ae = {
 	error: "mdi:alert-circle-outline",
 	offline: "mdi:connection",
 	info: "mdi:information-outline",
 	success: "mdi:check-circle-outline"
-}, Ae = class extends R {
+}, je = class extends L {
 	constructor(...e) {
 		super(...e), this.kind = "info", this.heading = "", this.message = "", this.compact = !1;
 	}
@@ -930,27 +930,27 @@ var ke = {
   `;
 	}
 	render() {
-		return k`
+		return O`
       <div class="panel" role=${this.kind === "error" ? "alert" : "status"} aria-live="polite">
-        <ha-icon icon=${ke[this.kind]} aria-hidden="true"></ha-icon>
+        <ha-icon icon=${Ae[this.kind]} aria-hidden="true"></ha-icon>
         <div>
           <strong>${this.heading}</strong>
-          ${this.message ? k`<p>${this.message}</p>` : null}
+          ${this.message ? O`<p>${this.message}</p>` : null}
         </div>
         <div class="actions"><slot name="actions"></slot></div>
       </div>
     `;
 	}
 };
-customElements.get("notification-manager-status-panel") || customElements.define("notification-manager-status-panel", Ae);
+customElements.get("notification-manager-status-panel") || customElements.define("notification-manager-status-panel", je);
 //#endregion
 //#region src/navigation.ts
-var je = [
+var Me = [
 	"notifications",
 	"people",
 	"activity",
 	"settings"
-], Me = [
+], Ne = [
 	{
 		route: "notifications",
 		label: "Notifications",
@@ -973,34 +973,34 @@ var je = [
 		adminOnly: !0
 	}
 ];
-function Ne(e) {
+function Pe(e) {
 	let t = e.replace(/^#\/?/, "").split(/[/?]/, 1)[0];
-	return je.includes(t) ? t : "notifications";
+	return Me.includes(t) ? t : "notifications";
 }
-function Pe(e, t) {
+function Fe(e, t) {
 	return e === "settings" && !t ? "notifications" : e;
 }
-function Fe(e) {
-	return Me.filter((t) => e || !t.adminOnly);
+function Ie(e) {
+	return Ne.filter((t) => e || !t.adminOnly);
 }
-function U(e) {
+function H(e) {
 	return `#/${e}`;
 }
 //#endregion
 //#region src/activity-format.ts
-function W(e) {
+function U(e) {
 	return e.length <= 1 ? e[0] ?? "" : e.length === 2 ? `${e[0]} and ${e[1]}` : `${e.slice(0, -1).join(", ")}, and ${e.at(-1)}`;
 }
-function Ie(e) {
+function Le(e) {
 	return e.status === "SENT" ? `${e.recipient_name}: sent` : e.status === "FAILED" ? `${e.recipient_name}: ${e.reason ?? "could not be reached"}` : `${e.recipient_name}: ${e.reason ?? "not eligible for this notification"}`;
 }
-function G(e) {
+function W(e) {
 	let t = e.recipient_results.filter((e) => e.status === "SENT").map((e) => e.recipient_name), n = e.recipient_results.filter((e) => e.status === "FAILED").map((e) => e.recipient_name), r = e.recipient_results.filter((e) => e.status === "SKIPPED").map((e) => e.recipient_name), i = [];
-	return t.length && i.push(`${e.status === "TEST" ? "Test sent" : "Sent"} to ${W(t)}`), n.length && i.push(`could not reach ${W(n)}`), r.length && i.push(`skipped ${W(r)}`), i.length ? i.join("; ") : e.reason ?? e.status.toLocaleLowerCase();
+	return t.length && i.push(`${e.status === "TEST" ? "Test sent" : "Sent"} to ${U(t)}`), n.length && i.push(`could not reach ${U(n)}`), r.length && i.push(`skipped ${U(r)}`), i.length ? i.join("; ") : e.reason ?? e.status.toLocaleLowerCase();
 }
 //#endregion
 //#region src/components/nm-empty-state.ts
-var Le = class extends R {
+var Re = class extends L {
 	constructor(...e) {
 		super(...e), this.icon = "mdi:information-outline", this.heading = "", this.message = "";
 	}
@@ -1051,7 +1051,7 @@ var Le = class extends R {
   `;
 	}
 	render() {
-		return k`
+		return O`
       <div class="empty">
         <ha-icon icon=${this.icon} aria-hidden="true"></ha-icon>
         <strong>${this.heading}</strong>
@@ -1060,12 +1060,13 @@ var Le = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-empty-state") || customElements.define("notification-manager-empty-state", Le);
+customElements.get("notification-manager-empty-state") || customElements.define("notification-manager-empty-state", Re);
 //#endregion
 //#region src/pages/page-styles.ts
-var K = o`
+var G = o`
   :host {
     display: block;
+    box-sizing: border-box;
     --nm-border: var(--divider-color, rgba(127, 127, 127, 0.3));
     --nm-control-border: var(--input-idle-line-color, rgba(127, 127, 127, 0.5));
     --nm-surface: var(--card-background-color, #fafafa);
@@ -1082,12 +1083,20 @@ var K = o`
     --nm-row-height-comfortable: 72px;
     --nm-radius: 8px;
     --nm-radius-compact: 6px;
+    max-inline-size: 1120px;
+    margin-inline: auto;
+    border: 1px solid var(--nm-border);
+    border-radius: var(--nm-radius);
+    padding: var(--nm-space-5);
+    background: var(--nm-surface);
     color: var(--primary-text-color, #212121);
     font: inherit;
   }
 
   .page-heading {
-    margin-bottom: var(--nm-space-5);
+    margin-bottom: var(--nm-space-4);
+    padding-bottom: var(--nm-space-4);
+    border-bottom: 1px solid var(--nm-border);
   }
 
   h2,
@@ -1122,6 +1131,18 @@ var K = o`
     margin-top: var(--nm-space-4);
     border-top: 1px solid var(--nm-border);
     padding-top: var(--nm-space-4);
+  }
+
+  .section {
+    min-inline-size: 0;
+  }
+
+  .page-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nm-space-3);
+    margin-bottom: var(--nm-space-4);
   }
 
   .section-heading {
@@ -1248,6 +1269,12 @@ var K = o`
   }
 
   @media (max-width: 600px) {
+    :host {
+      border-inline: 0;
+      border-radius: 0;
+      padding: var(--nm-space-4);
+    }
+
     .page-heading {
       margin-bottom: var(--nm-space-5);
     }
@@ -1276,13 +1303,13 @@ var K = o`
       text-align: start;
     }
   }
-`, Re = {
+`, ze = {
 	SENT: "Sent",
 	PARTIAL: "Partially sent",
 	SKIPPED: "Skipped",
 	FAILED: "Failed",
 	TEST: "Test"
-}, ze = class extends R {
+}, Be = class extends L {
 	constructor(...e) {
 		super(...e), this.activity = [], this.rules = [], this.recipients = [], this._ruleId = "", this._recipientId = "", this._status = "", this._refreshing = !1, this._error = "";
 	}
@@ -1301,7 +1328,7 @@ var K = o`
 		};
 	}
 	static {
-		this.styles = [K, o`
+		this.styles = [G, o`
       .filters {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
@@ -1339,7 +1366,7 @@ var K = o`
 					status: this._status || void 0
 				});
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._refreshing = !1;
 			}
@@ -1354,7 +1381,7 @@ var K = o`
 	}
 	render() {
 		let e = [...this._records ?? this.activity].sort((e, t) => Date.parse(t.timestamp) - Date.parse(e.timestamp));
-		return k`
+		return O`
       <div class="page-heading">
         <h2>Activity</h2>
         <p>Review what was sent, skipped or unable to reach a phone.</p>
@@ -1369,7 +1396,7 @@ var K = o`
 		}}
           >
             <option value="">All notifications</option>
-            ${this.rules.map((e) => k`<option value=${e.id}>${e.name}</option>`)}
+            ${this.rules.map((e) => O`<option value=${e.id}>${e.name}</option>`)}
           </select>
         </label>
         <label>
@@ -1381,7 +1408,7 @@ var K = o`
 		}}
           >
             <option value="">Everyone</option>
-            ${this.recipients.map((e) => k`<option value=${e.id}>${e.display_name}</option>`)}
+            ${this.recipients.map((e) => O`<option value=${e.id}>${e.display_name}</option>`)}
           </select>
         </label>
         <label>
@@ -1393,7 +1420,7 @@ var K = o`
 		}}
           >
             <option value="">All results</option>
-            ${Object.entries(Re).map(([e, t]) => k`<option value=${e}>${t}</option>`)}
+            ${Object.entries(ze).map(([e, t]) => O`<option value=${e}>${t}</option>`)}
           </select>
         </label>
         <notification-manager-button
@@ -1404,32 +1431,32 @@ var K = o`
           Reload
         </notification-manager-button>
       </div>
-      ${this._error ? k`<p class="error" role="alert">${this._error}</p>` : j}
-      ${e.length === 0 ? k`
+      ${this._error ? O`<p class="error" role="alert">${this._error}</p>` : A}
+      ${e.length === 0 ? O`
             <notification-manager-empty-state
               icon="mdi:history"
               heading="No activity yet"
               message="Delivery results will appear after a notification is evaluated."
             ></notification-manager-empty-state>
-          ` : k`
+          ` : O`
             <div class="data-list" aria-label="Notification activity">
-              ${e.map((e) => k`
+              ${e.map((e) => O`
                   <div class="data-row">
                     <div>
                       <span class="row-primary">${e.trigger_summary}</span>
                       <span class="row-secondary">
                         ${this.formatTimestamp(e.timestamp)}
-                        <br />${G(e)}
+                        <br />${W(e)}
                       </span>
-                      ${e.recipient_results.length > 1 || e.status === "PARTIAL" ? k`
+                      ${e.recipient_results.length > 1 || e.status === "PARTIAL" ? O`
                             <ul class="delivery-results" aria-label="Recipient results">
-                              ${e.recipient_results.map((e) => k`<li>${Ie(e)}</li>`)}
+                              ${e.recipient_results.map((e) => O`<li>${Le(e)}</li>`)}
                             </ul>
-                          ` : j}
+                          ` : A}
                     </div>
                     <div class="row-meta">
                       <span class="status" data-status=${e.status}>
-                        ${Re[e.status]}
+                        ${ze[e.status]}
                       </span>
                     </div>
                   </div>
@@ -1439,10 +1466,10 @@ var K = o`
     `;
 	}
 };
-customElements.get("notification-manager-activity-page") || customElements.define("notification-manager-activity-page", ze);
+customElements.get("notification-manager-activity-page") || customElements.define("notification-manager-activity-page", Be);
 //#endregion
 //#region src/rule-draft.ts
-var Be = /* @__PURE__ */ new Set([
+var Ve = /* @__PURE__ */ new Set([
 	"OPENED",
 	"CLOSED",
 	"REMAINS_OPEN",
@@ -1451,13 +1478,13 @@ var Be = /* @__PURE__ */ new Set([
 	"CLEARED",
 	"REMAINS_DETECTED"
 ]);
-function Ve(e) {
+function K(e) {
 	return e.device_id ? `device:${e.device_id}` : `entity:${e.entity_id}`;
 }
 function He(e) {
 	let t = /* @__PURE__ */ new Map();
 	for (let n of e) {
-		let e = Ve(n), r = t.get(e);
+		let e = K(n), r = t.get(e);
 		if (r) {
 			r.targets.push(n);
 			continue;
@@ -1474,13 +1501,36 @@ function He(e) {
 		targets: [...e.targets].sort((e, t) => e.display_name.localeCompare(t.display_name) || e.entity_id.localeCompare(t.entity_id))
 	})).sort((e, t) => e.name.localeCompare(t.name) || e.key.localeCompare(t.key));
 }
+function Ue(e) {
+	return e.filter((e) => !e.synthetic);
+}
+function We(e) {
+	return e.semantics.some((e) => Ve.has(e.semantic));
+}
+function Ge(e) {
+	return Ue(e).filter(We);
+}
+function Ke(e) {
+	return Ge(e).filter((e) => e.available);
+}
 function q(e) {
-	return e.filter((e) => e.semantics.some((e) => Be.has(e.semantic)) && !e.synthetic);
+	return We(e) ? e.available ? "ready" : "unavailable" : "unsupported";
 }
 function J(e) {
-	return e?.semantics.filter((e) => Be.has(e.semantic)) ?? [];
+	let t = Ue(e), n = Ke(t), r = He(t), i = new Set(n.map(K));
+	return {
+		discoveredTargets: t,
+		runtimeTargets: Ge(t),
+		usableTargets: n,
+		sources: r,
+		discoveredSourceCount: r.length,
+		readySourceCount: i.size
+	};
 }
-function Y(e, t) {
+function Y(e) {
+	return e?.semantics.filter((e) => Ve.has(e.semantic)) ?? [];
+}
+function qe(e, t) {
 	let n = e.parameters.state, r = e.type === "BINARY_STATE_DURATION";
 	if (t?.category === "motion") {
 		if (r && n === "on") return "REMAINS_DETECTED";
@@ -1494,7 +1544,7 @@ function Y(e, t) {
 		if (!r && n === "off") return "CLOSED";
 	}
 }
-var Ue = {
+var Je = {
 	OPENED: "opens",
 	CLOSED: "closes",
 	REMAINS_OPEN: "stays open",
@@ -1513,9 +1563,9 @@ function X(e) {
 }
 function Z(e, t, n, r) {
 	let i = t.startsWith("REMAINS_") ? ` for ${X(n)}` : "";
-	return `When ${e} ${Ue[t]}${i}, notify ${r}.`;
+	return `When ${e} ${Je[t]}${i}, notify ${r}.`;
 }
-function We(e, t, n) {
+function Ye(e, t, n) {
 	let r = e.toLocaleLowerCase();
 	switch (t) {
 		case "REMAINS_OPEN": return {
@@ -1560,7 +1610,7 @@ function We(e, t, n) {
 		};
 	}
 }
-function Ge(e, t, n) {
+function Xe(e, t, n) {
 	let r = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		id: n.existing?.id ?? n.id,
@@ -1606,7 +1656,7 @@ function Q() {
 }
 //#endregion
 //#region src/pages/notifications-page.ts
-var Ke = class extends R {
+var Ze = class extends L {
 	constructor(...e) {
 		super(...e), this.rules = [], this.targets = [], this.recipients = [], this.groups = [], this._filter = "ALL", this._workingId = "", this._error = "";
 	}
@@ -1624,7 +1674,7 @@ var Ke = class extends R {
 		};
 	}
 	static {
-		this.styles = [K, o`
+		this.styles = [G, o`
       .page-heading-row,
       .filters,
       .rule-row,
@@ -1783,7 +1833,7 @@ var Ke = class extends R {
 		return e.audiences.map((e) => e.type === "ME" ? "me" : e.type === "EVERYONE" ? "Everyone" : e.type === "ADMINS" ? "Admins" : e.type === "RECIPIENT" ? this.recipients.find((t) => t.id === e.recipient_id)?.display_name : this.groups.find((t) => t.id === e.group_id)?.name).filter(Boolean).join(", ");
 	}
 	_summary(e) {
-		let t = this.targets.find((t) => t.entity_id === e.trigger.target?.entity_id), n = Y(e.trigger, t);
+		let t = this.targets.find((t) => t.entity_id === e.trigger.target?.entity_id), n = qe(e.trigger, t);
 		if (!n || !e.trigger.target) return `Notify ${this._audienceLabel(e)}.`;
 		let r = e.trigger.parameters.duration_seconds, i = typeof r == "number" ? Math.max(1, Math.round(r / 60)) : 0;
 		return Z(e.trigger.target.display_name_snapshot, n, i, this._audienceLabel(e));
@@ -1800,7 +1850,7 @@ var Ke = class extends R {
 			try {
 				await this.api.setRuleEnabled(e.id, !e.enabled, e.revision), this._changed();
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._workingId = "";
 			}
@@ -1824,7 +1874,7 @@ var Ke = class extends R {
 				}
 			}), this._changed();
 		} catch (e) {
-			this._error = V(e).message;
+			this._error = B(e).message;
 		} finally {
 			this._workingId = "";
 		}
@@ -1835,7 +1885,7 @@ var Ke = class extends R {
 			try {
 				await this.api.deleteRule(e.id, e.revision), this._changed();
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._workingId = "";
 			}
@@ -1843,7 +1893,7 @@ var Ke = class extends R {
 	}
 	render() {
 		let e = this._filteredRules();
-		return k`
+		return O`
       <div class="page-heading-row">
         <div class="page-heading">
           <h2>Notifications</h2>
@@ -1867,7 +1917,7 @@ var Ke = class extends R {
 			["MINE", "Mine"],
 			["HOUSEHOLD", "Household"],
 			["ATTENTION", "Needs attention"]
-		].map(([e, t]) => k`
+		].map(([e, t]) => O`
             <button
               class="filter"
               type="button"
@@ -1878,17 +1928,17 @@ var Ke = class extends R {
             </button>
           `)}
       </div>
-      ${this._error ? k`<p class="error" role="alert">${this._error}</p>` : j}
+      ${this._error ? O`<p class="error" role="alert">${this._error}</p>` : A}
 
-      ${e.length === 0 ? k`
+      ${e.length === 0 ? O`
             <notification-manager-empty-state
               icon="mdi:bell-outline"
               heading=${this.rules.length ? "No notifications match this filter" : "No notifications yet"}
               message=${this.rules.length ? "Choose another filter to see your notifications." : "Create one to tell someone when something important happens at home."}
             ></notification-manager-empty-state>
-          ` : k`
+          ` : O`
             <div class="rule-list" aria-label="Notification rules">
-              ${e.map((e) => k`
+              ${e.map((e) => O`
                   <article class="rule-row">
                     <button
                       class="rule-main"
@@ -1934,10 +1984,10 @@ var Ke = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-notifications-page") || customElements.define("notification-manager-notifications-page", Ke);
+customElements.get("notification-manager-notifications-page") || customElements.define("notification-manager-notifications-page", Ze);
 //#endregion
 //#region src/pages/people-groups-page.ts
-var qe = class extends R {
+var Qe = class extends L {
 	constructor(...e) {
 		super(...e), this.recipients = [], this.groups = [], this.onboarding = !1, this.unconfirmedMappings = [], this._openRecipientId = "", this._busy = !1, this._feedback = "", this._error = "", this._editingGroupId = "", this._groupName = "", this._groupMembers = [], this._mappingRecipientIds = {};
 	}
@@ -1960,7 +2010,7 @@ var qe = class extends R {
 		};
 	}
 	static {
-		this.styles = [K, o`
+		this.styles = [G, o`
       .section-heading-row,
       .person-row,
       .group-row,
@@ -2111,7 +2161,7 @@ var qe = class extends R {
 					}
 				}), this._feedback = `${e.display_name}'s primary phone was updated.`, this._changed();
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._busy = !1;
 			}
@@ -2124,7 +2174,7 @@ var qe = class extends R {
 				let t = await this.api.testRecipient(e.id);
 				this._feedback = t.status === "SENT" ? `Test sent to ${e.display_name}.` : t.reason ?? `${e.display_name} does not currently have a usable phone.`;
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._busy = !1;
 			}
@@ -2141,7 +2191,7 @@ var qe = class extends R {
 		try {
 			await this.api.confirmRecipientMapping(e.source, r), this._feedback = `${e.display_name} was confirmed.`, this._changed();
 		} catch (e) {
-			this._error = V(e).message;
+			this._error = B(e).message;
 		} finally {
 			this._busy = !1;
 		}
@@ -2162,7 +2212,7 @@ var qe = class extends R {
 				};
 				e ? await this.api.updateGroup(t) : await this.api.createGroup(t), this._editingGroupId = "", this._feedback = `${t.name} was saved.`, this._changed();
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._busy = !1;
 			}
@@ -2174,14 +2224,14 @@ var qe = class extends R {
 			try {
 				await this.api.deleteGroup(e.id), this._changed();
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._busy = !1;
 			}
 		}
 	}
 	_renderGroupForm() {
-		return k`
+		return O`
       <div class="group-form">
         <label>
           Group name
@@ -2194,7 +2244,7 @@ var qe = class extends R {
         <div>
           <strong>People</strong>
           <div class="member-grid">
-            ${this.recipients.map((e) => k`
+            ${this.recipients.map((e) => O`
                 <label>
                   <input
                     type="checkbox"
@@ -2222,19 +2272,19 @@ var qe = class extends R {
 	}
 	render() {
 		let e = this.groups.filter((e) => e.type === "CUSTOM"), t = this.groups.filter((e) => e.type === "SYSTEM"), n = this.recipients.reduce((e, t) => e + this._activeEndpointCount(t), 0), r = this.onboarding ? this.recipients.find((e) => e.ha_user_id === this.currentUser?.id)?.id ?? this.recipients[0]?.id ?? "" : "", i = this._openRecipientId || r;
-		return k`
+		return O`
       <div class="page-heading">
         <h2>Household</h2>
         <p>Manage who receives notifications and which phone is used.</p>
       </div>
 
-      ${this.onboarding ? k`
+      ${this.onboarding ? O`
             <notification-manager-status-panel
               kind=${n > 0 ? "success" : "info"}
               heading=${n > 0 ? "Your household is ready" : "Let's connect your first phone"}
               message=${n > 0 ? `${n} notification ${n === 1 ? "phone is" : "phones are"} ready. You can send a test below, then create your first notification.` : "Notification Manager checks Home Assistant for Companion App phones automatically. If no phone appears, sign in to this Home Assistant from the Companion App and return here."}
             >
-              ${n > 0 ? k`
+              ${n > 0 ? O`
                     <notification-manager-button
                       slot="actions"
                       icon="mdi:plus"
@@ -2242,22 +2292,22 @@ var qe = class extends R {
                     >
                       Create first notification
                     </notification-manager-button>
-                  ` : j}
+                  ` : A}
             </notification-manager-status-panel>
-          ` : j}
+          ` : A}
 
-      ${this.unconfirmedMappings.length > 0 ? k`
+      ${this.unconfirmedMappings.length > 0 ? O`
             <notification-manager-status-panel
               kind="info"
               heading="Set up your household"
               message=${`${this.unconfirmedMappings.length} possible phone ${this.unconfirmedMappings.length === 1 ? "match needs" : "matches need"} administrator confirmation. Review each person below.`}
             ></notification-manager-status-panel>
-          ` : j}
-      ${this.unconfirmedMappings.length > 0 && this.currentUser?.is_admin ? k`
+          ` : A}
+      ${this.unconfirmedMappings.length > 0 && this.currentUser?.is_admin ? O`
             <div class="mapping-list" aria-label="Mappings to confirm">
               ${this.unconfirmedMappings.map((e) => {
 			let t = e.candidate_user_ids.length ? this.recipients.filter((t) => e.candidate_user_ids.includes(t.ha_user_id)) : this.recipients, n = t[0]?.id ?? "";
-			return k`
+			return O`
                   <div class="mapping-row">
                     <div>
                       <span class="row-primary">${e.display_name}</span>
@@ -2276,7 +2326,7 @@ var qe = class extends R {
 			}}
                     >
                       <option value="">Choose a person</option>
-                      ${t.map((e) => k`
+                      ${t.map((e) => O`
                           <option value=${e.id}>${e.display_name}</option>
                         `)}
                     </select>
@@ -2290,25 +2340,25 @@ var qe = class extends R {
                 `;
 		})}
             </div>
-          ` : j}
-      ${this._error ? k`<p class="feedback error" role="alert">${this._error}</p>` : j}
-      ${this._feedback ? k`<p class="feedback" aria-live="polite">${this._feedback}</p>` : j}
+          ` : A}
+      ${this._error ? O`<p class="feedback error" role="alert">${this._error}</p>` : A}
+      ${this._feedback ? O`<p class="feedback" aria-live="polite">${this._feedback}</p>` : A}
 
       <section class="section" aria-labelledby="people-heading">
         <div class="section-heading">
           <h3 id="people-heading">People and phones</h3>
         </div>
-        ${this.recipients.length === 0 ? k`
+        ${this.recipients.length === 0 ? O`
               <notification-manager-empty-state
                 icon="mdi:account-outline"
                 heading="No household members found"
                 message="Active Home Assistant users will appear here after discovery."
               ></notification-manager-empty-state>
-            ` : k`
+            ` : O`
               <div aria-label="Household recipients">
                 ${this.recipients.map((e) => {
 			let t = i === e.id, n = this._activeEndpointCount(e);
-			return k`
+			return O`
                     <article class="person">
                       <div class="person-row">
                         <button
@@ -2327,12 +2377,12 @@ var qe = class extends R {
                           aria-hidden="true"
                         ></ha-icon>
                       </div>
-                      ${t ? k`
+                      ${t ? O`
                             <div class="profile">
-                              ${e.endpoints.length ? k`
+                              ${e.endpoints.length ? O`
                                     <p class="hint">Primary notification device</p>
                                     <div class="endpoint-list">
-                                      ${e.endpoints.map((t, n) => k`
+                                      ${e.endpoints.map((t, n) => O`
                                           <label class="endpoint">
                                             <input
                                               type="radio"
@@ -2346,7 +2396,7 @@ var qe = class extends R {
                                           </label>
                                         `)}
                                     </div>
-                                  ` : k`<p class="hint">No phone is currently mapped to this person.</p>`}
+                                  ` : O`<p class="hint">No phone is currently mapped to this person.</p>`}
                               <notification-manager-button
                                 .disabled=${this._busy || n === 0 || !this._canEdit(e)}
                                 @click=${() => void this._test(e)}
@@ -2354,7 +2404,7 @@ var qe = class extends R {
                                 Send test
                               </notification-manager-button>
                             </div>
-                          ` : j}
+                          ` : A}
                     </article>
                   `;
 		})}
@@ -2368,17 +2418,17 @@ var qe = class extends R {
             <h3 id="groups-heading">Groups</h3>
             <p>Rules follow current group membership, so phones can change without editing rules.</p>
           </div>
-          ${this.currentUser?.is_admin ? k`
+          ${this.currentUser?.is_admin ? O`
                 <notification-manager-button icon="mdi:plus" @click=${() => this._startGroup()}>
                   New group
                 </notification-manager-button>
-              ` : j}
+              ` : A}
         </div>
-        ${this._editingGroupId === "new" ? this._renderGroupForm() : j}
+        ${this._editingGroupId === "new" ? this._renderGroupForm() : A}
         <div aria-label="Notification groups">
           ${[...t, ...e].map((e) => {
 			let t = e.system_type === "EVERYONE" ? this.recipients.length : e.member_recipient_ids.length, n = e.system_type === "ADMINS" ? "current administrators" : `${t} ${t === 1 ? "person" : "people"}`;
-			return k`
+			return O`
               <article class="group">
                 <div class="group-row">
                   <div>
@@ -2388,7 +2438,7 @@ var qe = class extends R {
                       ${n}
                     </span>
                   </div>
-                  ${e.type === "CUSTOM" && this.currentUser?.is_admin ? k`
+                  ${e.type === "CUSTOM" && this.currentUser?.is_admin ? O`
                         <div class="group-actions">
                           <notification-manager-button
                             variant="quiet"
@@ -2404,9 +2454,9 @@ var qe = class extends R {
                             Delete
                           </notification-manager-button>
                         </div>
-                      ` : j}
+                      ` : A}
                 </div>
-                ${this._editingGroupId === e.id ? this._renderGroupForm() : j}
+                ${this._editingGroupId === e.id ? this._renderGroupForm() : A}
               </article>
             `;
 		})}
@@ -2415,10 +2465,10 @@ var qe = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-people-groups-page") || customElements.define("notification-manager-people-groups-page", qe);
+customElements.get("notification-manager-people-groups-page") || customElements.define("notification-manager-people-groups-page", Qe);
 //#endregion
 //#region src/pages/rule-detail-page.ts
-var Je = class extends R {
+var $e = class extends L {
 	constructor(...e) {
 		super(...e), this.activity = [], this.targets = [], this.recipients = [], this.groups = [], this._busy = !1, this._feedback = "";
 	}
@@ -2435,7 +2485,7 @@ var Je = class extends R {
 		};
 	}
 	static {
-		this.styles = [K, o`
+		this.styles = [G, o`
       :host {
         max-inline-size: 840px;
         margin-inline: auto;
@@ -2507,7 +2557,7 @@ var Je = class extends R {
 	}
 	_summary() {
 		if (!this.rule?.trigger.target) return "This notification needs a replacement device.";
-		let e = this.targets.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id), t = Y(this.rule.trigger, e);
+		let e = this.targets.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id), t = qe(this.rule.trigger, e);
 		if (!t) return `Notify ${this._audienceLabel(this.rule.audiences)} when the event occurs.`;
 		let n = this.rule.trigger.parameters.duration_seconds, r = typeof n == "number" ? Math.max(1, Math.round(n / 60)) : 0;
 		return Z(this.rule.trigger.target.display_name_snapshot, t, r, this._audienceLabel(this.rule.audiences));
@@ -2532,7 +2582,7 @@ var Je = class extends R {
 					composed: !0
 				}));
 			} catch (e) {
-				this._feedback = V(e).message;
+				this._feedback = B(e).message;
 			} finally {
 				this._busy = !1;
 			}
@@ -2547,7 +2597,7 @@ var Je = class extends R {
 					composed: !0
 				}));
 			} catch (e) {
-				this._feedback = V(e).message;
+				this._feedback = B(e).message;
 			} finally {
 				this._busy = !1;
 			}
@@ -2562,13 +2612,13 @@ var Je = class extends R {
 					composed: !0
 				}));
 			} catch (e) {
-				this._feedback = V(e).message, this._busy = !1;
+				this._feedback = B(e).message, this._busy = !1;
 			}
 		}
 	}
 	render() {
 		let e = this.rule;
-		if (!e) return k`
+		if (!e) return O`
         <notification-manager-status-panel
           kind="error"
           heading="Notification not found"
@@ -2576,7 +2626,7 @@ var Je = class extends R {
         ></notification-manager-status-panel>
       `;
 		let t = this.activity.filter((t) => t.rule_id === e.id).slice(0, 5), n = t[0], r = this._resolvedRecipients(e), i = r.filter((e) => e.endpoints.some((e) => e.enabled)).length;
-		return k`
+		return O`
       <div class="back-row">
         <notification-manager-button
           variant="quiet"
@@ -2597,13 +2647,13 @@ var Je = class extends R {
       </div>
       <p class="summary">${this._summary()}</p>
 
-      ${e.health.issues.length ? k`
+      ${e.health.issues.length ? O`
             <notification-manager-status-panel
               kind=${e.health.status === "NEEDS_ATTENTION" ? "error" : "info"}
               heading=${e.health.status === "NEEDS_ATTENTION" ? "Needs attention" : "Limited"}
               .message=${e.health.issues.map((e) => e.message).join(" ")}
             ></notification-manager-status-panel>
-          ` : j}
+          ` : A}
 
       <div class="actions">
         <notification-manager-button
@@ -2623,7 +2673,7 @@ var Je = class extends R {
           ${e.enabled ? "Pause" : "Resume"}
         </notification-manager-button>
       </div>
-      ${this._feedback ? k`<p class="feedback" aria-live="polite">${this._feedback}</p>` : j}
+      ${this._feedback ? O`<p class="feedback" aria-live="polite">${this._feedback}</p>` : A}
 
       <section class="section" aria-labelledby="details-heading">
         <h3 id="details-heading">Details</h3>
@@ -2631,36 +2681,36 @@ var Je = class extends R {
           <dt>Recipients</dt>
           <dd>
             ${this._audienceLabel(e.audiences)}
-            ${r.length ? k`<br />${r.length}
+            ${r.length ? O`<br />${r.length}
                   ${r.length === 1 ? "person" : "people"}, ${i}
-                  ${i === 1 ? "phone" : "phones"}` : j}
+                  ${i === 1 ? "phone" : "phones"}` : A}
           </dd>
           <dt>Conditions</dt>
           <dd>${this._conditionSummary(e)}</dd>
           <dt>Last triggered</dt>
           <dd>${n ? new Date(n.timestamp).toLocaleString() : "Not yet"}</dd>
           <dt>Last result</dt>
-          <dd>${n ? G(n) : "No activity yet"}</dd>
+          <dd>${n ? W(n) : "No activity yet"}</dd>
         </dl>
       </section>
 
       <section class="section" aria-labelledby="recent-heading">
         <h3 id="recent-heading">Recent activity</h3>
-        ${t.length ? k`
+        ${t.length ? O`
               <div class="data-list">
-                ${t.map((e) => k`
+                ${t.map((e) => O`
                     <div class="data-row">
                       <div>
                         <span class="row-primary">${e.trigger_summary}</span>
                         <span class="row-secondary">
-                          ${new Date(e.timestamp).toLocaleString()}<br />${G(e)}
+                          ${new Date(e.timestamp).toLocaleString()}<br />${W(e)}
                         </span>
                       </div>
                       <span class="status" data-status=${e.status}>${e.status.toLowerCase()}</span>
                     </div>
                   `)}
               </div>
-            ` : k`<p class="hint">No activity has been recorded for this notification.</p>`}
+            ` : O`<p class="hint">No activity has been recorded for this notification.</p>`}
       </section>
 
       <div class="danger">
@@ -2675,17 +2725,17 @@ var Je = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-rule-detail-page") || customElements.define("notification-manager-rule-detail-page", Je);
+customElements.get("notification-manager-rule-detail-page") || customElements.define("notification-manager-rule-detail-page", $e);
 //#endregion
 //#region src/pages/rule-editor-page.ts
-var Ye = {
+var et = {
 	opening: "Door or window state",
 	motion: "Motion state"
 };
 function $(e) {
 	return e.currentTarget.value;
 }
-var Xe = class extends R {
+var tt = class extends L {
 	constructor(...e) {
 		super(...e), this.targets = [], this.recipients = [], this.groups = [], this._initialisedFor = "", this._draftId = Q(), this._selectedSourceKey = "", this._selectedTargetId = "", this._selectedSemantic = "", this._sourcePickerOpen = !0, this._sourceSearch = "", this._durationMinutes = 5, this._audienceMode = "ME", this._recipientIds = [], this._groupIds = [], this._name = "", this._title = "", this._message = "", this._contentEdited = !1, this._conditionDrafts = [], this._urgency = "NORMAL", this._sound = "default", this._cooldownMinutes = 0, this._replacePrevious = !1, this._imageUrl = "", this._deepLink = "", this._saving = !1, this._error = "", this._status = "";
 	}
@@ -2716,7 +2766,7 @@ var Xe = class extends R {
 		};
 	}
 	static {
-		this.styles = [K, o`
+		this.styles = [G, o`
       :host {
         max-inline-size: 1040px;
         margin-inline: auto;
@@ -2873,6 +2923,11 @@ var Xe = class extends R {
       }
 
       .signal-option:disabled {
+        cursor: not-allowed;
+        opacity: 0.62;
+      }
+
+      .source-option:disabled {
         cursor: not-allowed;
         opacity: 0.62;
       }
@@ -3113,8 +3168,8 @@ var Xe = class extends R {
 		let e = this.rule?.id ?? "new";
 		if (this._initialisedFor === e || this.targets.length === 0) return;
 		this._initialisedFor = e, this._sourcePickerOpen = !this.rule, this._sourceSearch = "";
-		let t = q(this.targets), n = this.rule?.trigger.target ? t.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id) : t.find((e) => e.available) ?? t[0];
-		this._selectedSourceKey = n ? Ve(n) : "", this._selectedTargetId = n?.entity_id ?? "", this._selectedSemantic = this.rule ? Y(this.rule.trigger, n) ?? "" : J(n)[0]?.semantic ?? "";
+		let t = J(this.targets), n = this.rule?.trigger.target ? t.discoveredTargets.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id) : t.usableTargets[0];
+		this._selectedSourceKey = n ? K(n) : "", this._selectedTargetId = n?.entity_id ?? "", this._selectedSemantic = this.rule ? qe(this.rule.trigger, n) ?? "" : Y(n)[0]?.semantic ?? "";
 		let r = this.rule?.trigger.parameters.duration_seconds;
 		this._durationMinutes = typeof r == "number" ? Math.max(1, Math.round(r / 60)) : 5, this.rule ? (this._name = this.rule.name, this._title = this.rule.content.title, this._message = this.rule.content.message, this._contentEdited = !0, this._imageUrl = this.rule.content.image_url ?? "", this._deepLink = this.rule.content.deep_link ?? "", this._urgency = this.rule.delivery_policy.urgency, this._sound = this.rule.delivery_policy.sound ?? "default", this._cooldownMinutes = Math.round((this.rule.behaviour.cooldown_seconds ?? 0) / 60), this._replacePrevious = this.rule.behaviour.replace_previous, this._initialiseAudience(this.rule.audiences), this._initialiseConditions(this.rule.conditions)) : this._applyGeneratedContent();
 	}
@@ -3160,7 +3215,7 @@ var Xe = class extends R {
 	}
 	_applyGeneratedContent() {
 		if (this._contentEdited || !this._selectedTarget || !this._selectedSemantic) return;
-		let e = We(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes);
+		let e = Ye(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes);
 		this._name = e.name, this._title = e.title, this._message = e.message;
 	}
 	_markDirty() {
@@ -3171,13 +3226,13 @@ var Xe = class extends R {
 		}));
 	}
 	_selectSource(e) {
-		let t = He(q(this.targets)).find((t) => t.key === e);
+		let t = J(this.targets).sources.find((t) => t.key === e);
 		if (!t) return;
-		let n = t.targets.find((e) => e.available) ?? t.targets[0];
+		let n = t.targets.find((e) => q(e) === "ready");
 		n && (this._selectedSourceKey = t.key, this._sourcePickerOpen = !1, this._sourceSearch = "", this._selectTarget(n.entity_id));
 	}
 	_selectTarget(e) {
-		this._sourcePickerOpen = !1, this._sourceSearch = "", e !== this._selectedTargetId && (this._selectedTargetId = e, this._selectedSemantic = J(this._selectedTarget)[0]?.semantic ?? "", this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty());
+		this._sourcePickerOpen = !1, this._sourceSearch = "", e !== this._selectedTargetId && (this._selectedTargetId = e, this._selectedSemantic = Y(this._selectedTarget)[0]?.semantic ?? "", this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty());
 	}
 	_selectSemantic(e) {
 		e !== this._selectedSemantic && (this._selectedSemantic = e, this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty());
@@ -3260,13 +3315,13 @@ var Xe = class extends R {
 	async _draft() {
 		if (!this.api || !this.currentUser) throw Error("Home Assistant is unavailable.");
 		let e = this._selectedTarget;
-		if (!e || !this._selectedSemantic) throw Error("Choose what should be watched.");
+		if (!e || !this._selectedSemantic || q(e) !== "ready") throw Error("Choose an available notification-ready signal.");
 		let t = this._audiences();
 		if (t.length === 0) throw Error("Choose at least one person or group.");
 		if (!this._name.trim() || !this._title.trim() || !this._message.trim()) throw Error("Add a notification name, title and message.");
 		for (let e of this._conditionDrafts) if (e.mode !== "TIME_WINDOW" && !e.targetId) throw Error(e.mode === "ENTITY_STATE" ? "Choose a device for each condition." : "Choose a person for each condition.");
 		let n = this._selectedSemantic.startsWith("REMAINS_") ? { duration_seconds: Math.round(this._durationMinutes * 60) } : {}, r = await this.api.resolveTrigger(e.entity_id, this._selectedSemantic, n);
-		return Ge(this.currentUser, r, {
+		return Xe(this.currentUser, r, {
 			id: this._draftId,
 			existing: this.rule,
 			name: this._name,
@@ -3293,7 +3348,7 @@ var Xe = class extends R {
 					composed: !0
 				}));
 			} catch (e) {
-				let t = V(e);
+				let t = B(e);
 				this._error = t.code === "conflict" ? "This notification changed while you were editing it. Reload it before saving again." : t.message;
 			} finally {
 				this._saving = !1;
@@ -3307,7 +3362,7 @@ var Xe = class extends R {
 				let e = await this._draft(), t = await this.api.testRule(e), n = t.recipient_results.filter((e) => e.status === "SENT").length;
 				this._status = n ? `Test sent to ${n} ${n === 1 ? "person" : "people"}.` : t.reason ?? "No eligible phone could receive the test.";
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._saving = !1;
 			}
@@ -3315,7 +3370,7 @@ var Xe = class extends R {
 	}
 	_renderAudienceChoices() {
 		let e = this.groups.filter((e) => e.type === "CUSTOM");
-		return k`
+		return O`
       <fieldset class="choice-group">
         <legend class="sr-only">Recipients</legend>
         <div class="choice-list">
@@ -3324,7 +3379,7 @@ var Xe = class extends R {
 			"EVERYONE",
 			"ADMINS",
 			"CHOOSE"
-		] : ["ME"]).map((e) => k`
+		] : ["ME"]).map((e) => O`
               <label class="choice">
                 <input
                   type="radio"
@@ -3340,11 +3395,11 @@ var Xe = class extends R {
             `)}
         </div>
       </fieldset>
-      ${this._audienceMode === "CHOOSE" ? k`
+      ${this._audienceMode === "CHOOSE" ? O`
             <div class="expanded-choice">
               <p class="hint">People</p>
               <div class="choice-list">
-                ${this.recipients.map((e) => k`
+                ${this.recipients.map((e) => O`
                     <label class="choice">
                       <input
                         type="checkbox"
@@ -3355,10 +3410,10 @@ var Xe = class extends R {
                     </label>
                   `)}
               </div>
-              ${e.length ? k`
+              ${e.length ? O`
                     <p class="hint">Groups</p>
                     <div class="choice-list">
-                      ${e.map((e) => k`
+                      ${e.map((e) => O`
                           <label class="choice">
                             <input
                               type="checkbox"
@@ -3369,14 +3424,14 @@ var Xe = class extends R {
                           </label>
                         `)}
                     </div>
-                  ` : j}
+                  ` : A}
             </div>
-          ` : j}
+          ` : A}
     `;
 	}
 	render() {
-		let e = q(this.targets), t = He(e), n = t.find((e) => e.key === this._selectedSourceKey), r = this._sourceSearch.trim().toLocaleLowerCase(), i = r ? t.filter((e) => e.name.toLocaleLowerCase().includes(r) || e.targets.some((e) => e.display_name.toLocaleLowerCase().includes(r) || e.entity_id.toLocaleLowerCase().includes(r))) : t, a = J(this._selectedTarget), o = this.targets.filter((e) => e.category === "person"), s = this._selectedSemantic.startsWith("REMAINS_"), c = this._supports("important"), l = this._supports("critical") && this._supports("sound"), u = this._supports("image"), d = this._supports("deep_link"), ee = this._supports("replacement"), f = this._resolvedRecipients(), p = f.filter((e) => e.endpoints.some((e) => e.enabled)).length, m = this._selectedTarget && this._selectedSemantic ? Z(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes, this._audienceName()) : "Choose a device, signal, behaviour and audience to review this notification.";
-		return k`
+		let { sources: e, usableTargets: t } = J(this.targets), n = e.find((e) => e.key === this._selectedSourceKey), r = this._sourceSearch.trim().toLocaleLowerCase(), i = r ? e.filter((e) => e.name.toLocaleLowerCase().includes(r) || e.targets.some((e) => e.display_name.toLocaleLowerCase().includes(r) || e.entity_id.toLocaleLowerCase().includes(r))) : e, a = this._selectedTarget && q(this._selectedTarget) === "ready" ? Y(this._selectedTarget) : [], o = this.targets.filter((e) => e.category === "person"), s = this._selectedSemantic.startsWith("REMAINS_"), c = this._supports("important"), l = this._supports("critical") && this._supports("sound"), u = this._supports("image"), d = this._supports("deep_link"), ee = this._supports("replacement"), f = this._resolvedRecipients(), p = f.filter((e) => e.endpoints.some((e) => e.enabled)).length, m = this._selectedTarget && this._selectedSemantic ? Z(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes, this._audienceName()) : "Choose a device, signal, behaviour and audience to review this notification.";
+		return O`
       <div class="editor-header">
         <notification-manager-button
           variant="quiet"
@@ -3394,18 +3449,18 @@ var Xe = class extends R {
         <p>Choose what to monitor, what should happen and who should be notified.</p>
       </div>
 
-      ${e.length === 0 ? k`
+      ${t.length === 0 ? O`
             <notification-manager-status-panel
               kind="error"
               heading="No notification-ready signals found"
               message="Add a supported device or entity in Home Assistant, then reload this page."
             ></notification-manager-status-panel>
-          ` : k`
+          ` : O`
             <div class="editor-layout">
               <div class="editor-form">
             <section class="composer-section" aria-labelledby="what-heading">
               <h3 id="what-heading">Device</h3>
-              ${this._sourcePickerOpen ? k`
+              ${this._sourcePickerOpen ? O`
                     <div class="field source-search">
                       <label for="source-search">Find a device or entity</label>
                       <input
@@ -3418,28 +3473,29 @@ var Xe = class extends R {
                       />
                     </div>
                     <div class="source-list" aria-label="Devices and entities">
-                      ${i.map((e) => k`
+                      ${i.map((e) => O`
                           <button
                             class="source-option"
                             type="button"
                             aria-pressed=${e.key === this._selectedSourceKey ? "true" : "false"}
+                            ?disabled=${e.targets.every((e) => q(e) !== "ready")}
                             @click=${() => this._selectSource(e.key)}
                           >
                             <span class="option-copy">
                               <span class="option-title">${e.name}</span>
-                              <span class="option-meta">
-                                ${e.kind === "device" ? "Device" : "Individual entity"}
+                               <span class="option-meta">
+                                 ${e.kind === "device" ? "Device" : "Individual entity"}${e.targets.every((e) => q(e) !== "ready") ? " · No notification-ready signals" : ""}
                               </span>
                             </span>
                             <span class="option-count">
-                              ${e.targets.length}
-                              ${e.targets.length === 1 ? "signal" : "signals"}
+                              ${e.targets.filter((e) => q(e) === "ready").length}
+                              of ${e.targets.length} ready
                             </span>
                           </button>
                         `)}
                     </div>
-                    ${i.length === 0 ? k`<p class="no-results">No matching devices or entities.</p>` : j}
-                  ` : k`
+                    ${i.length === 0 ? O`<p class="no-results">No matching devices or entities.</p>` : A}
+                  ` : O`
                     <button
                       class="source-option source-summary"
                       type="button"
@@ -3462,18 +3518,18 @@ var Xe = class extends R {
                 Choose what on ${n?.name ?? "this device"} should be monitored.
               </p>
               <div class="signal-list" aria-label="Signals">
-                ${n?.targets.map((e) => k`
+                ${n?.targets.map((e) => O`
                     <button
                       class="signal-option"
-                      type="button"
-                      aria-pressed=${e.entity_id === this._selectedTargetId ? "true" : "false"}
-                      ?disabled=${!e.available}
+                       type="button"
+                       aria-pressed=${e.entity_id === this._selectedTargetId ? "true" : "false"}
+                       ?disabled=${q(e) !== "ready"}
                       @click=${() => this._selectTarget(e.entity_id)}
                     >
                       <span class="option-copy">
                         <span class="option-title">${e.display_name}</span>
                         <span class="option-meta">
-                          ${Ye[e.category] ?? "Entity state"}${e.available ? "" : " · Unavailable"}
+                           ${et[e.category] ?? "Entity state"}${q(e) === "unavailable" ? " · Unavailable" : q(e) === "unsupported" ? " · Not supported for notifications yet" : ""}
                         </span>
                       </span>
                     </button>
@@ -3485,7 +3541,7 @@ var Xe = class extends R {
               <h3 id="when-heading">Behaviour</h3>
               <p class="selection-path">When ${this._selectedTarget?.display_name ?? "the signal"}…</p>
               <div class="behaviour-list" aria-label="Behaviours">
-                ${a.map((e) => k`
+                ${a.map((e) => O`
                     <button
                       class="behaviour-option"
                       type="button"
@@ -3497,7 +3553,7 @@ var Xe = class extends R {
                   `)}
               </div>
               <div class="field-grid">
-                ${s ? k`
+                ${s ? O`
                       <div class="field">
                         <label for="duration">For how long?</label>
                         <div>
@@ -3512,7 +3568,7 @@ var Xe = class extends R {
                           <p class="hint">Minutes</p>
                         </div>
                       </div>
-                    ` : j}
+                    ` : A}
               </div>
             </section>
 
@@ -3562,12 +3618,12 @@ var Xe = class extends R {
                 <div class="field-grid">
                   <div class="field full">
                     <label>Only notify when</label>
-                    ${this._conditionDrafts.length === 0 ? k`<p class="hint">No additional conditions</p>` : j}
+                    ${this._conditionDrafts.length === 0 ? O`<p class="hint">No additional conditions</p>` : A}
                   </div>
                   <div class="condition-list">
                     ${this._conditionDrafts.map((e, t) => {
 			let n = this.targets.find((t) => t.entity_id === e.targetId), r = e.mode === "ENTITY_STATE" ? this.targets.filter((e) => ["opening", "motion"].includes(e.category)) : o, i = n?.category === "motion" ? "Activity detected" : "Open", a = n?.category === "motion" ? "Clear" : "Closed";
-			return k`
+			return O`
                         <div class="condition-card">
                           <div class="field condition-kind">
                             <label for=${`condition-kind-${e.key}`}>Condition</label>
@@ -3585,7 +3641,7 @@ var Xe = class extends R {
                               <option value="ENTITY_STATE">Another device is in a selected state</option>
                             </select>
                           </div>
-                          ${e.mode === "TIME_WINDOW" ? k`
+                          ${e.mode === "TIME_WINDOW" ? O`
                                 <div class="field">
                                   <label for=${`condition-start-${e.key}`}>From</label>
                                   <input
@@ -3604,7 +3660,7 @@ var Xe = class extends R {
                                     @input=${(e) => this._updateCondition(t, { end: $(e) })}
                                   />
                                 </div>
-                              ` : k`
+                              ` : O`
                                 <div class="field condition-target">
                                   <label for=${`condition-target-${e.key}`}>
                                     ${e.mode === "ENTITY_STATE" ? "Device" : "Person"}
@@ -3617,14 +3673,14 @@ var Xe = class extends R {
                                     <option value="">
                                       ${e.mode === "ENTITY_STATE" ? "Choose a device" : "Choose a person"}
                                     </option>
-                                    ${r.map((e) => k`
+                                    ${r.map((e) => O`
                                         <option value=${e.entity_id} ?disabled=${!e.available}>
                                           ${e.display_name}
                                         </option>
                                       `)}
                                   </select>
                                 </div>
-                                ${e.mode === "ENTITY_STATE" ? k`
+                                ${e.mode === "ENTITY_STATE" ? O`
                                       <div class="field condition-target">
                                         <label for=${`condition-state-${e.key}`}>State</label>
                                         <select
@@ -3636,7 +3692,7 @@ var Xe = class extends R {
                                           <option value="off">${a}</option>
                                         </select>
                                       </div>
-                                    ` : j}
+                                    ` : A}
                               `}
                           <div class="condition-actions">
                             <button type="button" @click=${() => this._removeCondition(t)}>
@@ -3651,7 +3707,7 @@ var Xe = class extends R {
                     <button class="add-condition" type="button" @click=${this._addCondition}>
                       + Add condition
                     </button>
-                    ${this._conditionDrafts.length > 1 ? k`<p class="hint">All conditions must be met.</p>` : j}
+                    ${this._conditionDrafts.length > 1 ? O`<p class="hint">All conditions must be met.</p>` : A}
                   </div>
                   <div class="field">
                     <label for="urgency">Urgency</label>
@@ -3666,8 +3722,8 @@ var Xe = class extends R {
                       <option value="IMPORTANT" ?disabled=${!c}>Important</option>
                       <option value="CRITICAL" ?disabled=${!l}>Critical</option>
                     </select>
-                    ${c ? j : k`<p class="hint">Important alerts are not confirmed for every selected phone.</p>`}
-                    ${l ? j : k`<p class="hint">Critical alerts are not confirmed for every selected phone.</p>`}
+                    ${c ? A : O`<p class="hint">Important alerts are not confirmed for every selected phone.</p>`}
+                    ${l ? A : O`<p class="hint">Critical alerts are not confirmed for every selected phone.</p>`}
                   </div>
                   <div class="field">
                     <label for="cooldown">Wait before notifying again</label>
@@ -3682,7 +3738,7 @@ var Xe = class extends R {
                     />
                     <p class="hint">Minutes, or 0 for no cooldown</p>
                   </div>
-                  ${u ? k`
+                  ${u ? O`
                         <div class="field full">
                           <label for="image">Image address</label>
                           <input
@@ -3694,8 +3750,8 @@ var Xe = class extends R {
 		}}
                           />
                         </div>
-                      ` : j}
-                  ${d ? k`
+                      ` : A}
+                  ${d ? O`
                         <div class="field full">
                           <label for="deep-link">Open when tapped</label>
                           <input
@@ -3707,8 +3763,8 @@ var Xe = class extends R {
 		}}
                           />
                         </div>
-                      ` : j}
-                  ${ee ? k`
+                      ` : A}
+                  ${ee ? O`
                         <label class="choice field full">
                           <input
                             type="checkbox"
@@ -3719,7 +3775,7 @@ var Xe = class extends R {
                           />
                           Replace the previous phone notification from this rule
                         </label>
-                      ` : j}
+                      ` : A}
                 </div>
               </details>
             </section>
@@ -3730,7 +3786,7 @@ var Xe = class extends R {
               <p class="review">${m}</p>
               <div class="review-actions">
                 <div class="feedback" aria-live="polite">
-                  ${this._error ? k`<span class="error">${this._error}</span>` : this._status}
+                  ${this._error ? O`<span class="error">${this._error}</span>` : this._status}
                 </div>
                 <div class="button-row">
                   <notification-manager-button
@@ -3753,11 +3809,11 @@ var Xe = class extends R {
             </aside>
             </div>
             <div class="mobile-actions" aria-label="Notification actions">
-              ${this._error || this._status ? k`
+              ${this._error || this._status ? O`
                     <div class="mobile-feedback" aria-live="polite">
-                      ${this._error ? k`<span class="error">${this._error}</span>` : this._status}
+                      ${this._error ? O`<span class="error">${this._error}</span>` : this._status}
                     </div>
-                  ` : j}
+                  ` : A}
               <notification-manager-button
                 .fullWidth=${!0}
                 .disabled=${this._saving}
@@ -3778,10 +3834,10 @@ var Xe = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-rule-editor-page") || customElements.define("notification-manager-rule-editor-page", Xe);
+customElements.get("notification-manager-rule-editor-page") || customElements.define("notification-manager-rule-editor-page", tt);
 //#endregion
 //#region src/pages/settings-page.ts
-var Ze = class extends R {
+var nt = class extends L {
 	constructor(...e) {
 		super(...e), this.capabilityTargets = [], this.unconfirmedMappings = [], this._days = 30, this._records = 1e3, this._loading = !1, this._error = "", this._status = "";
 	}
@@ -3800,7 +3856,7 @@ var Ze = class extends R {
 		};
 	}
 	static {
-		this.styles = [K, o`
+		this.styles = [G, o`
       .settings-form {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 180px)) auto;
@@ -3828,7 +3884,7 @@ var Ze = class extends R {
 			try {
 				this._settings = await this.api.getSettings(), this._days = this._settings.activity_retention.days, this._records = this._settings.activity_retention.records;
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._loading = !1;
 			}
@@ -3844,15 +3900,15 @@ var Ze = class extends R {
 					activity_retention: e
 				}, this._status = "Activity retention was updated.";
 			} catch (e) {
-				this._error = V(e).message;
+				this._error = B(e).message;
 			} finally {
 				this._loading = !1;
 			}
 		}
 	}
 	render() {
-		let e = this.capabilityTargets.filter((e) => e.available).length, t = this._settings?.diagnostics;
-		return k`
+		let e = J(this.capabilityTargets), t = this._settings?.diagnostics;
+		return O`
       <div class="page-heading">
         <h2>Settings</h2>
         <p>Manage activity history and check that Notification Manager is ready.</p>
@@ -3865,8 +3921,12 @@ var Ze = class extends R {
         <dl class="definition-list">
           <dt>Signed in as</dt>
           <dd>${this.currentUser?.name || "Home Assistant administrator"}</dd>
-          <dt>Available devices</dt>
-          <dd>${e} of ${this.capabilityTargets.length} available</dd>
+          <dt>Discovered signals</dt>
+          <dd>${e.discoveredTargets.length}</dd>
+          <dt>Ready notification signals</dt>
+          <dd>${e.usableTargets.length}</dd>
+          <dt>Devices and entities with ready signals</dt>
+          <dd>${e.readySourceCount} of ${e.discoveredSourceCount}</dd>
           <dt>Phone matches to review</dt>
           <dd>${this.unconfirmedMappings.length}</dd>
         </dl>
@@ -3876,7 +3936,7 @@ var Ze = class extends R {
         <div class="section-heading">
           <h3 id="health-heading">System status</h3>
         </div>
-        ${this._loading && !t ? k`<p>Loading integration status…</p>` : t ? k`
+        ${this._loading && !t ? O`<p>Loading integration status…</p>` : t ? O`
                 <dl class="definition-list">
                   <dt>Version</dt>
                   <dd>${t.version}</dd>
@@ -3894,7 +3954,7 @@ var Ze = class extends R {
                     ${t.runtime.attached ? `Running, ${t.runtime.watched_rules} active, ${t.runtime.pending_timers} waiting` : "Not running"}
                   </dd>
                 </dl>
-              ` : j}
+              ` : A}
       </section>
 
       <section class="section" aria-labelledby="retention-heading">
@@ -3931,29 +3991,29 @@ var Ze = class extends R {
             Save
           </notification-manager-button>
         </div>
-        ${this._error ? k`<p class="feedback error" role="alert">${this._error}</p>` : j}
-        ${this._status ? k`<p class="feedback" aria-live="polite">${this._status}</p>` : j}
+        ${this._error ? O`<p class="feedback error" role="alert">${this._error}</p>` : A}
+        ${this._status ? O`<p class="feedback" aria-live="polite">${this._status}</p>` : A}
       </section>
     `;
 	}
 };
-customElements.get("notification-manager-settings-page") || customElements.define("notification-manager-settings-page", Ze);
+customElements.get("notification-manager-settings-page") || customElements.define("notification-manager-settings-page", nt);
 //#endregion
 //#region src/notification-manager-panel.ts
-var Qe = class extends R {
+var rt = class extends L {
 	constructor(...e) {
-		super(...e), this.narrow = !1, this._activeRoute = Ne(globalThis.location?.hash ?? ""), this._connectedToHomeAssistant = globalThis.navigator?.onLine ?? !0, this._errorMessage = "", this._loadState = "idle", this._loadGeneration = 0, this._notificationView = "list", this._onboardingActive = !1, this._selectedRuleId = "", this._editorDirty = !1, this._handleHashChange = () => {
-			let e = Ne(globalThis.location?.hash ?? "");
+		super(...e), this.narrow = !1, this._activeRoute = Pe(globalThis.location?.hash ?? ""), this._connectedToHomeAssistant = globalThis.navigator?.onLine ?? !0, this._errorMessage = "", this._loadState = "idle", this._loadGeneration = 0, this._notificationView = "list", this._onboardingActive = !1, this._selectedRuleId = "", this._editorDirty = !1, this._handleHashChange = () => {
+			let e = Pe(globalThis.location?.hash ?? "");
 			if (!this._bootstrapData) {
 				this._activeRoute = e;
 				return;
 			}
-			let t = Pe(e, this._bootstrapData.current_user.is_admin);
+			let t = Fe(e, this._bootstrapData.current_user.is_admin);
 			if (t !== "notifications" && this._editorDirty && !this._confirmDiscard()) {
-				globalThis.history?.replaceState(null, "", U("notifications"));
+				globalThis.history?.replaceState(null, "", H("notifications"));
 				return;
 			}
-			this._activeRoute = t, t !== "notifications" && (this._notificationView = "list", this._selectedRuleId = ""), t !== e && globalThis.history?.replaceState(null, "", U(t));
+			this._activeRoute = t, t !== "notifications" && (this._notificationView = "list", this._selectedRuleId = ""), t !== e && globalThis.history?.replaceState(null, "", H(t));
 		}, this._handleConnectionReady = () => {
 			this._connectedToHomeAssistant = !0, this._loadBootstrap();
 		}, this._handleConnectionLost = () => {
@@ -4191,7 +4251,7 @@ var Qe = class extends R {
   `;
 	}
 	connectedCallback() {
-		super.connectedCallback(), globalThis.addEventListener?.("hashchange", this._handleHashChange), globalThis.addEventListener?.("popstate", this._handleHashChange), globalThis.addEventListener?.("online", this._handleOnline), globalThis.addEventListener?.("offline", this._handleOffline), globalThis.addEventListener?.("beforeunload", this._handleBeforeUnload), this.hass?.connection && this._boundConnection !== this.hass.connection && (this._bindConnection(this.hass.connection), this._api = new H(this.hass), this._loadBootstrap());
+		super.connectedCallback(), globalThis.addEventListener?.("hashchange", this._handleHashChange), globalThis.addEventListener?.("popstate", this._handleHashChange), globalThis.addEventListener?.("online", this._handleOnline), globalThis.addEventListener?.("offline", this._handleOffline), globalThis.addEventListener?.("beforeunload", this._handleBeforeUnload), this.hass?.connection && this._boundConnection !== this.hass.connection && (this._bindConnection(this.hass.connection), this._api = new V(this.hass), this._loadBootstrap());
 	}
 	disconnectedCallback() {
 		globalThis.removeEventListener?.("hashchange", this._handleHashChange), globalThis.removeEventListener?.("popstate", this._handleHashChange), globalThis.removeEventListener?.("online", this._handleOnline), globalThis.removeEventListener?.("offline", this._handleOffline), globalThis.removeEventListener?.("beforeunload", this._handleBeforeUnload), this._unbindConnection(), this._api = void 0, super.disconnectedCallback();
@@ -4199,7 +4259,7 @@ var Qe = class extends R {
 	updated(e) {
 		if (e.has("hass")) {
 			let e = this.hass?.connection;
-			this._api = this.hass ? new H(this.hass) : void 0, e && e !== this._boundConnection ? (this._bindConnection(e), this._loadBootstrap()) : e || this._unbindConnection();
+			this._api = this.hass ? new V(this.hass) : void 0, e && e !== this._boundConnection ? (this._bindConnection(e), this._loadBootstrap()) : e || this._unbindConnection();
 		}
 	}
 	_bindConnection(e) {
@@ -4220,38 +4280,38 @@ var Qe = class extends R {
 			let r = await e.bootstrap();
 			if (t !== this._loadGeneration) return;
 			if (this._bootstrapData = r, this._loadState = "ready", this._connectedToHomeAssistant = !0, !n && r.current_user.is_admin && r.rules.length === 0 && !this._onboardingWasCompleted(r.current_user.id)) {
-				this._onboardingActive = !0, this._activeRoute = "people", globalThis.history?.replaceState(null, "", U("people"));
+				this._onboardingActive = !0, this._activeRoute = "people", globalThis.history?.replaceState(null, "", H("people"));
 				return;
 			}
-			let i = Pe(this._activeRoute, r.current_user.is_admin);
-			i !== this._activeRoute && (this._activeRoute = i, globalThis.history?.replaceState(null, "", U(i)));
+			let i = Fe(this._activeRoute, r.current_user.is_admin);
+			i !== this._activeRoute && (this._activeRoute = i, globalThis.history?.replaceState(null, "", H(i)));
 		} catch (e) {
 			if (t !== this._loadGeneration) return;
-			let r = V(e);
+			let r = B(e);
 			this._errorMessage = r.message, n ? (this._loadState = "ready", this._connectedToHomeAssistant = !1) : this._loadState = "error";
 		}
 	}
 	_renderHeader(e) {
-		return k`
+		return O`
       <header class="app-header">
         <div class="app-header-inner">
           <h1 class="app-title">Notification Manager</h1>
-          ${e ? this._renderNavigation(e) : j}
+          ${e ? this._renderNavigation(e) : A}
         </div>
       </header>
     `;
 	}
 	_renderNavigation(e) {
-		return k`
+		return O`
       <nav class="navigation" aria-label="Notification Manager">
         <div class="navigation-inner">
-          ${Fe(e.current_user.is_admin).map((e) => k`
+          ${Ie(e.current_user.is_admin).map((e) => O`
               <a
-                href=${U(e.route)}
+                href=${H(e.route)}
                 @click=${(t) => {
 			t.preventDefault(), this._goToRoute(e.route);
 		}}
-                aria-current=${this._activeRoute === e.route ? "page" : j}
+                aria-current=${this._activeRoute === e.route ? "page" : A}
               >
                 <ha-icon icon=${e.icon} aria-hidden="true"></ha-icon>
                 <span>${e.label}</span>
@@ -4267,10 +4327,10 @@ var Qe = class extends R {
 		return e && (this._editorDirty = !1), e;
 	}
 	_goToRoute(e) {
-		e !== "notifications" && !this._confirmDiscard() || (this._activeRoute = e, e !== "notifications" && (this._notificationView = "list"), globalThis.history?.pushState(null, "", U(e)));
+		e !== "notifications" && !this._confirmDiscard() || (this._activeRoute = e, e !== "notifications" && (this._notificationView = "list"), globalThis.history?.pushState(null, "", H(e)));
 	}
 	_showNotification(e, t = "") {
-		this._editorDirty && !this._confirmDiscard() || (this._activeRoute = "notifications", this._notificationView = e, this._selectedRuleId = t, e !== "create" && e !== "edit" && (this._editorDirty = !1), globalThis.history?.replaceState(null, "", U("notifications")));
+		this._editorDirty && !this._confirmDiscard() || (this._activeRoute = "notifications", this._notificationView = e, this._selectedRuleId = t, e !== "create" && e !== "edit" && (this._editorDirty = !1), globalThis.history?.replaceState(null, "", H("notifications")));
 	}
 	_onboardingWasCompleted(e) {
 		try {
@@ -4297,7 +4357,7 @@ var Qe = class extends R {
 	}
 	_renderNotifications(e) {
 		let t = e.rules.find((e) => e.id === this._selectedRuleId);
-		return this._notificationView === "create" || this._notificationView === "edit" ? k`
+		return this._notificationView === "create" || this._notificationView === "edit" ? O`
         <notification-manager-rule-editor-page
           .api=${this._api}
           .currentUser=${e.current_user}
@@ -4309,7 +4369,7 @@ var Qe = class extends R {
           @editor-cancel=${() => this._showNotification("list")}
           @rule-saved=${(e) => void this._handleRuleSaved(e)}
         ></notification-manager-rule-editor-page>
-      ` : this._notificationView === "detail" ? k`
+      ` : this._notificationView === "detail" ? O`
         <notification-manager-rule-detail-page
           .api=${this._api}
           .rule=${t}
@@ -4324,7 +4384,7 @@ var Qe = class extends R {
 		}}
           @data-changed=${() => void this._refreshData()}
         ></notification-manager-rule-detail-page>
-      ` : k`
+      ` : O`
       <notification-manager-notifications-page
         .api=${this._api}
         .currentUser=${e.current_user}
@@ -4339,7 +4399,7 @@ var Qe = class extends R {
     `;
 	}
 	_renderLoading() {
-		return k`
+		return O`
       <main>
         <div class="skeleton" role="status" aria-busy="true">
           <span class="sr-only">Loading Notification Manager</span>
@@ -4352,7 +4412,7 @@ var Qe = class extends R {
     `;
 	}
 	_renderError() {
-		return k`
+		return O`
       <main>
         <div class="state-container">
           <notification-manager-status-panel
@@ -4374,7 +4434,7 @@ var Qe = class extends R {
 	}
 	_renderPage(e) {
 		switch (this._activeRoute) {
-			case "people": return k`
+			case "people": return O`
           <notification-manager-people-groups-page
             .api=${this._api}
             .currentUser=${e.current_user}
@@ -4386,7 +4446,7 @@ var Qe = class extends R {
             @create-first-notification=${() => this._completeOnboardingAndCreate()}
           ></notification-manager-people-groups-page>
         `;
-			case "activity": return k`
+			case "activity": return O`
           <notification-manager-activity-page
             .api=${this._api}
             .activity=${e.activity}
@@ -4394,14 +4454,14 @@ var Qe = class extends R {
             .recipients=${e.recipients}
           ></notification-manager-activity-page>
         `;
-			case "settings": return e.current_user.is_admin ? k`
+			case "settings": return e.current_user.is_admin ? O`
               <notification-manager-settings-page
                 .api=${this._api}
                 .currentUser=${e.current_user}
                 .capabilityTargets=${e.capability_targets}
                 .unconfirmedMappings=${e.unconfirmed_recipient_mappings}
               ></notification-manager-settings-page>
-            ` : k`
+            ` : O`
               <notification-manager-notifications-page
                 .api=${this._api}
                 .currentUser=${e.current_user}
@@ -4416,22 +4476,22 @@ var Qe = class extends R {
 	}
 	render() {
 		let e = this._bootstrapData;
-		return k`
+		return O`
       <div class="shell">
         ${this._renderHeader(e)}
-        ${e && !this._connectedToHomeAssistant ? k`
+        ${e && !this._connectedToHomeAssistant ? O`
               <notification-manager-status-panel
                 kind="offline"
                 heading="Connection lost"
                 message="Waiting for Home Assistant. Current data may be out of date."
                 compact
               ></notification-manager-status-panel>
-            ` : j}
-        ${this._loadState === "error" ? this._renderError() : !e || this._loadState === "loading" ? this._renderLoading() : k`<main id="main-content">${this._renderPage(e)}</main>`}
+            ` : A}
+        ${this._loadState === "error" ? this._renderError() : !e || this._loadState === "loading" ? this._renderLoading() : O`<main id="main-content">${this._renderPage(e)}</main>`}
       </div>
     `;
 	}
 };
-customElements.get("notification-manager-panel") || customElements.define("notification-manager-panel", Qe);
+customElements.get("notification-manager-panel") || customElements.define("notification-manager-panel", rt);
 //#endregion
-export { H as NotificationManagerApi, B as NotificationManagerApiError, Qe as NotificationManagerPanel };
+export { V as NotificationManagerApi, z as NotificationManagerApiError, rt as NotificationManagerPanel };
