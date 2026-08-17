@@ -29,11 +29,11 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return a(t);
-})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: ee, getOwnPropertySymbols: te, getPrototypeOf: ne } = Object, f = globalThis, re = f.trustedTypes, ie = re ? re.emptyScript : "", ae = f.reactiveElementPolyfillSupport, p = (e, t) => e, m = {
+})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: ee, getOwnPropertySymbols: f, getPrototypeOf: p } = Object, m = globalThis, te = m.trustedTypes, ne = te ? te.emptyScript : "", re = m.reactiveElementPolyfillSupport, h = (e, t) => e, g = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
-				e = e ? ie : null;
+				e = e ? ne : null;
 				break;
 			case Object:
 			case Array: e = e == null ? e : JSON.stringify(e);
@@ -58,23 +58,23 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, oe = (e, t) => !l(e, t), h = {
+}, ie = (e, t) => !l(e, t), ae = {
 	attribute: !0,
 	type: String,
-	converter: m,
+	converter: g,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: oe
+	hasChanged: ie
 };
-Symbol.metadata ??= Symbol("metadata"), f.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var g = class extends HTMLElement {
+Symbol.metadata ??= Symbol("metadata"), m.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
+var _ = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = h) {
+	static createProperty(e, t = ae) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
@@ -100,17 +100,17 @@ var g = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? h;
+		return this.elementProperties.get(e) ?? ae;
 	}
 	static _$Ei() {
-		if (this.hasOwnProperty(p("elementProperties"))) return;
-		let e = ne(this);
+		if (this.hasOwnProperty(h("elementProperties"))) return;
+		let e = p(this);
 		e.finalize(), e.l !== void 0 && (this.l = [...e.l]), this.elementProperties = new Map(e.elementProperties);
 	}
 	static finalize() {
-		if (this.hasOwnProperty(p("finalized"))) return;
-		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(p("properties"))) {
-			let e = this.properties, t = [...ee(e), ...te(e)];
+		if (this.hasOwnProperty(h("finalized"))) return;
+		if (this.finalized = !0, this._$Ei(), this.hasOwnProperty(h("properties"))) {
+			let e = this.properties, t = [...ee(e), ...f(e)];
 			for (let n of t) this.createProperty(n, e[n]);
 		}
 		let e = this[Symbol.metadata];
@@ -171,14 +171,14 @@ var g = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? m : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? g : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? m : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? g : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -187,7 +187,7 @@ var g = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? oe)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? ie)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,25 +251,25 @@ var g = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-g.elementStyles = [], g.shadowRootOptions = { mode: "open" }, g[p("elementProperties")] = /* @__PURE__ */ new Map(), g[p("finalized")] = /* @__PURE__ */ new Map(), ae?.({ ReactiveElement: g }), (f.reactiveElementVersions ??= []).push("2.1.2");
+_.elementStyles = [], _.shadowRootOptions = { mode: "open" }, _[h("elementProperties")] = /* @__PURE__ */ new Map(), _[h("finalized")] = /* @__PURE__ */ new Map(), re?.({ ReactiveElement: _ }), (m.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var _ = globalThis, se = (e) => e, v = _.trustedTypes, y = v ? v.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ce = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, le = "?" + b, ue = `<${le}>`, x = document, S = () => x.createComment(""), C = (e) => e === null || typeof e != "object" && typeof e != "function", w = Array.isArray, de = (e) => w(e) || typeof e?.[Symbol.iterator] == "function", T = "[ 	\n\f\r]", E = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, fe = /-->/g, pe = />/g, D = RegExp(`>|${T}(?:([^\\s"'>=/]+)(${T}*=${T}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), O = /'/g, me = /"/g, he = /^(?:script|style|textarea|title)$/i, k = ((e) => (t, ...n) => ({
+var v = globalThis, oe = (e) => e, y = v.trustedTypes, se = y ? y.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ce = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, x = "?" + b, le = `<${x}>`, S = document, C = () => S.createComment(""), w = (e) => e === null || typeof e != "object" && typeof e != "function", T = Array.isArray, ue = (e) => T(e) || typeof e?.[Symbol.iterator] == "function", E = "[ 	\n\f\r]", D = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, de = /-->/g, fe = />/g, O = RegExp(`>|${E}(?:([^\\s"'>=/]+)(${E}*=${E}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), pe = /'/g, me = /"/g, he = /^(?:script|style|textarea|title)$/i, k = ((e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}))(1), A = Symbol.for("lit-noChange"), j = Symbol.for("lit-nothing"), ge = /* @__PURE__ */ new WeakMap(), M = x.createTreeWalker(x, 129);
+}))(1), A = Symbol.for("lit-noChange"), j = Symbol.for("lit-nothing"), ge = /* @__PURE__ */ new WeakMap(), M = S.createTreeWalker(S, 129);
 function _e(e, t) {
-	if (!w(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return y === void 0 ? t : y.createHTML(t);
+	if (!T(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return se === void 0 ? t : se.createHTML(t);
 }
 var ve = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = E;
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = D;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === E ? c[1] === "!--" ? o = fe : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = D) : (he.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = D) : o = pe : o === D ? c[0] === ">" ? (o = i ?? E, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? D : c[3] === "\"" ? me : O) : o === me || o === O ? o = D : o === fe || o === pe ? o = E : (o = D, i = void 0);
-		let d = o === D && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === E ? n + ue : l >= 0 ? (r.push(s), n.slice(0, l) + ce + n.slice(l) + b + d) : n + b + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === D ? c[1] === "!--" ? o = de : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = O) : (he.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = O) : o = fe : o === O ? c[0] === ">" ? (o = i ?? D, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? O : c[3] === "\"" ? me : pe) : o === me || o === pe ? o = O : o === de || o === fe ? o = D : (o = O, i = void 0);
+		let d = o === O && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === D ? n + le : l >= 0 ? (r.push(s), n.slice(0, l) + ce + n.slice(l) + b + d) : n + b + (l === -2 ? t : d);
 	}
 	return [_e(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
 }, N = class e {
@@ -299,16 +299,16 @@ var ve = (e, t) => {
 				if (he.test(i.tagName)) {
 					let e = i.textContent.split(b), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = v ? v.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], S()), M.nextNode(), c.push({
+						i.textContent = y ? y.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], C()), M.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], S());
+						i.append(e[t], C());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === le) c.push({
+				if (i.data === x) c.push({
 					type: 2,
 					index: a
 				});
@@ -324,13 +324,13 @@ var ve = (e, t) => {
 		}
 	}
 	static createElement(e, t) {
-		let n = x.createElement("template");
+		let n = S.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
 function P(e, t, n = e, r) {
 	if (t === A) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = C(t) ? void 0 : t._$litDirective$;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = w(t) ? void 0 : t._$litDirective$;
 	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = P(e, i._$AS(e, t.values), i, r)), t;
 }
 var ye = class {
@@ -344,7 +344,7 @@ var ye = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? x).importNode(t, !0);
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? S).importNode(t, !0);
 		M.currentNode = r;
 		let i = M.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
@@ -354,7 +354,7 @@ var ye = class {
 			}
 			a !== s?.index && (i = M.nextNode(), a++);
 		}
-		return M.currentNode = x, r;
+		return M.currentNode = S, r;
 	}
 	p(e) {
 		let t = 0;
@@ -378,7 +378,7 @@ var ye = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = P(this, e, t), C(e) ? e === j || e == null || e === "" ? (this._$AH !== j && this._$AR(), this._$AH = j) : e !== this._$AH && e !== A && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? de(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = P(this, e, t), w(e) ? e === j || e == null || e === "" ? (this._$AH !== j && this._$AR(), this._$AH = j) : e !== this._$AH && e !== A && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? ue(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,7 +387,7 @@ var ye = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== j && C(this._$AH) ? this._$AA.nextSibling.data = e : this.T(x.createTextNode(e)), this._$AH = e;
+		this._$AH !== j && w(this._$AH) ? this._$AA.nextSibling.data = e : this.T(S.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
 		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = N.createElement(_e(n.h, n.h[0]), this.options)), n);
@@ -402,15 +402,15 @@ var ye = class {
 		return t === void 0 && ge.set(e.strings, t = new N(e)), t;
 	}
 	k(t) {
-		w(this._$AH) || (this._$AH = [], this._$AR());
+		T(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(S()), this.O(S()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(C()), this.O(C()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = se(e).nextSibling;
-			se(e).remove(), e = t;
+			let t = oe(e).nextSibling;
+			oe(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
@@ -428,10 +428,10 @@ var ye = class {
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = P(this, e, t, 0), a = !C(e) || e !== this._$AH && e !== A, a && (this._$AH = e);
+		if (i === void 0) e = P(this, e, t, 0), a = !w(e) || e !== this._$AH && e !== A, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = P(this, r[n + o], t, o), s === A && (s = this._$AH[o]), a ||= !C(s) || s !== this._$AH[o], s === j ? e = j : e !== j && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = P(this, r[n + o], t, o), s === A && (s = this._$AH[o]), a ||= !w(s) || s !== this._$AH[o], s === j ? e = j : e !== j && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
@@ -474,16 +474,16 @@ var ye = class {
 	_$AI(e) {
 		P(this, e);
 	}
-}, we = _.litHtmlPolyfillSupport;
-we?.(N, F), (_.litHtmlVersions ??= []).push("3.3.3");
+}, we = v.litHtmlPolyfillSupport;
+we?.(N, F), (v.litHtmlVersions ??= []).push("3.3.3");
 var Te = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new F(t.insertBefore(S(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new F(t.insertBefore(C(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, L = globalThis, R = class extends g {
+}, L = globalThis, R = class extends _ {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -684,7 +684,7 @@ var H = class {
 	}
 }, Oe = class extends R {
 	constructor(...e) {
-		super(...e), this.variant = "secondary", this.icon = "", this.disabled = !1, this.buttonType = "button";
+		super(...e), this.variant = "secondary", this.icon = "", this.disabled = !1, this.fullWidth = !1, this.buttonType = "button";
 	}
 	static {
 		this.properties = {
@@ -695,6 +695,11 @@ var H = class {
 			icon: { type: String },
 			disabled: {
 				type: Boolean,
+				reflect: !0
+			},
+			fullWidth: {
+				type: Boolean,
+				attribute: "full-width",
 				reflect: !0
 			},
 			buttonType: {
@@ -712,14 +717,14 @@ var H = class {
 
     button {
       box-sizing: border-box;
-      min-block-size: 44px;
+      min-block-size: var(--nm-control-height, 44px);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: var(--nm-space-2, 8px);
       border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-      border-radius: 8px;
-      padding: 0 16px;
+      border-radius: var(--nm-radius, 8px);
+      padding: 0 var(--nm-space-4, 16px);
       background: var(--card-background-color, #fafafa);
       color: var(--primary-text-color, #212121);
       font: inherit;
@@ -738,6 +743,18 @@ var H = class {
       color: var(--text-primary-color, #f7f7f7);
     }
 
+    :host([variant="danger"]) button {
+      border-color: var(--error-color, #c62828);
+      background: transparent;
+      color: var(--error-color, #c62828);
+    }
+
+    :host([variant="quiet"]) button {
+      border-color: transparent;
+      background: transparent;
+      color: var(--primary-color, #3f6f58);
+    }
+
     button:hover:not(:disabled) {
       background: var(--secondary-background-color, #f1f1f1);
     }
@@ -746,14 +763,27 @@ var H = class {
       background: var(--dark-primary-color, var(--primary-color, #365f4d));
     }
 
+    :host([variant="danger"]) button:hover:not(:disabled),
+    :host([variant="quiet"]) button:hover:not(:disabled) {
+      background: var(--secondary-background-color, #f1f1f1);
+    }
+
     button:focus-visible {
-      outline: 3px solid var(--primary-color, #3f6f58);
+      outline: 2px solid var(--primary-color, #3f6f58);
       outline-offset: 2px;
     }
 
     button:disabled {
       opacity: 0.55;
       cursor: not-allowed;
+    }
+
+    :host([full-width]) {
+      display: block;
+    }
+
+    :host([full-width]) button {
+      inline-size: 100%;
     }
 
     ha-icon {
@@ -817,23 +847,29 @@ var ke = {
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: center;
-      gap: 12px;
+      gap: var(--nm-space-3, 12px);
       border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-      border-radius: 8px;
-      padding: 16px;
+      border-inline-start-width: 4px;
+      border-radius: var(--nm-radius, 8px);
+      padding: var(--nm-space-4, 16px);
       background: var(--card-background-color, #fafafa);
     }
 
     :host([kind="error"]) .panel {
-      border-color: var(--error-color, #c62828);
+      border-inline-start-color: var(--error-color, #c62828);
     }
 
     :host([kind="offline"]) .panel {
+      border-inline-start-color: var(--warning-color, #8a5a00);
       background: var(--secondary-background-color, #f1f1f1);
     }
 
+    :host([kind="info"]) .panel {
+      border-inline-start-color: var(--primary-color, #3f6f58);
+    }
+
     :host([kind="success"]) .panel {
-      border-color: var(--success-color, #2e7d32);
+      border-inline-start-color: var(--success-color, #2e7d32);
     }
 
     :host([compact]) .panel {
@@ -922,7 +958,7 @@ var je = [
 	},
 	{
 		route: "people",
-		label: "People & Groups",
+		label: "Household",
 		icon: "mdi:account-multiple-outline"
 	},
 	{
@@ -956,7 +992,7 @@ function W(e) {
 	return e.length <= 1 ? e[0] ?? "" : e.length === 2 ? `${e[0]} and ${e[1]}` : `${e.slice(0, -1).join(", ")}, and ${e.at(-1)}`;
 }
 function Ie(e) {
-	return e.status === "SENT" ? `${e.recipient_name} — sent` : e.status === "FAILED" ? `${e.recipient_name} — ${e.reason ?? "could not be reached"}` : `${e.recipient_name} — ${e.reason ?? "not eligible for this notification"}`;
+	return e.status === "SENT" ? `${e.recipient_name}: sent` : e.status === "FAILED" ? `${e.recipient_name}: ${e.reason ?? "could not be reached"}` : `${e.recipient_name}: ${e.reason ?? "not eligible for this notification"}`;
 }
 function G(e) {
 	let t = e.recipient_results.filter((e) => e.status === "SENT").map((e) => e.recipient_name), n = e.recipient_results.filter((e) => e.status === "FAILED").map((e) => e.recipient_name), r = e.recipient_results.filter((e) => e.status === "SKIPPED").map((e) => e.recipient_name), i = [];
@@ -1030,12 +1066,28 @@ customElements.get("notification-manager-empty-state") || customElements.define(
 var K = o`
   :host {
     display: block;
+    --nm-border: var(--divider-color, rgba(127, 127, 127, 0.3));
+    --nm-control-border: var(--input-idle-line-color, rgba(127, 127, 127, 0.5));
+    --nm-surface: var(--card-background-color, #fafafa);
+    --nm-muted-surface: var(--secondary-background-color, #f1f1f1);
+    --nm-space-1: 4px;
+    --nm-space-2: 8px;
+    --nm-space-3: 12px;
+    --nm-space-4: 16px;
+    --nm-space-5: 24px;
+    --nm-space-6: 32px;
+    --nm-control-height: 44px;
+    --nm-option-height: 52px;
+    --nm-row-height: 64px;
+    --nm-row-height-comfortable: 72px;
+    --nm-radius: 8px;
+    --nm-radius-compact: 6px;
     color: var(--primary-text-color, #212121);
     font: inherit;
   }
 
   .page-heading {
-    margin-bottom: 28px;
+    margin-bottom: var(--nm-space-5);
   }
 
   h2,
@@ -1045,15 +1097,15 @@ var K = o`
   }
 
   h2 {
-    font-size: 24px;
-    font-weight: 500;
+    font-size: 26px;
+    font-weight: 600;
     line-height: 1.25;
     letter-spacing: -0.01em;
   }
 
   h3 {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 17px;
+    font-weight: 600;
     line-height: 1.35;
   }
 
@@ -1067,24 +1119,26 @@ var K = o`
   }
 
   .section + .section {
-    margin-top: 36px;
+    margin-top: var(--nm-space-4);
+    border-top: 1px solid var(--nm-border);
+    padding-top: var(--nm-space-4);
   }
 
   .section-heading {
-    margin-bottom: 14px;
+    margin-bottom: var(--nm-space-3);
   }
 
   .data-list {
-    border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+    border-top: 1px solid var(--nm-border);
   }
 
   .data-row {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
-    gap: 16px;
-    min-block-size: 64px;
-    border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+    gap: var(--nm-space-4);
+    min-block-size: var(--nm-row-height);
+    border-bottom: 1px solid var(--nm-border);
     padding: 10px 0;
   }
 
@@ -1116,9 +1170,10 @@ var K = o`
 
   .status {
     display: inline-block;
-    border-radius: 8px;
+    border: 1px solid var(--nm-border);
+    border-radius: var(--nm-radius-compact);
     padding: 3px 7px;
-    background: var(--secondary-background-color, #f1f1f1);
+    background: var(--nm-muted-surface);
     color: var(--primary-text-color, #212121);
     font-size: 12px;
     font-weight: 600;
@@ -1139,13 +1194,13 @@ var K = o`
     display: grid;
     grid-template-columns: minmax(160px, 0.45fr) minmax(0, 1fr);
     margin: 0;
-    border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+    border-top: 1px solid var(--nm-border);
   }
 
   dt,
   dd {
     margin: 0;
-    border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+    border-bottom: 1px solid var(--nm-border);
     padding: 14px 0;
     font-size: 14px;
     line-height: 1.45;
@@ -1160,15 +1215,47 @@ var K = o`
     text-align: end;
   }
 
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    box-sizing: border-box;
+    min-block-size: var(--nm-control-height);
+    border: 1px solid var(--nm-control-border);
+    border-radius: var(--nm-radius);
+    padding: 9px 11px;
+    background: var(--nm-surface);
+    color: var(--primary-text-color, #212121);
+    font: inherit;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible {
+    outline: 2px solid var(--primary-color, #3f6f58);
+    outline-offset: 2px;
+  }
+
+  .hint,
+  .feedback {
+    color: var(--secondary-text-color, #616161);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .error {
+    color: var(--error-color, #c62828);
+  }
+
   @media (max-width: 600px) {
     .page-heading {
-      margin-bottom: 24px;
+      margin-bottom: var(--nm-space-5);
     }
 
     .data-row {
       grid-template-columns: 1fr;
       gap: 6px;
-      min-block-size: 72px;
+      min-block-size: var(--nm-row-height-comfortable);
     }
 
     .row-meta {
@@ -1219,26 +1306,11 @@ var K = o`
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
         align-items: end;
-        gap: 10px;
-        margin-bottom: 18px;
+        gap: var(--nm-space-3);
+        margin-bottom: var(--nm-space-4);
       }
 
-      label { display: grid; gap: 5px; font-weight: 600; }
-
-      select {
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 6px;
-        padding: 0 10px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
-
-      select:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
-        outline-offset: 2px;
-      }
+      label { display: grid; gap: var(--nm-space-2); font-weight: 600; }
 
       .error { margin-bottom: 12px; color: var(--error-color, #c62828); }
 
@@ -1285,7 +1357,7 @@ var K = o`
 		return k`
       <div class="page-heading">
         <h2>Activity</h2>
-        <p>See why a notification was sent, skipped or could not reach someone.</p>
+        <p>Review what was sent, skipped or unable to reach a phone.</p>
       </div>
       <div class="filters" aria-label="Activity filters">
         <label>
@@ -1324,8 +1396,12 @@ var K = o`
             ${Object.entries(Re).map(([e, t]) => k`<option value=${e}>${t}</option>`)}
           </select>
         </label>
-        <notification-manager-button .disabled=${this._refreshing} @click=${this._refresh}>
-          Refresh
+        <notification-manager-button
+          icon="mdi:refresh"
+          .disabled=${this._refreshing}
+          @click=${this._refresh}
+        >
+          Reload
         </notification-manager-button>
       </div>
       ${this._error ? k`<p class="error" role="alert">${this._error}</p>` : j}
@@ -1376,12 +1452,35 @@ var Be = /* @__PURE__ */ new Set([
 	"REMAINS_DETECTED"
 ]);
 function Ve(e) {
-	return e.filter((e) => e.semantics.some((e) => Be.has(e.semantic)) && !e.synthetic);
+	return e.device_id ? `device:${e.device_id}` : `entity:${e.entity_id}`;
+}
+function He(e) {
+	let t = /* @__PURE__ */ new Map();
+	for (let n of e) {
+		let e = Ve(n), r = t.get(e);
+		if (r) {
+			r.targets.push(n);
+			continue;
+		}
+		t.set(e, {
+			key: e,
+			name: n.device_name?.trim() || n.display_name,
+			kind: n.device_id ? "device" : "entity",
+			targets: [n]
+		});
+	}
+	return [...t.values()].map((e) => ({
+		...e,
+		targets: [...e.targets].sort((e, t) => e.display_name.localeCompare(t.display_name) || e.entity_id.localeCompare(t.entity_id))
+	})).sort((e, t) => e.name.localeCompare(t.name) || e.key.localeCompare(t.key));
 }
 function q(e) {
+	return e.filter((e) => e.semantics.some((e) => Be.has(e.semantic)) && !e.synthetic);
+}
+function J(e) {
 	return e?.semantics.filter((e) => Be.has(e.semantic)) ?? [];
 }
-function J(e, t) {
+function Y(e, t) {
 	let n = e.parameters.state, r = e.type === "BINARY_STATE_DURATION";
 	if (t?.category === "motion") {
 		if (r && n === "on") return "REMAINS_DETECTED";
@@ -1395,7 +1494,7 @@ function J(e, t) {
 		if (!r && n === "off") return "CLOSED";
 	}
 }
-var He = {
+var Ue = {
 	OPENED: "opens",
 	CLOSED: "closes",
 	REMAINS_OPEN: "stays open",
@@ -1409,30 +1508,30 @@ var He = {
 	BELOW: "falls below the selected value",
 	AT_TIME: "reaches the selected time"
 };
-function Y(e) {
+function X(e) {
 	return `${e} ${e === 1 ? "minute" : "minutes"}`;
 }
-function X(e, t, n, r) {
-	let i = t.startsWith("REMAINS_") ? ` for ${Y(n)}` : "";
-	return `When ${e} ${He[t]}${i}, notify ${r}.`;
+function Z(e, t, n, r) {
+	let i = t.startsWith("REMAINS_") ? ` for ${X(n)}` : "";
+	return `When ${e} ${Ue[t]}${i}, notify ${r}.`;
 }
-function Ue(e, t, n) {
+function We(e, t, n) {
 	let r = e.toLocaleLowerCase();
 	switch (t) {
 		case "REMAINS_OPEN": return {
 			name: `${e} left open`,
 			title: e,
-			message: `The ${r} has been open for ${Y(n)}.`
+			message: `The ${r} has been open for ${X(n)}.`
 		};
 		case "REMAINS_CLOSED": return {
 			name: `${e} stayed closed`,
 			title: e,
-			message: `The ${r} has been closed for ${Y(n)}.`
+			message: `The ${r} has been closed for ${X(n)}.`
 		};
 		case "REMAINS_DETECTED": return {
 			name: `${e} activity continues`,
 			title: e,
-			message: `${e} has detected activity for ${Y(n)}.`
+			message: `${e} has detected activity for ${X(n)}.`
 		};
 		case "OPENED": return {
 			name: `${e} opened`,
@@ -1461,7 +1560,7 @@ function Ue(e, t, n) {
 		};
 	}
 }
-function We(e, t, n) {
+function Ge(e, t, n) {
 	let r = (/* @__PURE__ */ new Date()).toISOString();
 	return {
 		id: n.existing?.id ?? n.id,
@@ -1502,12 +1601,12 @@ function We(e, t, n) {
 		updated_at: r
 	};
 }
-function Z() {
+function Q() {
 	return globalThis.crypto?.randomUUID?.() ?? `rule-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 //#endregion
 //#region src/pages/notifications-page.ts
-var Ge = class extends R {
+var Ke = class extends R {
 	constructor(...e) {
 		super(...e), this.rules = [], this.targets = [], this.recipients = [], this.groups = [], this._filter = "ALL", this._workingId = "", this._error = "";
 	}
@@ -1532,28 +1631,30 @@ var Ge = class extends R {
       .rule-actions {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: var(--nm-space-3);
       }
 
       .page-heading-row {
         justify-content: space-between;
-        margin-bottom: 20px;
+        margin-bottom: var(--nm-space-5);
       }
 
       .page-heading { margin: 0; }
 
       .filters {
         overflow-x: auto;
-        margin-bottom: 10px;
-        padding-bottom: 6px;
+        gap: var(--nm-space-1);
+        margin-bottom: var(--nm-space-1);
+        border-bottom: 1px solid var(--nm-border);
       }
 
       .filter {
-        min-block-size: 40px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.4));
-        border-radius: 20px;
-        padding: 0 14px;
-        background: var(--card-background-color, #fafafa);
+        min-block-size: var(--nm-control-height);
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        padding: 0 12px;
+        background: transparent;
         color: var(--secondary-text-color, #616161);
         font: inherit;
         font-weight: 600;
@@ -1562,16 +1663,17 @@ var Ge = class extends R {
       }
 
       .filter[aria-pressed="true"] {
-        border-color: var(--primary-color, #3f6f58);
-        background: var(--primary-color, #3f6f58);
-        color: var(--text-primary-color, #f7f7f7);
+        border-bottom-color: var(--primary-color, #3f6f58);
+        color: var(--primary-text-color, #212121);
       }
+
+      .filter:hover { background: var(--secondary-background-color, #f1f1f1); }
 
       .filter:focus-visible,
       .rule-main:focus-visible,
       summary:focus-visible,
       .menu button:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -1581,7 +1683,7 @@ var Ge = class extends R {
 
       .rule-row {
         justify-content: space-between;
-        min-block-size: 76px;
+        min-block-size: var(--nm-row-height-comfortable);
         border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
       }
 
@@ -1631,7 +1733,7 @@ var Ge = class extends R {
         place-items: center;
         inline-size: 44px;
         block-size: 44px;
-        border-radius: 50%;
+        border-radius: var(--nm-radius);
         cursor: pointer;
         list-style: none;
       }
@@ -1644,17 +1746,17 @@ var Ge = class extends R {
         inset-inline-end: 0;
         min-inline-size: 160px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.4));
-        border-radius: 8px;
+        border-radius: var(--nm-radius);
         padding: 4px;
         background: var(--card-background-color, #fafafa);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
       }
 
       .menu button {
         inline-size: 100%;
-        min-block-size: 40px;
+        min-block-size: var(--nm-control-height);
         border: 0;
-        border-radius: 5px;
+        border-radius: var(--nm-radius-compact);
         padding-inline: 10px;
         background: transparent;
         color: inherit;
@@ -1668,7 +1770,7 @@ var Ge = class extends R {
       .error { margin-block: 12px; }
 
       @media (max-width: 600px) {
-        .page-heading-row { align-items: flex-start; }
+        .page-heading-row { align-items: stretch; flex-direction: column; }
         .rule-summary { white-space: normal; }
         .state { display: none; }
       }
@@ -1681,10 +1783,10 @@ var Ge = class extends R {
 		return e.audiences.map((e) => e.type === "ME" ? "me" : e.type === "EVERYONE" ? "Everyone" : e.type === "ADMINS" ? "Admins" : e.type === "RECIPIENT" ? this.recipients.find((t) => t.id === e.recipient_id)?.display_name : this.groups.find((t) => t.id === e.group_id)?.name).filter(Boolean).join(", ");
 	}
 	_summary(e) {
-		let t = this.targets.find((t) => t.entity_id === e.trigger.target?.entity_id), n = J(e.trigger, t);
+		let t = this.targets.find((t) => t.entity_id === e.trigger.target?.entity_id), n = Y(e.trigger, t);
 		if (!n || !e.trigger.target) return `Notify ${this._audienceLabel(e)}.`;
 		let r = e.trigger.parameters.duration_seconds, i = typeof r == "number" ? Math.max(1, Math.round(r / 60)) : 0;
-		return X(e.trigger.target.display_name_snapshot, n, i, this._audienceLabel(e));
+		return Z(e.trigger.target.display_name_snapshot, n, i, this._audienceLabel(e));
 	}
 	_changed() {
 		this.dispatchEvent(new CustomEvent("data-changed", {
@@ -1711,7 +1813,7 @@ var Ge = class extends R {
 		try {
 			await this.api.createRule({
 				...e,
-				id: Z(),
+				id: Q(),
 				revision: 0,
 				name: `${e.name} copy`,
 				created_at: t,
@@ -1832,10 +1934,10 @@ var Ge = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-notifications-page") || customElements.define("notification-manager-notifications-page", Ge);
+customElements.get("notification-manager-notifications-page") || customElements.define("notification-manager-notifications-page", Ke);
 //#endregion
 //#region src/pages/people-groups-page.ts
-var Ke = class extends R {
+var qe = class extends R {
 	constructor(...e) {
 		super(...e), this.recipients = [], this.groups = [], this.onboarding = !1, this.unconfirmedMappings = [], this._openRecipientId = "", this._busy = !1, this._feedback = "", this._error = "", this._editingGroupId = "", this._groupName = "", this._groupMembers = [], this._mappingRecipientIds = {};
 	}
@@ -1866,10 +1968,10 @@ var Ke = class extends R {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: var(--nm-space-3);
       }
 
-      .section-heading-row { margin-bottom: 12px; }
+      .section-heading-row { margin-bottom: var(--nm-space-3); }
       .section-heading { margin: 0; }
 
       .person,
@@ -1881,7 +1983,7 @@ var Ke = class extends R {
       .group:first-child { border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3)); }
 
       .person-row,
-      .group-row { min-block-size: 68px; }
+      .group-row { min-block-size: var(--nm-row-height-comfortable); }
 
       .person-main {
         min-inline-size: 0;
@@ -1898,7 +2000,7 @@ var Ke = class extends R {
       .person-main:focus-visible,
       input:focus-visible,
       button:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -1910,17 +2012,21 @@ var Ke = class extends R {
       .profile,
       .group-form {
         margin-bottom: 14px;
-        border-inline-start: 3px solid var(--divider-color, rgba(127, 127, 127, 0.35));
-        padding: 4px 0 12px 16px;
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-4);
+        background: var(--secondary-background-color, #f1f1f1);
       }
 
-      .endpoint-list { display: grid; gap: 6px; margin-block: 10px; }
+      .group-form > label { display: grid; gap: var(--nm-space-2); font-weight: 600; }
+
+      .endpoint-list { display: grid; gap: var(--nm-space-2); margin-block: var(--nm-space-2); }
 
       .endpoint {
         display: flex;
         align-items: center;
-        gap: 9px;
-        min-block-size: 40px;
+        gap: var(--nm-space-2);
+        min-block-size: var(--nm-control-height);
         font-weight: 500;
       }
 
@@ -1933,69 +2039,40 @@ var Ke = class extends R {
 
       .group-form {
         display: grid;
-        gap: 12px;
+        gap: var(--nm-space-3);
         max-inline-size: 620px;
         margin-top: 12px;
       }
 
-      .group-form input[type="text"] {
-        inline-size: 100%;
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.5));
-        border-radius: 6px;
-        padding: 9px 11px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
+      .group-form input[type="text"] { inline-size: 100%; }
 
-      .mapping-list { display: grid; gap: 10px; margin-top: 14px; }
+      .mapping-list { display: grid; gap: var(--nm-space-3); margin-top: var(--nm-space-3); }
 
       .mapping-row {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(180px, 0.7fr) auto;
         align-items: center;
-        gap: 10px;
+        gap: var(--nm-space-3);
         border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        padding-bottom: 10px;
+        padding-bottom: var(--nm-space-3);
       }
 
-      .mapping-row select {
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 6px;
-        padding-inline: 10px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
+      .mapping-row select { inline-size: 100%; }
 
       .member-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px 14px;
+        gap: var(--nm-space-2) var(--nm-space-4);
       }
 
       .member-grid label {
         display: flex;
         align-items: center;
         gap: 8px;
-        min-block-size: 40px;
+        min-block-size: var(--nm-control-height);
       }
 
-      .text-action,
-      .delete {
-        min-block-size: 40px;
-        border: 0;
-        padding: 0 8px;
-        background: transparent;
-        color: var(--primary-color, #3f6f58);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .delete { color: var(--error-color, #c62828); }
+      .group-actions { display: flex; align-items: center; gap: 4px; }
 
       @media (max-width: 600px) {
         .member-grid { grid-template-columns: 1fr; }
@@ -2077,7 +2154,7 @@ var Ke = class extends R {
 			this._busy = !0;
 			try {
 				let e = this.groups.find((e) => e.id === this._editingGroupId), t = {
-					id: e?.id ?? Z().replace(/^rule-/, "group-"),
+					id: e?.id ?? Q().replace(/^rule-/, "group-"),
 					name: this._groupName.trim(),
 					type: "CUSTOM",
 					member_recipient_ids: this._groupMembers,
@@ -2147,8 +2224,8 @@ var Ke = class extends R {
 		let e = this.groups.filter((e) => e.type === "CUSTOM"), t = this.groups.filter((e) => e.type === "SYSTEM"), n = this.recipients.reduce((e, t) => e + this._activeEndpointCount(t), 0), r = this.onboarding ? this.recipients.find((e) => e.ha_user_id === this.currentUser?.id)?.id ?? this.recipients[0]?.id ?? "" : "", i = this._openRecipientId || r;
 		return k`
       <div class="page-heading">
-        <h2>People &amp; Groups</h2>
-        <p>Choose each person's primary phone and organise household audiences.</p>
+        <h2>Household</h2>
+        <p>Manage who receives notifications and which phone is used.</p>
       </div>
 
       ${this.onboarding ? k`
@@ -2219,7 +2296,7 @@ var Ke = class extends R {
 
       <section class="section" aria-labelledby="people-heading">
         <div class="section-heading">
-          <h3 id="people-heading">People</h3>
+          <h3 id="people-heading">People and phones</h3>
         </div>
         ${this.recipients.length === 0 ? k`
               <notification-manager-empty-state
@@ -2307,18 +2384,25 @@ var Ke = class extends R {
                   <div>
                     <span class="row-primary">${e.name}</span>
                     <span class="row-secondary">
-                      ${e.type === "SYSTEM" ? "Updates automatically" : "Custom group"}
-                      · ${n}
+                      ${e.type === "SYSTEM" ? "Updates automatically" : "Custom group"},
+                      ${n}
                     </span>
                   </div>
                   ${e.type === "CUSTOM" && this.currentUser?.is_admin ? k`
-                        <div>
-                          <button class="text-action" type="button" @click=${() => this._startGroup(e)}>
+                        <div class="group-actions">
+                          <notification-manager-button
+                            variant="quiet"
+                            @click=${() => this._startGroup(e)}
+                          >
                             Edit
-                          </button>
-                          <button class="delete" type="button" @click=${() => void this._deleteGroup(e)}>
+                          </notification-manager-button>
+                          <notification-manager-button
+                            variant="danger"
+                            .disabled=${this._busy}
+                            @click=${() => void this._deleteGroup(e)}
+                          >
                             Delete
-                          </button>
+                          </notification-manager-button>
                         </div>
                       ` : j}
                 </div>
@@ -2331,10 +2415,10 @@ var Ke = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-people-groups-page") || customElements.define("notification-manager-people-groups-page", Ke);
+customElements.get("notification-manager-people-groups-page") || customElements.define("notification-manager-people-groups-page", qe);
 //#endregion
 //#region src/pages/rule-detail-page.ts
-var qe = class extends R {
+var Je = class extends R {
 	constructor(...e) {
 		super(...e), this.activity = [], this.targets = [], this.recipients = [], this.groups = [], this._busy = !1, this._feedback = "";
 	}
@@ -2357,32 +2441,14 @@ var qe = class extends R {
         margin-inline: auto;
       }
 
-      .back {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        min-block-size: 44px;
-        margin-bottom: 18px;
-        border: 0;
-        padding: 0;
-        background: transparent;
-        color: var(--primary-color, #3f6f58);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .back:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
-        outline-offset: 2px;
-      }
+      .back-row { margin-bottom: var(--nm-space-3); }
 
       .title-row,
       .actions {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
+        gap: var(--nm-space-3);
       }
 
       .title-row h2 {
@@ -2391,7 +2457,7 @@ var qe = class extends R {
 
       .summary {
         max-inline-size: 65ch;
-        margin: 12px 0 22px;
+        margin: var(--nm-space-3) 0 var(--nm-space-5);
         color: var(--primary-text-color, #212121);
         font-size: 17px;
         line-height: 1.55;
@@ -2400,11 +2466,11 @@ var qe = class extends R {
       .actions {
         justify-content: flex-start;
         flex-wrap: wrap;
-        margin-bottom: 28px;
+        margin-bottom: var(--nm-space-5);
       }
 
       .section {
-        padding-top: 24px;
+        padding-top: var(--nm-space-4);
         border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
       }
 
@@ -2414,19 +2480,7 @@ var qe = class extends R {
       }
 
       .danger {
-        margin-top: 28px;
-      }
-
-      .danger button {
-        min-block-size: 44px;
-        border: 1px solid var(--error-color, #c62828);
-        border-radius: 6px;
-        padding: 0 14px;
-        background: transparent;
-        color: var(--error-color, #c62828);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
+        margin-top: var(--nm-space-5);
       }
 
       @media (max-width: 600px) {
@@ -2453,10 +2507,10 @@ var qe = class extends R {
 	}
 	_summary() {
 		if (!this.rule?.trigger.target) return "This notification needs a replacement device.";
-		let e = this.targets.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id), t = J(this.rule.trigger, e);
+		let e = this.targets.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id), t = Y(this.rule.trigger, e);
 		if (!t) return `Notify ${this._audienceLabel(this.rule.audiences)} when the event occurs.`;
 		let n = this.rule.trigger.parameters.duration_seconds, r = typeof n == "number" ? Math.max(1, Math.round(n / 60)) : 0;
-		return X(this.rule.trigger.target.display_name_snapshot, t, r, this._audienceLabel(this.rule.audiences));
+		return Z(this.rule.trigger.target.display_name_snapshot, t, r, this._audienceLabel(this.rule.audiences));
 	}
 	_conditionSummary(e) {
 		return e.conditions.length === 0 ? "No additional conditions" : e.conditions.map((e) => {
@@ -2523,17 +2577,18 @@ var qe = class extends R {
       `;
 		let t = this.activity.filter((t) => t.rule_id === e.id).slice(0, 5), n = t[0], r = this._resolvedRecipients(e), i = r.filter((e) => e.endpoints.some((e) => e.enabled)).length;
 		return k`
-      <button
-        class="back"
-        type="button"
-        @click=${() => this.dispatchEvent(new CustomEvent("detail-close", {
+      <div class="back-row">
+        <notification-manager-button
+          variant="quiet"
+          icon="mdi:arrow-left"
+          @click=${() => this.dispatchEvent(new CustomEvent("detail-close", {
 			bubbles: !0,
 			composed: !0
 		}))}
-      >
-        <ha-icon icon="mdi:arrow-left" aria-hidden="true"></ha-icon>
-        Notifications
-      </button>
+        >
+          Notifications
+        </notification-manager-button>
+      </div>
       <div class="title-row">
         <h2>${e.name}</h2>
         <span class="status" data-status=${e.health.status}>
@@ -2577,7 +2632,7 @@ var qe = class extends R {
           <dd>
             ${this._audienceLabel(e.audiences)}
             ${r.length ? k`<br />${r.length}
-                  ${r.length === 1 ? "person" : "people"} · ${i}
+                  ${r.length === 1 ? "person" : "people"}, ${i}
                   ${i === 1 ? "phone" : "phones"}` : j}
           </dd>
           <dt>Conditions</dt>
@@ -2609,24 +2664,30 @@ var qe = class extends R {
       </section>
 
       <div class="danger">
-        <button type="button" @click=${this._delete} ?disabled=${this._busy}>Delete notification</button>
+        <notification-manager-button
+          variant="danger"
+          .disabled=${this._busy}
+          @click=${this._delete}
+        >
+          Delete notification
+        </notification-manager-button>
       </div>
     `;
 	}
 };
-customElements.get("notification-manager-rule-detail-page") || customElements.define("notification-manager-rule-detail-page", qe);
+customElements.get("notification-manager-rule-detail-page") || customElements.define("notification-manager-rule-detail-page", Je);
 //#endregion
 //#region src/pages/rule-editor-page.ts
-var Je = {
-	opening: "Doors & windows",
-	motion: "Motion"
+var Ye = {
+	opening: "Door or window state",
+	motion: "Motion state"
 };
-function Q(e) {
+function $(e) {
 	return e.currentTarget.value;
 }
-var Ye = class extends R {
+var Xe = class extends R {
 	constructor(...e) {
-		super(...e), this.targets = [], this.recipients = [], this.groups = [], this._initialisedFor = "", this._draftId = Z(), this._selectedTargetId = "", this._selectedSemantic = "", this._durationMinutes = 5, this._audienceMode = "ME", this._recipientIds = [], this._groupIds = [], this._name = "", this._title = "", this._message = "", this._contentEdited = !1, this._conditionDrafts = [], this._urgency = "NORMAL", this._sound = "default", this._cooldownMinutes = 0, this._replacePrevious = !1, this._imageUrl = "", this._deepLink = "", this._saving = !1, this._error = "", this._status = "";
+		super(...e), this.targets = [], this.recipients = [], this.groups = [], this._initialisedFor = "", this._draftId = Q(), this._selectedSourceKey = "", this._selectedTargetId = "", this._selectedSemantic = "", this._sourcePickerOpen = !0, this._sourceSearch = "", this._durationMinutes = 5, this._audienceMode = "ME", this._recipientIds = [], this._groupIds = [], this._name = "", this._title = "", this._message = "", this._contentEdited = !1, this._conditionDrafts = [], this._urgency = "NORMAL", this._sound = "default", this._cooldownMinutes = 0, this._replacePrevious = !1, this._imageUrl = "", this._deepLink = "", this._saving = !1, this._error = "", this._status = "";
 	}
 	static {
 		this.properties = {
@@ -2644,7 +2705,10 @@ var Ye = class extends R {
 			_name: { state: !0 },
 			_recipientIds: { state: !0 },
 			_saving: { state: !0 },
+			_sourcePickerOpen: { state: !0 },
+			_sourceSearch: { state: !0 },
 			_selectedSemantic: { state: !0 },
+			_selectedSourceKey: { state: !0 },
 			_selectedTargetId: { state: !0 },
 			_status: { state: !0 },
 			_title: { state: !0 },
@@ -2654,78 +2718,58 @@ var Ye = class extends R {
 	static {
 		this.styles = [K, o`
       :host {
-        max-inline-size: 840px;
+        max-inline-size: 1040px;
         margin-inline: auto;
       }
 
-      .editor-header,
-      .review-actions,
-      .section-title-row {
+      .editor-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 16px;
+        gap: var(--nm-space-4);
+        margin-bottom: var(--nm-space-2);
       }
 
-      .editor-header {
-        margin-bottom: 24px;
-      }
-
-      .back {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        min-block-size: 44px;
-        border: 0;
-        padding: 0;
-        background: transparent;
-        color: var(--primary-color, #3f6f58);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .back:focus-visible,
       input:focus-visible,
       select:focus-visible,
       textarea:focus-visible,
       summary:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
       .composer-section {
         border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        padding-block: 24px;
+        padding-block: var(--nm-space-4);
       }
 
-      .section-number {
-        display: inline-grid;
-        place-items: center;
-        inline-size: 26px;
-        block-size: 26px;
-        border-radius: 50%;
-        background: var(--secondary-background-color, #ededed);
-        color: var(--secondary-text-color, #616161);
-        font-size: 12px;
-        font-weight: 700;
+      .editor-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        align-items: start;
+        gap: var(--nm-space-6);
       }
 
-      .section-title-row h3 {
-        flex: 1;
+      .editor-form {
+        min-inline-size: 0;
+      }
+
+      .editor-form .composer-section:first-child {
+        border-top: 0;
+        padding-block-start: 0;
       }
 
       .field-grid {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-        margin-top: 16px;
+        gap: var(--nm-space-4);
+        margin-top: var(--nm-space-4);
       }
 
       .field,
       .choice-group {
         display: grid;
-        gap: 7px;
+        gap: var(--nm-space-2);
       }
 
       .field.full,
@@ -2740,17 +2784,10 @@ var Ye = class extends R {
         font-weight: 600;
       }
 
-      input,
+      input:not([type="checkbox"]):not([type="radio"]),
       select,
       textarea {
         inline-size: 100%;
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.5));
-        border-radius: 6px;
-        padding: 9px 11px;
-        background: var(--card-background-color, #fafafa);
-        color: var(--primary-text-color, #212121);
-        font: inherit;
       }
 
       textarea {
@@ -2764,19 +2801,124 @@ var Ye = class extends R {
         font-size: 13px;
       }
 
+      .source-search {
+        margin-top: var(--nm-space-4);
+      }
+
+      .source-list,
+      .signal-list,
+      .behaviour-list {
+        display: grid;
+        gap: var(--nm-space-2);
+        margin-top: var(--nm-space-3);
+      }
+
+      .source-list {
+        max-block-size: 320px;
+        overflow-y: auto;
+        padding-inline-end: var(--nm-space-1);
+        scrollbar-gutter: stable;
+      }
+
+      .source-option,
+      .signal-option,
+      .behaviour-option {
+        inline-size: 100%;
+        min-block-size: var(--nm-option-height);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--nm-space-3);
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.4));
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-2) var(--nm-space-3);
+        background: var(--card-background-color, #fafafa);
+        color: var(--primary-text-color, #212121);
+        text-align: start;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .behaviour-option {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .source-summary {
+        margin-top: var(--nm-space-3);
+      }
+
+      .change-label {
+        color: var(--primary-color, #3f6f58);
+        font-weight: 600;
+      }
+
+      .source-option:hover,
+      .signal-option:hover,
+      .behaviour-option:hover {
+        border-color: var(--primary-color, #3f6f58);
+      }
+
+      .source-option[aria-pressed="true"],
+      .signal-option[aria-pressed="true"],
+      .behaviour-option[aria-pressed="true"] {
+        border-color: var(--primary-color, #3f6f58);
+        background: color-mix(in srgb, var(--primary-color, #3f6f58) 8%, transparent);
+      }
+
+      .source-option:focus-visible,
+      .signal-option:focus-visible,
+      .behaviour-option:focus-visible {
+        outline: 2px solid var(--primary-color, #3f6f58);
+        outline-offset: 2px;
+      }
+
+      .signal-option:disabled {
+        cursor: not-allowed;
+        opacity: 0.62;
+      }
+
+      .option-copy {
+        display: grid;
+        gap: 2px;
+        min-inline-size: 0;
+      }
+
+      .option-title {
+        overflow-wrap: anywhere;
+        font-weight: 600;
+      }
+
+      .option-meta,
+      .option-count {
+        color: var(--secondary-text-color, #616161);
+        font-size: 13px;
+        font-weight: 400;
+      }
+
+      .selection-path {
+        margin: 8px 0 0;
+        color: var(--secondary-text-color, #616161);
+        font-size: 14px;
+      }
+
+      .no-results {
+        margin: 12px 0 0;
+        color: var(--secondary-text-color, #616161);
+      }
+
       .condition-list {
         display: grid;
         grid-column: 1 / -1;
-        gap: 12px;
+        gap: var(--nm-space-3);
       }
 
       .condition-card {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: var(--nm-space-3);
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.35));
-        border-radius: 8px;
-        padding: 14px;
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-3);
       }
 
       .condition-card .condition-kind,
@@ -2791,10 +2933,10 @@ var Ye = class extends R {
 
       .condition-actions button,
       .add-condition {
-        min-block-size: 40px;
+        min-block-size: var(--nm-control-height);
         border: 0;
-        border-radius: 6px;
-        padding: 0 10px;
+        border-radius: var(--nm-radius-compact);
+        padding: 0 var(--nm-space-3);
         background: transparent;
         color: var(--primary-color, #3f6f58);
         font: inherit;
@@ -2804,13 +2946,13 @@ var Ye = class extends R {
 
       .condition-actions button:focus-visible,
       .add-condition:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
       fieldset {
         min-inline-size: 0;
-        margin: 16px 0 0;
+        margin: var(--nm-space-4) 0 0;
         border: 0;
         padding: 0;
       }
@@ -2818,18 +2960,18 @@ var Ye = class extends R {
       .choice-list {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-        margin-top: 8px;
+        gap: var(--nm-space-2);
+        margin-top: var(--nm-space-2);
       }
 
       .choice {
         display: flex;
         align-items: flex-start;
-        gap: 9px;
-        min-block-size: 44px;
+        gap: var(--nm-space-2);
+        min-block-size: var(--nm-control-height);
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.35));
-        border-radius: 6px;
-        padding: 10px;
+        border-radius: var(--nm-radius-compact);
+        padding: var(--nm-space-2);
         font-weight: 500;
         cursor: pointer;
       }
@@ -2848,9 +2990,9 @@ var Ye = class extends R {
       }
 
       .expanded-choice {
-        margin-top: 12px;
+        margin-top: var(--nm-space-3);
         border-inline-start: 3px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-        padding-inline-start: 16px;
+        padding-inline-start: var(--nm-space-4);
       }
 
       details {
@@ -2859,7 +3001,7 @@ var Ye = class extends R {
       }
 
       summary {
-        min-block-size: 48px;
+        min-block-size: var(--nm-option-height);
         display: flex;
         align-items: center;
         font-weight: 600;
@@ -2867,23 +3009,43 @@ var Ye = class extends R {
       }
 
       .review {
-        border-inline-start: 4px solid var(--primary-color, #3f6f58);
-        padding: 16px 18px;
-        background: var(--secondary-background-color, #f1f1f1);
-        font-size: 16px;
+        margin: 10px 0 0;
+        color: var(--primary-text-color, #212121);
+        font-size: 15px;
         line-height: 1.5;
       }
 
+      .review-panel {
+        position: sticky;
+        inset-block-start: 24px;
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+        border-radius: var(--nm-radius);
+        padding: var(--nm-space-4);
+        background: var(--card-background-color, #fafafa);
+      }
+
       .review-actions {
-        align-items: flex-start;
-        margin-top: 18px;
+        display: grid;
+        align-items: stretch;
+        justify-content: stretch;
+        gap: var(--nm-space-4);
+        margin-top: var(--nm-space-4);
       }
 
       .button-row {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        gap: 8px;
+        display: grid;
+        justify-content: stretch;
+        gap: var(--nm-space-2);
+      }
+
+      .mobile-actions {
+        display: none;
+      }
+
+      .mobile-feedback {
+        grid-column: 1 / -1;
+        color: var(--secondary-text-color, #616161);
+        font-size: 13px;
       }
 
       .feedback {
@@ -2896,6 +3058,43 @@ var Ye = class extends R {
         color: var(--error-color, #c62828);
       }
 
+      .sr-only {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      @media (max-width: 840px) {
+        :host { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+        .editor-layout { grid-template-columns: 1fr; gap: var(--nm-space-2); }
+        .review-panel { position: static; }
+
+        .review-panel .review-actions {
+          display: none;
+        }
+
+        .mobile-actions {
+          position: fixed;
+          z-index: 5;
+          inset-inline: 0;
+          inset-block-end: 0;
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: var(--nm-space-2);
+          border-top: 1px solid var(--nm-border);
+          padding:
+            var(--nm-space-3)
+            max(var(--nm-space-4), env(safe-area-inset-right))
+            max(var(--nm-space-3), env(safe-area-inset-bottom))
+            max(var(--nm-space-4), env(safe-area-inset-left));
+          background: var(--card-background-color, #fafafa);
+          box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+      }
+
       @media (max-width: 640px) {
         .field-grid,
         .choice-list,
@@ -2903,17 +3102,7 @@ var Ye = class extends R {
           grid-template-columns: 1fr;
         }
 
-        .review-actions {
-          display: grid;
-        }
-
-        .button-row {
-          justify-content: stretch;
-        }
-
-        .button-row notification-manager-button {
-          flex: 1;
-        }
+        .choice-list { gap: var(--nm-space-2); }
       }
     `];
 	}
@@ -2923,9 +3112,9 @@ var Ye = class extends R {
 	_initialise() {
 		let e = this.rule?.id ?? "new";
 		if (this._initialisedFor === e || this.targets.length === 0) return;
-		this._initialisedFor = e;
-		let t = Ve(this.targets), n = this.rule?.trigger.target ? t.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id) : t.find((e) => e.available) ?? t[0];
-		this._selectedTargetId = n?.entity_id ?? "", this._selectedSemantic = this.rule ? J(this.rule.trigger, n) ?? "" : q(n)[0]?.semantic ?? "";
+		this._initialisedFor = e, this._sourcePickerOpen = !this.rule, this._sourceSearch = "";
+		let t = q(this.targets), n = this.rule?.trigger.target ? t.find((e) => e.entity_id === this.rule?.trigger.target?.entity_id) : t.find((e) => e.available) ?? t[0];
+		this._selectedSourceKey = n ? Ve(n) : "", this._selectedTargetId = n?.entity_id ?? "", this._selectedSemantic = this.rule ? Y(this.rule.trigger, n) ?? "" : J(n)[0]?.semantic ?? "";
 		let r = this.rule?.trigger.parameters.duration_seconds;
 		this._durationMinutes = typeof r == "number" ? Math.max(1, Math.round(r / 60)) : 5, this.rule ? (this._name = this.rule.name, this._title = this.rule.content.title, this._message = this.rule.content.message, this._contentEdited = !0, this._imageUrl = this.rule.content.image_url ?? "", this._deepLink = this.rule.content.deep_link ?? "", this._urgency = this.rule.delivery_policy.urgency, this._sound = this.rule.delivery_policy.sound ?? "default", this._cooldownMinutes = Math.round((this.rule.behaviour.cooldown_seconds ?? 0) / 60), this._replacePrevious = this.rule.behaviour.replace_previous, this._initialiseAudience(this.rule.audiences), this._initialiseConditions(this.rule.conditions)) : this._applyGeneratedContent();
 	}
@@ -2939,7 +3128,7 @@ var Ye = class extends R {
 	}
 	_initialiseConditions(e) {
 		this._conditionDrafts = e.map((e) => ({
-			key: Z(),
+			key: Q(),
 			mode: e.type,
 			targetId: e.target?.entity_id ?? "",
 			start: String(e.parameters.start ?? "22:00"),
@@ -2949,7 +3138,7 @@ var Ye = class extends R {
 	}
 	_addCondition() {
 		this._conditionDrafts = [...this._conditionDrafts, {
-			key: Z(),
+			key: Q(),
 			mode: "PERSON_HOME",
 			targetId: "",
 			start: "22:00",
@@ -2971,7 +3160,7 @@ var Ye = class extends R {
 	}
 	_applyGeneratedContent() {
 		if (this._contentEdited || !this._selectedTarget || !this._selectedSemantic) return;
-		let e = Ue(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes);
+		let e = We(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes);
 		this._name = e.name, this._title = e.title, this._message = e.message;
 	}
 	_markDirty() {
@@ -2981,17 +3170,29 @@ var Ye = class extends R {
 			composed: !0
 		}));
 	}
-	_changeTarget(e) {
-		this._selectedTargetId = Q(e), this._selectedSemantic = q(this._selectedTarget)[0]?.semantic ?? "", this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty();
+	_selectSource(e) {
+		let t = He(q(this.targets)).find((t) => t.key === e);
+		if (!t) return;
+		let n = t.targets.find((e) => e.available) ?? t.targets[0];
+		n && (this._selectedSourceKey = t.key, this._sourcePickerOpen = !1, this._sourceSearch = "", this._selectTarget(n.entity_id));
 	}
-	_changeSemantic(e) {
-		this._selectedSemantic = Q(e), this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty();
+	_selectTarget(e) {
+		this._sourcePickerOpen = !1, this._sourceSearch = "", e !== this._selectedTargetId && (this._selectedTargetId = e, this._selectedSemantic = J(this._selectedTarget)[0]?.semantic ?? "", this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty());
+	}
+	_selectSemantic(e) {
+		e !== this._selectedSemantic && (this._selectedSemantic = e, this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty());
+	}
+	_changeSourceSearch(e) {
+		this._sourceSearch = $(e);
+	}
+	async _openSourcePicker() {
+		this._sourcePickerOpen = !0, await this.updateComplete, this.shadowRoot?.querySelector("#source-search")?.focus();
 	}
 	_changeDuration(e) {
-		this._durationMinutes = Math.max(1, Number(Q(e)) || 1), this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty();
+		this._durationMinutes = Math.max(1, Number($(e)) || 1), this._contentEdited = !1, this._applyGeneratedContent(), this._markDirty();
 	}
 	_setContent(e, t) {
-		let n = Q(t);
+		let n = $(t);
 		e === "name" && (this._name = n), e === "title" && (this._title = n), e === "message" && (this._message = n), this._contentEdited = !0, this._markDirty();
 	}
 	_toggleSelection(e, t, n) {
@@ -3065,7 +3266,7 @@ var Ye = class extends R {
 		if (!this._name.trim() || !this._title.trim() || !this._message.trim()) throw Error("Add a notification name, title and message.");
 		for (let e of this._conditionDrafts) if (e.mode !== "TIME_WINDOW" && !e.targetId) throw Error(e.mode === "ENTITY_STATE" ? "Choose a device for each condition." : "Choose a person for each condition.");
 		let n = this._selectedSemantic.startsWith("REMAINS_") ? { duration_seconds: Math.round(this._durationMinutes * 60) } : {}, r = await this.api.resolveTrigger(e.entity_id, this._selectedSemantic, n);
-		return We(this.currentUser, r, {
+		return Ge(this.currentUser, r, {
 			id: this._draftId,
 			existing: this.rule,
 			name: this._name,
@@ -3116,7 +3317,7 @@ var Ye = class extends R {
 		let e = this.groups.filter((e) => e.type === "CUSTOM");
 		return k`
       <fieldset class="choice-group">
-        <legend>Who should be told?</legend>
+        <legend class="sr-only">Recipients</legend>
         <div class="choice-list">
           ${(this.currentUser?.is_admin ? [
 			"ME",
@@ -3174,76 +3375,129 @@ var Ye = class extends R {
     `;
 	}
 	render() {
-		let e = Ve(this.targets), t = q(this._selectedTarget), n = this.targets.filter((e) => e.category === "person"), r = this._selectedSemantic.startsWith("REMAINS_"), i = this._supports("important"), a = this._supports("critical") && this._supports("sound"), o = this._supports("image"), s = this._supports("deep_link"), c = this._supports("replacement"), l = this._resolvedRecipients(), u = l.filter((e) => e.endpoints.some((e) => e.enabled)).length, d = this._selectedTarget && this._selectedSemantic ? X(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes, this._audienceName()) : "Choose a device, event and audience to review this notification.";
+		let e = q(this.targets), t = He(e), n = t.find((e) => e.key === this._selectedSourceKey), r = this._sourceSearch.trim().toLocaleLowerCase(), i = r ? t.filter((e) => e.name.toLocaleLowerCase().includes(r) || e.targets.some((e) => e.display_name.toLocaleLowerCase().includes(r) || e.entity_id.toLocaleLowerCase().includes(r))) : t, a = J(this._selectedTarget), o = this.targets.filter((e) => e.category === "person"), s = this._selectedSemantic.startsWith("REMAINS_"), c = this._supports("important"), l = this._supports("critical") && this._supports("sound"), u = this._supports("image"), d = this._supports("deep_link"), ee = this._supports("replacement"), f = this._resolvedRecipients(), p = f.filter((e) => e.endpoints.some((e) => e.enabled)).length, m = this._selectedTarget && this._selectedSemantic ? Z(this._selectedTarget.display_name, this._selectedSemantic, this._durationMinutes, this._audienceName()) : "Choose a device, signal, behaviour and audience to review this notification.";
 		return k`
       <div class="editor-header">
-        <button
-          class="back"
-          type="button"
+        <notification-manager-button
+          variant="quiet"
+          icon="mdi:arrow-left"
           @click=${() => this.dispatchEvent(new CustomEvent("editor-cancel", {
 			bubbles: !0,
 			composed: !0
 		}))}
         >
-          <ha-icon icon="mdi:arrow-left" aria-hidden="true"></ha-icon>
           Notifications
-        </button>
+        </notification-manager-button>
       </div>
       <div class="page-heading">
         <h2>${this.rule ? "Edit notification" : "Create notification"}</h2>
-        <p>Tell someone when something important happens at home.</p>
+        <p>Choose what to monitor, what should happen and who should be notified.</p>
       </div>
 
       ${e.length === 0 ? k`
             <notification-manager-status-panel
               kind="error"
-              heading="No supported devices found"
-              message="Add a door, window or motion sensor in Home Assistant, then reload this page."
+              heading="No notification-ready signals found"
+              message="Add a supported device or entity in Home Assistant, then reload this page."
             ></notification-manager-status-panel>
           ` : k`
+            <div class="editor-layout">
+              <div class="editor-form">
             <section class="composer-section" aria-labelledby="what-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">1</span>
-                <h3 id="what-heading">What do you want to know about?</h3>
-              </div>
-              <div class="field-grid">
-                <div class="field full">
-                  <label for="target">Door, window or motion sensor</label>
-                  <select id="target" @change=${this._changeTarget} .value=${this._selectedTargetId}>
-                    ${Object.entries(Je).map(([t, n]) => {
-			let r = e.filter((e) => e.category === t);
-			return r.length ? k`
-                            <optgroup label=${n}>
-                              ${r.map((e) => k`
-                                  <option value=${e.entity_id} ?disabled=${!e.available}>
-                                    ${e.display_name}${e.available ? "" : " (unavailable)"}
-                                  </option>
-                                `)}
-                            </optgroup>
-                          ` : j;
-		})}
-                  </select>
-                </div>
+              <h3 id="what-heading">Device</h3>
+              ${this._sourcePickerOpen ? k`
+                    <div class="field source-search">
+                      <label for="source-search">Find a device or entity</label>
+                      <input
+                        id="source-search"
+                        type="search"
+                        placeholder="Search by device, signal or entity ID"
+                        autocomplete="off"
+                        .value=${this._sourceSearch}
+                        @input=${this._changeSourceSearch}
+                      />
+                    </div>
+                    <div class="source-list" aria-label="Devices and entities">
+                      ${i.map((e) => k`
+                          <button
+                            class="source-option"
+                            type="button"
+                            aria-pressed=${e.key === this._selectedSourceKey ? "true" : "false"}
+                            @click=${() => this._selectSource(e.key)}
+                          >
+                            <span class="option-copy">
+                              <span class="option-title">${e.name}</span>
+                              <span class="option-meta">
+                                ${e.kind === "device" ? "Device" : "Individual entity"}
+                              </span>
+                            </span>
+                            <span class="option-count">
+                              ${e.targets.length}
+                              ${e.targets.length === 1 ? "signal" : "signals"}
+                            </span>
+                          </button>
+                        `)}
+                    </div>
+                    ${i.length === 0 ? k`<p class="no-results">No matching devices or entities.</p>` : j}
+                  ` : k`
+                    <button
+                      class="source-option source-summary"
+                      type="button"
+                      @click=${this._openSourcePicker}
+                    >
+                      <span class="option-copy">
+                        <span class="option-title">${n?.name ?? "Selected entity"}</span>
+                        <span class="option-meta">
+                          ${n?.kind === "device" ? "Device" : "Individual entity"}
+                        </span>
+                      </span>
+                      <span class="change-label">Change</span>
+                    </button>
+                  `}
+            </section>
+
+            <section class="composer-section" aria-labelledby="signal-heading">
+              <h3 id="signal-heading">Signal</h3>
+              <p class="selection-path">
+                Choose what on ${n?.name ?? "this device"} should be monitored.
+              </p>
+              <div class="signal-list" aria-label="Signals">
+                ${n?.targets.map((e) => k`
+                    <button
+                      class="signal-option"
+                      type="button"
+                      aria-pressed=${e.entity_id === this._selectedTargetId ? "true" : "false"}
+                      ?disabled=${!e.available}
+                      @click=${() => this._selectTarget(e.entity_id)}
+                    >
+                      <span class="option-copy">
+                        <span class="option-title">${e.display_name}</span>
+                        <span class="option-meta">
+                          ${Ye[e.category] ?? "Entity state"}${e.available ? "" : " · Unavailable"}
+                        </span>
+                      </span>
+                    </button>
+                  `)}
               </div>
             </section>
 
             <section class="composer-section" aria-labelledby="when-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">2</span>
-                <h3 id="when-heading">When?</h3>
+              <h3 id="when-heading">Behaviour</h3>
+              <p class="selection-path">When ${this._selectedTarget?.display_name ?? "the signal"}…</p>
+              <div class="behaviour-list" aria-label="Behaviours">
+                ${a.map((e) => k`
+                    <button
+                      class="behaviour-option"
+                      type="button"
+                      aria-pressed=${e.semantic === this._selectedSemantic ? "true" : "false"}
+                      @click=${() => this._selectSemantic(e.semantic)}
+                    >
+                      <span class="option-title">${e.label}</span>
+                    </button>
+                  `)}
               </div>
               <div class="field-grid">
-                <div class="field ${r ? "" : "full"}">
-                  <label for="semantic">When ${this._selectedTarget?.display_name ?? "it"}</label>
-                  <select
-                    id="semantic"
-                    @change=${this._changeSemantic}
-                    .value=${this._selectedSemantic}
-                  >
-                    ${t.map((e) => k`<option value=${e.semantic}>${e.label}</option>`)}
-                  </select>
-                </div>
-                ${r ? k`
+                ${s ? k`
                       <div class="field">
                         <label for="duration">For how long?</label>
                         <div>
@@ -3263,23 +3517,17 @@ var Ye = class extends R {
             </section>
 
             <section class="composer-section" aria-labelledby="who-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">3</span>
-                <h3 id="who-heading">Who should be told?</h3>
-              </div>
+              <h3 id="who-heading">Recipients</h3>
               ${this._renderAudienceChoices()}
               <p class="hint">
-                ${l.length}
-                ${l.length === 1 ? "person" : "people"} ·
-                ${u} ${u === 1 ? "phone" : "phones"} currently ready
+                ${f.length}
+                ${f.length === 1 ? "person" : "people"},
+                ${p} ${p === 1 ? "phone" : "phones"} currently ready
               </p>
             </section>
 
             <section class="composer-section" aria-labelledby="message-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">4</span>
-                <h3 id="message-heading">Message</h3>
-              </div>
+              <h3 id="message-heading">Message</h3>
               <div class="field-grid">
                 <div class="field full">
                   <label for="name">Notification name</label>
@@ -3310,7 +3558,7 @@ var Ye = class extends R {
 
             <section class="composer-section" aria-labelledby="options-heading">
               <details>
-                <summary id="options-heading">More options</summary>
+                <summary id="options-heading">Conditions and delivery options</summary>
                 <div class="field-grid">
                   <div class="field full">
                     <label>Only notify when</label>
@@ -3318,7 +3566,7 @@ var Ye = class extends R {
                   </div>
                   <div class="condition-list">
                     ${this._conditionDrafts.map((e, t) => {
-			let r = this.targets.find((t) => t.entity_id === e.targetId), i = e.mode === "ENTITY_STATE" ? this.targets.filter((e) => ["opening", "motion"].includes(e.category)) : n, a = r?.category === "motion" ? "Activity detected" : "Open", o = r?.category === "motion" ? "Clear" : "Closed";
+			let n = this.targets.find((t) => t.entity_id === e.targetId), r = e.mode === "ENTITY_STATE" ? this.targets.filter((e) => ["opening", "motion"].includes(e.category)) : o, i = n?.category === "motion" ? "Activity detected" : "Open", a = n?.category === "motion" ? "Clear" : "Closed";
 			return k`
                         <div class="condition-card">
                           <div class="field condition-kind">
@@ -3327,7 +3575,7 @@ var Ye = class extends R {
                               id=${`condition-kind-${e.key}`}
                               .value=${e.mode}
                               @change=${(e) => this._updateCondition(t, {
-				mode: Q(e),
+				mode: $(e),
 				targetId: ""
 			})}
                             >
@@ -3344,7 +3592,7 @@ var Ye = class extends R {
                                     id=${`condition-start-${e.key}`}
                                     type="time"
                                     .value=${e.start}
-                                    @input=${(e) => this._updateCondition(t, { start: Q(e) })}
+                                    @input=${(e) => this._updateCondition(t, { start: $(e) })}
                                   />
                                 </div>
                                 <div class="field">
@@ -3353,7 +3601,7 @@ var Ye = class extends R {
                                     id=${`condition-end-${e.key}`}
                                     type="time"
                                     .value=${e.end}
-                                    @input=${(e) => this._updateCondition(t, { end: Q(e) })}
+                                    @input=${(e) => this._updateCondition(t, { end: $(e) })}
                                   />
                                 </div>
                               ` : k`
@@ -3364,12 +3612,12 @@ var Ye = class extends R {
                                   <select
                                     id=${`condition-target-${e.key}`}
                                     .value=${e.targetId}
-                                    @change=${(e) => this._updateCondition(t, { targetId: Q(e) })}
+                                    @change=${(e) => this._updateCondition(t, { targetId: $(e) })}
                                   >
                                     <option value="">
                                       ${e.mode === "ENTITY_STATE" ? "Choose a device" : "Choose a person"}
                                     </option>
-                                    ${i.map((e) => k`
+                                    ${r.map((e) => k`
                                         <option value=${e.entity_id} ?disabled=${!e.available}>
                                           ${e.display_name}
                                         </option>
@@ -3382,10 +3630,10 @@ var Ye = class extends R {
                                         <select
                                           id=${`condition-state-${e.key}`}
                                           .value=${e.expectedState}
-                                          @change=${(e) => this._updateCondition(t, { expectedState: Q(e) })}
+                                          @change=${(e) => this._updateCondition(t, { expectedState: $(e) })}
                                         >
-                                          <option value="on">${a}</option>
-                                          <option value="off">${o}</option>
+                                          <option value="on">${i}</option>
+                                          <option value="off">${a}</option>
                                         </select>
                                       </div>
                                     ` : j}
@@ -3411,15 +3659,15 @@ var Ye = class extends R {
                       id="urgency"
                       .value=${this._urgency}
                       @change=${(e) => {
-			this._urgency = Q(e), this._markDirty();
+			this._urgency = $(e), this._markDirty();
 		}}
                     >
                       <option value="NORMAL">Normal</option>
-                      <option value="IMPORTANT" ?disabled=${!i}>Important</option>
-                      <option value="CRITICAL" ?disabled=${!a}>Critical</option>
+                      <option value="IMPORTANT" ?disabled=${!c}>Important</option>
+                      <option value="CRITICAL" ?disabled=${!l}>Critical</option>
                     </select>
-                    ${i ? j : k`<p class="hint">Important alerts are not confirmed for every selected phone.</p>`}
-                    ${a ? j : k`<p class="hint">Critical alerts are not confirmed for every selected phone.</p>`}
+                    ${c ? j : k`<p class="hint">Important alerts are not confirmed for every selected phone.</p>`}
+                    ${l ? j : k`<p class="hint">Critical alerts are not confirmed for every selected phone.</p>`}
                   </div>
                   <div class="field">
                     <label for="cooldown">Wait before notifying again</label>
@@ -3429,12 +3677,12 @@ var Ye = class extends R {
                       min="0"
                       .value=${String(this._cooldownMinutes)}
                       @input=${(e) => {
-			this._cooldownMinutes = Math.max(0, Number(Q(e)) || 0), this._markDirty();
+			this._cooldownMinutes = Math.max(0, Number($(e)) || 0), this._markDirty();
 		}}
                     />
                     <p class="hint">Minutes, or 0 for no cooldown</p>
                   </div>
-                  ${o ? k`
+                  ${u ? k`
                         <div class="field full">
                           <label for="image">Image address</label>
                           <input
@@ -3442,12 +3690,12 @@ var Ye = class extends R {
                             inputmode="url"
                             .value=${this._imageUrl}
                             @input=${(e) => {
-			this._imageUrl = Q(e), this._markDirty();
+			this._imageUrl = $(e), this._markDirty();
 		}}
                           />
                         </div>
                       ` : j}
-                  ${s ? k`
+                  ${d ? k`
                         <div class="field full">
                           <label for="deep-link">Open when tapped</label>
                           <input
@@ -3455,12 +3703,12 @@ var Ye = class extends R {
                             .value=${this._deepLink}
                             placeholder="/lovelace/home"
                             @input=${(e) => {
-			this._deepLink = Q(e), this._markDirty();
+			this._deepLink = $(e), this._markDirty();
 		}}
                           />
                         </div>
                       ` : j}
-                  ${c ? k`
+                  ${ee ? k`
                         <label class="choice field full">
                           <input
                             type="checkbox"
@@ -3475,19 +3723,18 @@ var Ye = class extends R {
                 </div>
               </details>
             </section>
-
-            <section class="composer-section" aria-labelledby="review-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">5</span>
-                <h3 id="review-heading">Review</h3>
               </div>
-              <p class="review">${d}</p>
+
+            <aside class="review-panel" aria-labelledby="review-heading">
+              <h3 id="review-heading">Review</h3>
+              <p class="review">${m}</p>
               <div class="review-actions">
                 <div class="feedback" aria-live="polite">
                   ${this._error ? k`<span class="error">${this._error}</span>` : this._status}
                 </div>
                 <div class="button-row">
                   <notification-manager-button
+                    .fullWidth=${!0}
                     .disabled=${this._saving}
                     @click=${this._sendTest}
                   >
@@ -3495,6 +3742,7 @@ var Ye = class extends R {
                   </notification-manager-button>
                   <notification-manager-button
                     variant="primary"
+                    .fullWidth=${!0}
                     .disabled=${this._saving}
                     @click=${this._save}
                   >
@@ -3502,15 +3750,38 @@ var Ye = class extends R {
                   </notification-manager-button>
                 </div>
               </div>
-            </section>
+            </aside>
+            </div>
+            <div class="mobile-actions" aria-label="Notification actions">
+              ${this._error || this._status ? k`
+                    <div class="mobile-feedback" aria-live="polite">
+                      ${this._error ? k`<span class="error">${this._error}</span>` : this._status}
+                    </div>
+                  ` : j}
+              <notification-manager-button
+                .fullWidth=${!0}
+                .disabled=${this._saving}
+                @click=${this._sendTest}
+              >
+                Send test
+              </notification-manager-button>
+              <notification-manager-button
+                variant="primary"
+                .fullWidth=${!0}
+                .disabled=${this._saving}
+                @click=${this._save}
+              >
+                ${this._saving ? "Saving…" : "Save notification"}
+              </notification-manager-button>
+            </div>
           `}
     `;
 	}
 };
-customElements.get("notification-manager-rule-editor-page") || customElements.define("notification-manager-rule-editor-page", Ye);
+customElements.get("notification-manager-rule-editor-page") || customElements.define("notification-manager-rule-editor-page", Xe);
 //#endregion
 //#region src/pages/settings-page.ts
-var Xe = class extends R {
+var Ze = class extends R {
 	constructor(...e) {
 		super(...e), this.capabilityTargets = [], this.unconfirmedMappings = [], this._days = 30, this._records = 1e3, this._loading = !1, this._error = "", this._status = "";
 	}
@@ -3534,26 +3805,11 @@ var Xe = class extends R {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 180px)) auto;
         align-items: end;
-        gap: 12px;
-        margin-top: 14px;
+        gap: var(--nm-space-3);
+        margin-top: var(--nm-space-3);
       }
 
-      label { display: grid; gap: 5px; font-weight: 600; }
-
-      input {
-        min-block-size: 44px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 6px;
-        padding: 0 10px;
-        background: var(--card-background-color, #fafafa);
-        color: inherit;
-        font: inherit;
-      }
-
-      input:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
-        outline-offset: 2px;
-      }
+      label { display: grid; gap: var(--nm-space-2); font-weight: 600; }
 
       .feedback { margin-top: 10px; color: var(--secondary-text-color, #616161); }
       .error { color: var(--error-color, #c62828); }
@@ -3599,43 +3855,43 @@ var Xe = class extends R {
 		return k`
       <div class="page-heading">
         <h2>Settings</h2>
-        <p>Review Notification Manager discovery and integration status.</p>
+        <p>Manage activity history and check that Notification Manager is ready.</p>
       </div>
 
       <section class="section" aria-labelledby="integration-heading">
         <div class="section-heading">
-          <h3 id="integration-heading">Integration</h3>
+          <h3 id="integration-heading">Overview</h3>
         </div>
         <dl class="definition-list">
           <dt>Signed in as</dt>
           <dd>${this.currentUser?.name || "Home Assistant administrator"}</dd>
-          <dt>Capability targets</dt>
+          <dt>Available devices</dt>
           <dd>${e} of ${this.capabilityTargets.length} available</dd>
-          <dt>Recipient mappings to confirm</dt>
+          <dt>Phone matches to review</dt>
           <dd>${this.unconfirmedMappings.length}</dd>
         </dl>
       </section>
 
       <section class="section" aria-labelledby="health-heading">
         <div class="section-heading">
-          <h3 id="health-heading">Status</h3>
+          <h3 id="health-heading">System status</h3>
         </div>
         ${this._loading && !t ? k`<p>Loading integration status…</p>` : t ? k`
                 <dl class="definition-list">
                   <dt>Version</dt>
                   <dd>${t.version}</dd>
-                  <dt>Active notifications</dt>
+                  <dt>Notifications on</dt>
                   <dd>${t.rules.enabled} of ${t.rules.total}</dd>
                   <dt>Needs attention</dt>
                   <dd>${t.rules.health.NEEDS_ATTENTION}</dd>
-                  <dt>Recipients and phones</dt>
+                  <dt>Household phones</dt>
                   <dd>
-                    ${t.discovery.recipients} people ·
+                    ${t.discovery.recipients} people,
                     ${t.discovery.enabled_endpoints} ready phones
                   </dd>
-                  <dt>Runtime watchers</dt>
+                  <dt>Notification engine</dt>
                   <dd>
-                    ${t.runtime.attached ? `${t.runtime.watched_rules} rules · ${t.runtime.pending_timers} pending timers` : "Not attached"}
+                    ${t.runtime.attached ? `Running, ${t.runtime.watched_rules} active, ${t.runtime.pending_timers} waiting` : "Not running"}
                   </dd>
                 </dl>
               ` : j}
@@ -3658,7 +3914,7 @@ var Xe = class extends R {
             />
           </label>
           <label>
-            Maximum records
+            Maximum entries
             <input
               type="number"
               min="1"
@@ -3681,10 +3937,10 @@ var Xe = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-settings-page") || customElements.define("notification-manager-settings-page", Xe);
+customElements.get("notification-manager-settings-page") || customElements.define("notification-manager-settings-page", Ze);
 //#endregion
 //#region src/notification-manager-panel.ts
-var $ = class extends R {
+var Qe = class extends R {
 	constructor(...e) {
 		super(...e), this.narrow = !1, this._activeRoute = Ne(globalThis.location?.hash ?? ""), this._connectedToHomeAssistant = globalThis.navigator?.onLine ?? !0, this._errorMessage = "", this._loadState = "idle", this._loadGeneration = 0, this._notificationView = "list", this._onboardingActive = !1, this._selectedRuleId = "", this._editorDirty = !1, this._handleHashChange = () => {
 			let e = Ne(globalThis.location?.hash ?? "");
@@ -3755,19 +4011,23 @@ var $ = class extends R {
     }
 
     .app-header {
+      border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+      background: var(--app-header-background-color, var(--card-background-color, #fafafa));
+      color: var(--app-header-text-color, var(--primary-text-color, #212121));
+    }
+
+    .app-header-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      min-block-size: 56px;
+      gap: 28px;
+      min-block-size: 64px;
+      max-inline-size: 1120px;
+      margin: 0 auto;
       padding:
         max(8px, env(safe-area-inset-top))
         max(24px, env(safe-area-inset-right))
         8px
         max(24px, env(safe-area-inset-left));
-      border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-      background: var(--app-header-background-color, var(--card-background-color, #fafafa));
-      color: var(--app-header-text-color, var(--primary-text-color, #212121));
     }
 
     .app-title {
@@ -3778,19 +4038,9 @@ var $ = class extends R {
       letter-spacing: -0.01em;
     }
 
-    .user-name {
-      overflow: hidden;
-      max-inline-size: 240px;
-      color: var(--app-header-text-color, var(--primary-text-color, #212121));
-      font-size: 13px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
     .navigation {
+      flex: 1;
       overflow-x: auto;
-      border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-      background: var(--card-background-color, #fafafa);
       scrollbar-width: thin;
     }
 
@@ -3798,10 +4048,8 @@ var $ = class extends R {
       display: flex;
       align-items: stretch;
       gap: 4px;
-      max-inline-size: 1200px;
       min-inline-size: max-content;
-      margin: 0 auto;
-      padding: 0 24px;
+      justify-content: flex-end;
     }
 
     .navigation a {
@@ -3810,7 +4058,7 @@ var $ = class extends R {
       align-items: center;
       gap: 8px;
       min-block-size: 48px;
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 0 12px;
       color: var(--secondary-text-color, #616161);
       font-weight: 500;
@@ -3844,7 +4092,7 @@ var $ = class extends R {
     }
 
     .navigation a:focus-visible {
-      outline: 3px solid var(--primary-color, #3f6f58);
+      outline: 2px solid var(--primary-color, #3f6f58);
       outline-offset: -3px;
     }
 
@@ -3856,7 +4104,7 @@ var $ = class extends R {
     }
 
     main {
-      max-inline-size: 1200px;
+      max-inline-size: 1120px;
       margin: 0 auto;
       padding:
         32px
@@ -3904,15 +4152,22 @@ var $ = class extends R {
     }
 
     @media (max-width: 700px) {
-      .app-header {
-        padding-inline: max(16px, env(safe-area-inset-left));
+      .app-header-inner {
+        display: block;
+        padding: max(10px, env(safe-area-inset-top)) 0 0;
       }
 
-      .user-name {
-        max-inline-size: 120px;
+      .app-title {
+        padding: 0 max(16px, env(safe-area-inset-left)) 10px;
+        font-size: 18px;
+      }
+
+      .navigation {
+        border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
       }
 
       .navigation-inner {
+        justify-content: flex-start;
         padding-inline: 8px;
       }
 
@@ -3923,13 +4178,8 @@ var $ = class extends R {
 
       main {
         padding-block-start: 24px;
-        padding-inline: max(16px, env(safe-area-inset-left));
-      }
-    }
-
-    @media (max-width: 430px) {
-      .user-name {
-        display: none;
+        padding-inline-start: max(16px, env(safe-area-inset-left));
+        padding-inline-end: max(16px, env(safe-area-inset-right));
       }
     }
 
@@ -3981,11 +4231,13 @@ var $ = class extends R {
 			this._errorMessage = r.message, n ? (this._loadState = "ready", this._connectedToHomeAssistant = !1) : this._loadState = "error";
 		}
 	}
-	_renderHeader() {
+	_renderHeader(e) {
 		return k`
       <header class="app-header">
-        <h1 class="app-title">Notification Manager</h1>
-        ${this._bootstrapData ? k`<span class="user-name">${this._bootstrapData.current_user.name}</span>` : j}
+        <div class="app-header-inner">
+          <h1 class="app-title">Notification Manager</h1>
+          ${e ? this._renderNavigation(e) : j}
+        </div>
       </header>
     `;
 	}
@@ -4166,8 +4418,7 @@ var $ = class extends R {
 		let e = this._bootstrapData;
 		return k`
       <div class="shell">
-        ${this._renderHeader()}
-        ${e ? this._renderNavigation(e) : j}
+        ${this._renderHeader(e)}
         ${e && !this._connectedToHomeAssistant ? k`
               <notification-manager-status-panel
                 kind="offline"
@@ -4181,6 +4432,6 @@ var $ = class extends R {
     `;
 	}
 };
-customElements.get("notification-manager-panel") || customElements.define("notification-manager-panel", $);
+customElements.get("notification-manager-panel") || customElements.define("notification-manager-panel", Qe);
 //#endregion
-export { H as NotificationManagerApi, B as NotificationManagerApiError, $ as NotificationManagerPanel };
+export { H as NotificationManagerApi, B as NotificationManagerApiError, Qe as NotificationManagerPanel };
