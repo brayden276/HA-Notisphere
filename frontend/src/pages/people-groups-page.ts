@@ -74,7 +74,7 @@ export class PeopleGroupsPage extends LitElement {
       .person-main:focus-visible,
       input:focus-visible,
       button:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -86,9 +86,13 @@ export class PeopleGroupsPage extends LitElement {
       .profile,
       .group-form {
         margin-bottom: 14px;
-        border-inline-start: 3px solid var(--divider-color, rgba(127, 127, 127, 0.35));
-        padding: 4px 0 12px 16px;
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+        border-radius: 8px;
+        padding: 16px;
+        background: var(--secondary-background-color, #f1f1f1);
       }
+
+      .group-form > label { display: grid; gap: 6px; font-weight: 600; }
 
       .endpoint-list { display: grid; gap: 6px; margin-block: 10px; }
 
@@ -118,7 +122,7 @@ export class PeopleGroupsPage extends LitElement {
         inline-size: 100%;
         min-block-size: 44px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.5));
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 9px 11px;
         background: var(--card-background-color, #fafafa);
         color: inherit;
@@ -139,7 +143,7 @@ export class PeopleGroupsPage extends LitElement {
       .mapping-row select {
         min-block-size: 44px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 6px;
+        border-radius: 8px;
         padding-inline: 10px;
         background: var(--card-background-color, #fafafa);
         color: inherit;
@@ -159,19 +163,7 @@ export class PeopleGroupsPage extends LitElement {
         min-block-size: 40px;
       }
 
-      .text-action,
-      .delete {
-        min-block-size: 40px;
-        border: 0;
-        padding: 0 8px;
-        background: transparent;
-        color: var(--primary-color, #3f6f58);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .delete { color: var(--error-color, #c62828); }
+      .group-actions { display: flex; align-items: center; gap: 4px; }
 
       @media (max-width: 600px) {
         .member-grid { grid-template-columns: 1fr; }
@@ -376,8 +368,8 @@ export class PeopleGroupsPage extends LitElement {
     const openRecipientId = this._openRecipientId || defaultOpenRecipientId;
     return html`
       <div class="page-heading">
-        <h2>People &amp; Groups</h2>
-        <p>Choose each person's primary phone and organise household audiences.</p>
+        <h2>Household</h2>
+        <p>Manage who receives notifications and which phone is used.</p>
       </div>
 
       ${this.onboarding
@@ -473,7 +465,7 @@ export class PeopleGroupsPage extends LitElement {
 
       <section class="section" aria-labelledby="people-heading">
         <div class="section-heading">
-          <h3 id="people-heading">People</h3>
+          <h3 id="people-heading">People and phones</h3>
         </div>
         ${this.recipients.length === 0
           ? html`
@@ -589,19 +581,26 @@ export class PeopleGroupsPage extends LitElement {
                   <div>
                     <span class="row-primary">${group.name}</span>
                     <span class="row-secondary">
-                      ${group.type === "SYSTEM" ? "Updates automatically" : "Custom group"}
-                      · ${membership}
+                      ${group.type === "SYSTEM" ? "Updates automatically" : "Custom group"},
+                      ${membership}
                     </span>
                   </div>
                   ${group.type === "CUSTOM" && this.currentUser?.is_admin
                     ? html`
-                        <div>
-                          <button class="text-action" type="button" @click=${() => this._startGroup(group)}>
+                        <div class="group-actions">
+                          <notification-manager-button
+                            variant="quiet"
+                            @click=${() => this._startGroup(group)}
+                          >
                             Edit
-                          </button>
-                          <button class="delete" type="button" @click=${() => void this._deleteGroup(group)}>
+                          </notification-manager-button>
+                          <notification-manager-button
+                            variant="danger"
+                            .disabled=${this._busy}
+                            @click=${() => void this._deleteGroup(group)}
+                          >
                             Delete
-                          </button>
+                          </notification-manager-button>
                         </div>
                       `
                     : nothing}

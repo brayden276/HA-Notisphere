@@ -7,11 +7,11 @@ function joinNames(names: string[]): string {
 }
 
 export function recipientOutcome(result: RecipientResult): string {
-  if (result.status === "SENT") return `${result.recipient_name} — sent`;
+  if (result.status === "SENT") return `${result.recipient_name}: sent`;
   if (result.status === "FAILED") {
-    return `${result.recipient_name} — ${result.reason ?? "could not be reached"}`;
+    return `${result.recipient_name}: ${result.reason ?? "could not be reached"}`;
   }
-  return `${result.recipient_name} — ${result.reason ?? "not eligible for this notification"}`;
+  return `${result.recipient_name}: ${result.reason ?? "not eligible for this notification"}`;
 }
 
 export function activityOutcome(record: ActivityRecord): string {

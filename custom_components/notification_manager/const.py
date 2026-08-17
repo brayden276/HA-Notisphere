@@ -3,7 +3,7 @@
 from typing import Final
 
 DOMAIN: Final = "notification_manager"
-INTEGRATION_VERSION: Final = "0.1.1"
+INTEGRATION_VERSION: Final = "0.2.0"
 DATA_MANAGER: Final = "manager"
 DATA_RECIPIENT_DISCOVERY: Final = "recipient_discovery"
 DATA_WEBSOCKET_REGISTERED: Final = f"{DOMAIN}_websocket_registered"

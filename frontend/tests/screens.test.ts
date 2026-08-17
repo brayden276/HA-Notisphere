@@ -195,6 +195,12 @@ describe("core product screens", () => {
     await settle(page);
 
     const root = page.shadowRoot as ShadowRoot;
+    expect(root.querySelector(".editor-layout")).not.toBeNull();
+    expect(root.querySelector(".review-panel")).not.toBeNull();
+    expect(root.querySelector(".section-number")).toBeNull();
+    expect([...root.querySelectorAll("h3")].map((heading) => heading.textContent?.trim())).toEqual(
+      ["Device", "Trigger", "Recipients", "Message", "Review"],
+    );
     const moreOptions = root.querySelector("details") as HTMLDetailsElement;
     expect(moreOptions.open).toBe(false);
 

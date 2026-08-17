@@ -51,7 +51,7 @@ export class ActivityPage extends LitElement {
       select {
         min-block-size: 44px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 0 10px;
         background: var(--card-background-color, #fafafa);
         color: inherit;
@@ -59,7 +59,7 @@ export class ActivityPage extends LitElement {
       }
 
       select:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -127,7 +127,7 @@ export class ActivityPage extends LitElement {
     return html`
       <div class="page-heading">
         <h2>Activity</h2>
-        <p>See why a notification was sent, skipped or could not reach someone.</p>
+        <p>Review what was sent, skipped or unable to reach a phone.</p>
       </div>
       <div class="filters" aria-label="Activity filters">
         <label>
@@ -173,8 +173,12 @@ export class ActivityPage extends LitElement {
             )}
           </select>
         </label>
-        <notification-manager-button .disabled=${this._refreshing} @click=${this._refresh}>
-          Refresh
+        <notification-manager-button
+          icon="mdi:refresh"
+          .disabled=${this._refreshing}
+          @click=${this._refresh}
+        >
+          Reload
         </notification-manager-button>
       </div>
       ${this._error ? html`<p class="error" role="alert">${this._error}</p>` : nothing}

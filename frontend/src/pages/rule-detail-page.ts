@@ -36,25 +36,7 @@ export class RuleDetailPage extends LitElement {
         margin-inline: auto;
       }
 
-      .back {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        min-block-size: 44px;
-        margin-bottom: 18px;
-        border: 0;
-        padding: 0;
-        background: transparent;
-        color: var(--primary-color, #3f6f58);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .back:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
-        outline-offset: 2px;
-      }
+      .back-row { margin-bottom: 14px; }
 
       .title-row,
       .actions {
@@ -94,18 +76,6 @@ export class RuleDetailPage extends LitElement {
 
       .danger {
         margin-top: 28px;
-      }
-
-      .danger button {
-        min-block-size: 44px;
-        border: 1px solid var(--error-color, #c62828);
-        border-radius: 6px;
-        padding: 0 14px;
-        background: transparent;
-        color: var(--error-color, #c62828);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
       }
 
       @media (max-width: 600px) {
@@ -266,15 +236,16 @@ export class RuleDetailPage extends LitElement {
       recipient.endpoints.some((endpoint) => endpoint.enabled),
     ).length;
     return html`
-      <button
-        class="back"
-        type="button"
-        @click=${() =>
-          this.dispatchEvent(new CustomEvent("detail-close", { bubbles: true, composed: true }))}
-      >
-        <ha-icon icon="mdi:arrow-left" aria-hidden="true"></ha-icon>
-        Notifications
-      </button>
+      <div class="back-row">
+        <notification-manager-button
+          variant="quiet"
+          icon="mdi:arrow-left"
+          @click=${() =>
+            this.dispatchEvent(new CustomEvent("detail-close", { bubbles: true, composed: true }))}
+        >
+          Notifications
+        </notification-manager-button>
+      </div>
       <div class="title-row">
         <h2>${rule.name}</h2>
         <span class="status" data-status=${rule.health.status}>
@@ -323,7 +294,7 @@ export class RuleDetailPage extends LitElement {
             ${this._audienceLabel(rule.audiences)}
             ${resolvedRecipients.length
               ? html`<br />${resolvedRecipients.length}
-                  ${resolvedRecipients.length === 1 ? "person" : "people"} · ${phoneCount}
+                  ${resolvedRecipients.length === 1 ? "person" : "people"}, ${phoneCount}
                   ${phoneCount === 1 ? "phone" : "phones"}`
               : nothing}
           </dd>
@@ -360,7 +331,13 @@ export class RuleDetailPage extends LitElement {
       </section>
 
       <div class="danger">
-        <button type="button" @click=${this._delete} ?disabled=${this._busy}>Delete notification</button>
+        <notification-manager-button
+          variant="danger"
+          .disabled=${this._busy}
+          @click=${this._delete}
+        >
+          Delete notification
+        </notification-manager-button>
       </div>
     `;
   }

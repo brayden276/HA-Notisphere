@@ -5,6 +5,7 @@ export class NotificationManagerButton extends LitElement {
     variant: { type: String, reflect: true },
     icon: { type: String },
     disabled: { type: Boolean, reflect: true },
+    fullWidth: { type: Boolean, attribute: "full-width", reflect: true },
     buttonType: { type: String, attribute: "button-type" },
   };
 
@@ -42,6 +43,18 @@ export class NotificationManagerButton extends LitElement {
       color: var(--text-primary-color, #f7f7f7);
     }
 
+    :host([variant="danger"]) button {
+      border-color: var(--error-color, #c62828);
+      background: transparent;
+      color: var(--error-color, #c62828);
+    }
+
+    :host([variant="quiet"]) button {
+      border-color: transparent;
+      background: transparent;
+      color: var(--primary-color, #3f6f58);
+    }
+
     button:hover:not(:disabled) {
       background: var(--secondary-background-color, #f1f1f1);
     }
@@ -50,14 +63,27 @@ export class NotificationManagerButton extends LitElement {
       background: var(--dark-primary-color, var(--primary-color, #365f4d));
     }
 
+    :host([variant="danger"]) button:hover:not(:disabled),
+    :host([variant="quiet"]) button:hover:not(:disabled) {
+      background: var(--secondary-background-color, #f1f1f1);
+    }
+
     button:focus-visible {
-      outline: 3px solid var(--primary-color, #3f6f58);
+      outline: 2px solid var(--primary-color, #3f6f58);
       outline-offset: 2px;
     }
 
     button:disabled {
       opacity: 0.55;
       cursor: not-allowed;
+    }
+
+    :host([full-width]) {
+      display: block;
+    }
+
+    :host([full-width]) button {
+      inline-size: 100%;
     }
 
     ha-icon {
@@ -74,9 +100,10 @@ export class NotificationManagerButton extends LitElement {
     }
   `;
 
-  variant: "primary" | "secondary" = "secondary";
+  variant: "primary" | "secondary" | "danger" | "quiet" = "secondary";
   icon = "";
   disabled = false;
+  fullWidth = false;
   buttonType: "button" | "submit" | "reset" = "button";
 
   render() {

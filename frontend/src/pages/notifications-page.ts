@@ -50,16 +50,18 @@ export class NotificationsPage extends LitElement {
 
       .filters {
         overflow-x: auto;
-        margin-bottom: 10px;
-        padding-bottom: 6px;
+        gap: 2px;
+        margin-bottom: 4px;
+        border-bottom: 1px solid var(--nm-border);
       }
 
       .filter {
-        min-block-size: 40px;
-        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.4));
-        border-radius: 20px;
-        padding: 0 14px;
-        background: var(--card-background-color, #fafafa);
+        min-block-size: 44px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        padding: 0 12px;
+        background: transparent;
         color: var(--secondary-text-color, #616161);
         font: inherit;
         font-weight: 600;
@@ -68,16 +70,17 @@ export class NotificationsPage extends LitElement {
       }
 
       .filter[aria-pressed="true"] {
-        border-color: var(--primary-color, #3f6f58);
-        background: var(--primary-color, #3f6f58);
-        color: var(--text-primary-color, #f7f7f7);
+        border-bottom-color: var(--primary-color, #3f6f58);
+        color: var(--primary-text-color, #212121);
       }
+
+      .filter:hover { background: var(--secondary-background-color, #f1f1f1); }
 
       .filter:focus-visible,
       .rule-main:focus-visible,
       summary:focus-visible,
       .menu button:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -137,7 +140,7 @@ export class NotificationsPage extends LitElement {
         place-items: center;
         inline-size: 44px;
         block-size: 44px;
-        border-radius: 50%;
+        border-radius: 8px;
         cursor: pointer;
         list-style: none;
       }
@@ -153,7 +156,7 @@ export class NotificationsPage extends LitElement {
         border-radius: 8px;
         padding: 4px;
         background: var(--card-background-color, #fafafa);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
       }
 
       .menu button {
@@ -174,7 +177,7 @@ export class NotificationsPage extends LitElement {
       .error { margin-block: 12px; }
 
       @media (max-width: 600px) {
-        .page-heading-row { align-items: flex-start; }
+        .page-heading-row { align-items: stretch; flex-direction: column; }
         .rule-summary { white-space: normal; }
         .state { display: none; }
       }

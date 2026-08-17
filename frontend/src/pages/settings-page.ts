@@ -42,7 +42,7 @@ export class SettingsPage extends LitElement {
       input {
         min-block-size: 44px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.45));
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 0 10px;
         background: var(--card-background-color, #fafafa);
         color: inherit;
@@ -50,7 +50,7 @@ export class SettingsPage extends LitElement {
       }
 
       input:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -116,26 +116,26 @@ export class SettingsPage extends LitElement {
     return html`
       <div class="page-heading">
         <h2>Settings</h2>
-        <p>Review Notification Manager discovery and integration status.</p>
+        <p>Manage activity history and check that Notification Manager is ready.</p>
       </div>
 
       <section class="section" aria-labelledby="integration-heading">
         <div class="section-heading">
-          <h3 id="integration-heading">Integration</h3>
+          <h3 id="integration-heading">Overview</h3>
         </div>
         <dl class="definition-list">
           <dt>Signed in as</dt>
           <dd>${this.currentUser?.name || "Home Assistant administrator"}</dd>
-          <dt>Capability targets</dt>
+          <dt>Available devices</dt>
           <dd>${availableTargets} of ${this.capabilityTargets.length} available</dd>
-          <dt>Recipient mappings to confirm</dt>
+          <dt>Phone matches to review</dt>
           <dd>${this.unconfirmedMappings.length}</dd>
         </dl>
       </section>
 
       <section class="section" aria-labelledby="health-heading">
         <div class="section-heading">
-          <h3 id="health-heading">Status</h3>
+          <h3 id="health-heading">System status</h3>
         </div>
         ${this._loading && !diagnostics
           ? html`<p>Loading integration status…</p>`
@@ -144,20 +144,20 @@ export class SettingsPage extends LitElement {
                 <dl class="definition-list">
                   <dt>Version</dt>
                   <dd>${diagnostics.version}</dd>
-                  <dt>Active notifications</dt>
+                  <dt>Notifications on</dt>
                   <dd>${diagnostics.rules.enabled} of ${diagnostics.rules.total}</dd>
                   <dt>Needs attention</dt>
                   <dd>${diagnostics.rules.health.NEEDS_ATTENTION}</dd>
-                  <dt>Recipients and phones</dt>
+                  <dt>Household phones</dt>
                   <dd>
-                    ${diagnostics.discovery.recipients} people ·
+                    ${diagnostics.discovery.recipients} people,
                     ${diagnostics.discovery.enabled_endpoints} ready phones
                   </dd>
-                  <dt>Runtime watchers</dt>
+                  <dt>Notification engine</dt>
                   <dd>
                     ${diagnostics.runtime.attached
-                      ? `${diagnostics.runtime.watched_rules} rules · ${diagnostics.runtime.pending_timers} pending timers`
-                      : "Not attached"}
+                      ? `Running, ${diagnostics.runtime.watched_rules} active, ${diagnostics.runtime.pending_timers} waiting`
+                      : "Not running"}
                   </dd>
                 </dl>
               `
@@ -182,7 +182,7 @@ export class SettingsPage extends LitElement {
             />
           </label>
           <label>
-            Maximum records
+            Maximum entries
             <input
               type="number"
               min="1"

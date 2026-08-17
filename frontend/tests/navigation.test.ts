@@ -29,7 +29,9 @@ describe("notification manager navigation", () => {
   });
 
   it("shows settings to administrators", () => {
-    expect(navigationForUser(true).map((item) => item.route)).toContain("settings");
+    const items = navigationForUser(true);
+    expect(items.map((item) => item.route)).toContain("settings");
+    expect(items.find((item) => item.route === "people")?.label).toBe("Household");
     expect(routeForUser("settings", true)).toBe("settings");
     expect(hrefForRoute("settings")).toBe("#/settings");
   });

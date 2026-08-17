@@ -67,19 +67,23 @@ export class NotificationManagerPanel extends LitElement {
     }
 
     .app-header {
+      border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+      background: var(--app-header-background-color, var(--card-background-color, #fafafa));
+      color: var(--app-header-text-color, var(--primary-text-color, #212121));
+    }
+
+    .app-header-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      min-block-size: 56px;
+      gap: 28px;
+      min-block-size: 64px;
+      max-inline-size: 1120px;
+      margin: 0 auto;
       padding:
         max(8px, env(safe-area-inset-top))
         max(24px, env(safe-area-inset-right))
         8px
         max(24px, env(safe-area-inset-left));
-      border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-      background: var(--app-header-background-color, var(--card-background-color, #fafafa));
-      color: var(--app-header-text-color, var(--primary-text-color, #212121));
     }
 
     .app-title {
@@ -90,19 +94,9 @@ export class NotificationManagerPanel extends LitElement {
       letter-spacing: -0.01em;
     }
 
-    .user-name {
-      overflow: hidden;
-      max-inline-size: 240px;
-      color: var(--app-header-text-color, var(--primary-text-color, #212121));
-      font-size: 13px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
     .navigation {
+      flex: 1;
       overflow-x: auto;
-      border-bottom: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
-      background: var(--card-background-color, #fafafa);
       scrollbar-width: thin;
     }
 
@@ -110,10 +104,8 @@ export class NotificationManagerPanel extends LitElement {
       display: flex;
       align-items: stretch;
       gap: 4px;
-      max-inline-size: 1200px;
       min-inline-size: max-content;
-      margin: 0 auto;
-      padding: 0 24px;
+      justify-content: flex-end;
     }
 
     .navigation a {
@@ -122,7 +114,7 @@ export class NotificationManagerPanel extends LitElement {
       align-items: center;
       gap: 8px;
       min-block-size: 48px;
-      border-radius: 8px;
+      border-radius: 6px;
       padding: 0 12px;
       color: var(--secondary-text-color, #616161);
       font-weight: 500;
@@ -156,7 +148,7 @@ export class NotificationManagerPanel extends LitElement {
     }
 
     .navigation a:focus-visible {
-      outline: 3px solid var(--primary-color, #3f6f58);
+      outline: 2px solid var(--primary-color, #3f6f58);
       outline-offset: -3px;
     }
 
@@ -168,7 +160,7 @@ export class NotificationManagerPanel extends LitElement {
     }
 
     main {
-      max-inline-size: 1200px;
+      max-inline-size: 1120px;
       margin: 0 auto;
       padding:
         32px
@@ -216,15 +208,22 @@ export class NotificationManagerPanel extends LitElement {
     }
 
     @media (max-width: 700px) {
-      .app-header {
-        padding-inline: max(16px, env(safe-area-inset-left));
+      .app-header-inner {
+        display: block;
+        padding: max(10px, env(safe-area-inset-top)) 0 0;
       }
 
-      .user-name {
-        max-inline-size: 120px;
+      .app-title {
+        padding: 0 max(16px, env(safe-area-inset-left)) 10px;
+        font-size: 18px;
+      }
+
+      .navigation {
+        border-top: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
       }
 
       .navigation-inner {
+        justify-content: flex-start;
         padding-inline: 8px;
       }
 
@@ -236,12 +235,6 @@ export class NotificationManagerPanel extends LitElement {
       main {
         padding-block-start: 24px;
         padding-inline: max(16px, env(safe-area-inset-left));
-      }
-    }
-
-    @media (max-width: 430px) {
-      .user-name {
-        display: none;
       }
     }
 
@@ -426,13 +419,13 @@ export class NotificationManagerPanel extends LitElement {
     }
   }
 
-  private _renderHeader() {
+  private _renderHeader(data?: BootstrapData) {
     return html`
       <header class="app-header">
-        <h1 class="app-title">Notification Manager</h1>
-        ${this._bootstrapData
-          ? html`<span class="user-name">${this._bootstrapData.current_user.name}</span>`
-          : nothing}
+        <div class="app-header-inner">
+          <h1 class="app-title">Notification Manager</h1>
+          ${data ? this._renderNavigation(data) : nothing}
+        </div>
       </header>
     `;
   }
@@ -665,8 +658,7 @@ export class NotificationManagerPanel extends LitElement {
     const data = this._bootstrapData;
     return html`
       <div class="shell">
-        ${this._renderHeader()}
-        ${data ? this._renderNavigation(data) : nothing}
+        ${this._renderHeader(data)}
         ${data && !this._connectedToHomeAssistant
           ? html`
               <notification-manager-status-panel

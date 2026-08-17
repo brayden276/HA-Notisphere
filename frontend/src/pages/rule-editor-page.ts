@@ -75,13 +75,11 @@ export class RuleEditorPage extends LitElement {
     pageStyles,
     css`
       :host {
-        max-inline-size: 840px;
+        max-inline-size: 1040px;
         margin-inline: auto;
       }
 
-      .editor-header,
-      .review-actions,
-      .section-title-row {
+      .editor-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -89,29 +87,14 @@ export class RuleEditorPage extends LitElement {
       }
 
       .editor-header {
-        margin-bottom: 24px;
+        margin-bottom: 8px;
       }
 
-      .back {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        min-block-size: 44px;
-        border: 0;
-        padding: 0;
-        background: transparent;
-        color: var(--primary-color, #3f6f58);
-        font: inherit;
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      .back:focus-visible,
       input:focus-visible,
       select:focus-visible,
       textarea:focus-visible,
       summary:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -120,20 +103,20 @@ export class RuleEditorPage extends LitElement {
         padding-block: 24px;
       }
 
-      .section-number {
-        display: inline-grid;
-        place-items: center;
-        inline-size: 26px;
-        block-size: 26px;
-        border-radius: 50%;
-        background: var(--secondary-background-color, #ededed);
-        color: var(--secondary-text-color, #616161);
-        font-size: 12px;
-        font-weight: 700;
+      .editor-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        align-items: start;
+        gap: 32px;
       }
 
-      .section-title-row h3 {
-        flex: 1;
+      .editor-form {
+        min-inline-size: 0;
+      }
+
+      .editor-form .composer-section:first-child {
+        border-top: 0;
+        padding-block-start: 0;
       }
 
       .field-grid {
@@ -167,7 +150,7 @@ export class RuleEditorPage extends LitElement {
         inline-size: 100%;
         min-block-size: 44px;
         border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.5));
-        border-radius: 6px;
+        border-radius: 8px;
         padding: 9px 11px;
         background: var(--card-background-color, #fafafa);
         color: var(--primary-text-color, #212121);
@@ -225,7 +208,7 @@ export class RuleEditorPage extends LitElement {
 
       .condition-actions button:focus-visible,
       .add-condition:focus-visible {
-        outline: 3px solid var(--primary-color, #3f6f58);
+        outline: 2px solid var(--primary-color, #3f6f58);
         outline-offset: 2px;
       }
 
@@ -288,22 +271,34 @@ export class RuleEditorPage extends LitElement {
       }
 
       .review {
-        border-inline-start: 4px solid var(--primary-color, #3f6f58);
-        padding: 16px 18px;
-        background: var(--secondary-background-color, #f1f1f1);
-        font-size: 16px;
+        margin: 10px 0 0;
+        color: var(--primary-text-color, #212121);
+        font-size: 15px;
         line-height: 1.5;
       }
 
+      .review-panel {
+        position: sticky;
+        inset-block-start: 24px;
+        border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+        border-radius: 8px;
+        padding: 18px;
+        background: var(--card-background-color, #fafafa);
+      }
+
       .review-actions {
-        align-items: flex-start;
+        display: grid;
+        align-items: stretch;
+        justify-content: stretch;
+        gap: 16px;
         margin-top: 18px;
       }
 
       .button-row {
         display: flex;
         flex-wrap: wrap;
-        justify-content: flex-end;
+        display: grid;
+        justify-content: stretch;
         gap: 8px;
       }
 
@@ -317,6 +312,20 @@ export class RuleEditorPage extends LitElement {
         color: var(--error-color, #c62828);
       }
 
+      .sr-only {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+
+      @media (max-width: 840px) {
+        .editor-layout { grid-template-columns: 1fr; gap: 8px; }
+        .review-panel { position: static; }
+      }
+
       @media (max-width: 640px) {
         .field-grid,
         .choice-list,
@@ -324,17 +333,7 @@ export class RuleEditorPage extends LitElement {
           grid-template-columns: 1fr;
         }
 
-        .review-actions {
-          display: grid;
-        }
-
-        .button-row {
-          justify-content: stretch;
-        }
-
-        .button-row notification-manager-button {
-          flex: 1;
-        }
+        .choice-list { gap: 6px; }
       }
     `,
   ];
@@ -709,7 +708,7 @@ export class RuleEditorPage extends LitElement {
     const customGroups = this.groups.filter((group) => group.type === "CUSTOM");
     return html`
       <fieldset class="choice-group">
-        <legend>Who should be told?</legend>
+        <legend class="sr-only">Recipients</legend>
         <div class="choice-list">
           ${(this.currentUser?.is_admin
             ? (["ME", "EVERYONE", "ADMINS", "CHOOSE"] as AudienceMode[])
@@ -818,19 +817,18 @@ export class RuleEditorPage extends LitElement {
 
     return html`
       <div class="editor-header">
-        <button
-          class="back"
-          type="button"
+        <notification-manager-button
+          variant="quiet"
+          icon="mdi:arrow-left"
           @click=${() =>
             this.dispatchEvent(new CustomEvent("editor-cancel", { bubbles: true, composed: true }))}
         >
-          <ha-icon icon="mdi:arrow-left" aria-hidden="true"></ha-icon>
           Notifications
-        </button>
+        </notification-manager-button>
       </div>
       <div class="page-heading">
         <h2>${this.rule ? "Edit notification" : "Create notification"}</h2>
-        <p>Tell someone when something important happens at home.</p>
+        <p>Choose the event, recipients and message. Advanced delivery options are optional.</p>
       </div>
 
       ${targets.length === 0
@@ -842,11 +840,10 @@ export class RuleEditorPage extends LitElement {
             ></notification-manager-status-panel>
           `
         : html`
+            <div class="editor-layout">
+              <div class="editor-form">
             <section class="composer-section" aria-labelledby="what-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">1</span>
-                <h3 id="what-heading">What do you want to know about?</h3>
-              </div>
+              <h3 id="what-heading">Device</h3>
               <div class="field-grid">
                 <div class="field full">
                   <label for="target">Door, window or motion sensor</label>
@@ -873,10 +870,7 @@ export class RuleEditorPage extends LitElement {
             </section>
 
             <section class="composer-section" aria-labelledby="when-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">2</span>
-                <h3 id="when-heading">When?</h3>
-              </div>
+              <h3 id="when-heading">Trigger</h3>
               <div class="field-grid">
                 <div class="field ${showDuration ? "" : "full"}">
                   <label for="semantic">When ${this._selectedTarget?.display_name ?? "it"}</label>
@@ -912,23 +906,17 @@ export class RuleEditorPage extends LitElement {
             </section>
 
             <section class="composer-section" aria-labelledby="who-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">3</span>
-                <h3 id="who-heading">Who should be told?</h3>
-              </div>
+              <h3 id="who-heading">Recipients</h3>
               ${this._renderAudienceChoices()}
               <p class="hint">
                 ${resolvedRecipients.length}
-                ${resolvedRecipients.length === 1 ? "person" : "people"} ·
+                ${resolvedRecipients.length === 1 ? "person" : "people"},
                 ${resolvedPhones} ${resolvedPhones === 1 ? "phone" : "phones"} currently ready
               </p>
             </section>
 
             <section class="composer-section" aria-labelledby="message-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">4</span>
-                <h3 id="message-heading">Message</h3>
-              </div>
+              <h3 id="message-heading">Message</h3>
               <div class="field-grid">
                 <div class="field full">
                   <label for="name">Notification name</label>
@@ -959,7 +947,7 @@ export class RuleEditorPage extends LitElement {
 
             <section class="composer-section" aria-labelledby="options-heading">
               <details>
-                <summary id="options-heading">More options</summary>
+                <summary id="options-heading">Conditions and delivery options</summary>
                 <div class="field-grid">
                   <div class="field full">
                     <label>Only notify when</label>
@@ -1172,12 +1160,10 @@ export class RuleEditorPage extends LitElement {
                 </div>
               </details>
             </section>
-
-            <section class="composer-section" aria-labelledby="review-heading">
-              <div class="section-title-row">
-                <span class="section-number" aria-hidden="true">5</span>
-                <h3 id="review-heading">Review</h3>
               </div>
+
+            <aside class="review-panel" aria-labelledby="review-heading">
+              <h3 id="review-heading">Review</h3>
               <p class="review">${review}</p>
               <div class="review-actions">
                 <div class="feedback" aria-live="polite">
@@ -1185,6 +1171,7 @@ export class RuleEditorPage extends LitElement {
                 </div>
                 <div class="button-row">
                   <notification-manager-button
+                    .fullWidth=${true}
                     .disabled=${this._saving}
                     @click=${this._sendTest}
                   >
@@ -1192,6 +1179,7 @@ export class RuleEditorPage extends LitElement {
                   </notification-manager-button>
                   <notification-manager-button
                     variant="primary"
+                    .fullWidth=${true}
                     .disabled=${this._saving}
                     @click=${this._save}
                   >
@@ -1199,7 +1187,8 @@ export class RuleEditorPage extends LitElement {
                   </notification-manager-button>
                 </div>
               </div>
-            </section>
+            </aside>
+            </div>
           `}
     `;
   }

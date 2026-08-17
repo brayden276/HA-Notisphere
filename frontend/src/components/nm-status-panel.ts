@@ -28,6 +28,7 @@ export class NotificationManagerStatusPanel extends LitElement {
       align-items: center;
       gap: 12px;
       border: 1px solid var(--divider-color, rgba(127, 127, 127, 0.3));
+      border-inline-start-width: 4px;
       border-radius: 8px;
       padding: 16px;
       background: var(--card-background-color, #fafafa);
@@ -38,7 +39,12 @@ export class NotificationManagerStatusPanel extends LitElement {
     }
 
     :host([kind="offline"]) .panel {
+      border-inline-start-color: var(--warning-color, #8a5a00);
       background: var(--secondary-background-color, #f1f1f1);
+    }
+
+    :host([kind="info"]) .panel {
+      border-inline-start-color: var(--primary-color, #3f6f58);
     }
 
     :host([kind="success"]) .panel {

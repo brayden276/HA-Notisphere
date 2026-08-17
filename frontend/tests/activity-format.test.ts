@@ -40,7 +40,7 @@ describe("human activity formatting", () => {
 
     expect(activityOutcome(activity)).toBe("Sent to Brayden; could not reach Sarah");
     expect(recipientOutcome(activity.recipient_results[1]!)).toBe(
-      "Sarah — This phone could not be reached.",
+      "Sarah: This phone could not be reached.",
     );
   });
 

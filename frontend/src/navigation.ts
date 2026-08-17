@@ -11,7 +11,7 @@ export interface NavigationItem {
 
 export const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { route: "notifications", label: "Notifications", icon: "mdi:bell-outline" },
-  { route: "people", label: "People & Groups", icon: "mdi:account-multiple-outline" },
+  { route: "people", label: "Household", icon: "mdi:account-multiple-outline" },
   { route: "activity", label: "Activity", icon: "mdi:history" },
   { route: "settings", label: "Settings", icon: "mdi:cog-outline", adminOnly: true },
 ];
