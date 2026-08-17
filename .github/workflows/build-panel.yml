@@ -1,0 +1,77 @@
+name: Build packaged panel
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend/**"
+      - ".github/workflows/build-panel.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-panel-main
+  cancel-in-progress: true
+
+jobs:
+  build-panel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source commit
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type check
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Test
+        working-directory: frontend
+        run: npm test
+
+      - name: Build packaged panel
+        working-directory: frontend
+        run: npm run build
+
+      - name: Verify packaged panel
+        shell: bash
+        run: |
+          bundle="custom_components/notification_manager/frontend/notification-manager-panel.js"
+          test -s "$bundle"
+          node --check "$bundle"
+
+      - name: Commit packaged panel
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          bundle="custom_components/notification_manager/frontend/notification-manager-panel.js"
+          if git diff --quiet -- "$bundle"; then
+            echo "Packaged panel is already current."
+            exit 0
+          fi
+
+          git fetch origin main
+          if [[ "$(git rev-parse origin/main)" != "$SOURCE_SHA" ]]; then
+            echo "A newer main commit exists; its workflow will build the current panel."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$bundle"
+          git commit -m "chore: rebuild packaged panel [skip ci]"
+          git push origin HEAD:main

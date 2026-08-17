@@ -188,7 +188,7 @@ npm run typecheck
 npm test
 ```
 
-The checked-in validation workflow runs these checks and validates the JSON descriptors. It intentionally does not run a frontend production build. Release validation must separately create and verify the packaged panel, then complete the real Home Assistant acceptance scenarios in [Release readiness](docs/RELEASE.md).
+The checked-in validation workflow runs these checks and validates the JSON descriptors. On pushes to `main` that change the frontend, the **Build packaged panel** workflow separately runs the frontend checks, generates the production panel and commits only the updated bundle back to `main`. Wait for that workflow to finish before downloading or publishing the new revision. Release validation must still complete the real Home Assistant acceptance scenarios in [Release readiness](docs/RELEASE.md).
 
 ## Support and contributing
 

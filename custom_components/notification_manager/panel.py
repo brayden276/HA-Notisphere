@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +29,7 @@ async def async_register_panel(hass: Any) -> None:
     from homeassistant.components import panel_custom
     from homeassistant.components.http import StaticPathConfig
 
+    module_url = await hass.async_add_executor_job(_panel_module_url, bundle)
     if not hass.data.get(DATA_PANEL_STATIC_REGISTERED):
         await hass.http.async_register_static_paths(
             [StaticPathConfig(PANEL_STATIC_URL, str(bundle), True)]
@@ -39,7 +41,7 @@ async def async_register_panel(hass: Any) -> None:
         webcomponent_name=PANEL_ELEMENT,
         sidebar_title=PANEL_TITLE,
         sidebar_icon=PANEL_ICON,
-        module_url=PANEL_STATIC_URL,
+        module_url=module_url,
         require_admin=False,
         config={"domain": DOMAIN},
         config_panel_domain=DOMAIN,
@@ -53,3 +55,11 @@ def async_unregister_panel(hass: Any) -> None:
     from homeassistant.components import frontend
 
     frontend.async_remove_panel(hass, PANEL_URL_PATH, warn_if_unknown=False)
+
+
+def _panel_module_url(bundle: Path) -> str:
+    """Return a browser cache key derived from the packaged panel content."""
+
+    with bundle.open("rb") as stream:
+        digest = hashlib.file_digest(stream, "sha256").hexdigest()[:12]
+    return f"{PANEL_STATIC_URL}?v={digest}"
