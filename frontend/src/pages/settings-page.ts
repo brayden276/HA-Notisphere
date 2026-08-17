@@ -10,6 +10,7 @@ import type {
   SettingsData,
   UnconfirmedRecipientMapping,
 } from "../models";
+import { targetInventory } from "../rule-draft";
 import { pageStyles } from "./page-styles";
 
 export class SettingsPage extends LitElement {
@@ -96,7 +97,7 @@ export class SettingsPage extends LitElement {
   }
 
   render() {
-    const availableTargets = this.capabilityTargets.filter((target) => target.available).length;
+    const inventory = targetInventory(this.capabilityTargets);
     const diagnostics = this._settings?.diagnostics;
     return html`
       <div class="page-heading">
@@ -111,8 +112,12 @@ export class SettingsPage extends LitElement {
         <dl class="definition-list">
           <dt>Signed in as</dt>
           <dd>${this.currentUser?.name || "Home Assistant administrator"}</dd>
-          <dt>Available devices</dt>
-          <dd>${availableTargets} of ${this.capabilityTargets.length} available</dd>
+          <dt>Discovered signals</dt>
+          <dd>${inventory.discoveredTargets.length}</dd>
+          <dt>Ready notification signals</dt>
+          <dd>${inventory.usableTargets.length}</dd>
+          <dt>Devices and entities with ready signals</dt>
+          <dd>${inventory.readySourceCount} of ${inventory.discoveredSourceCount}</dd>
           <dt>Phone matches to review</dt>
           <dd>${this.unconfirmedMappings.length}</dd>
         </dl>

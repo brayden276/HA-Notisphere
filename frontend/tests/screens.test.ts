@@ -13,9 +13,11 @@ import type {
 import "../src/pages/notifications-page";
 import "../src/pages/people-groups-page";
 import "../src/pages/rule-editor-page";
+import "../src/pages/settings-page";
 import type { NotificationsPage } from "../src/pages/notifications-page";
 import type { PeopleGroupsPage } from "../src/pages/people-groups-page";
 import type { RuleEditorPage } from "../src/pages/rule-editor-page";
+import type { SettingsPage } from "../src/pages/settings-page";
 
 const user: CurrentUser = { id: "user-1", name: "Alice", is_admin: true };
 const garage: CapabilityTarget = {
@@ -258,7 +260,7 @@ describe("core product screens", () => {
     const root = page.shadowRoot as ShadowRoot;
     const device = root.querySelector(".source-option") as HTMLButtonElement;
     expect(device.textContent).toContain("Garage");
-    expect(device.querySelector(".option-count")?.textContent).toMatch(/2\s+signals/);
+    expect(device.querySelector(".option-count")?.textContent).toMatch(/2\s+of\s+2\s+ready/);
     expect(root.querySelectorAll(".source-option")).toHaveLength(1);
     expect(root.querySelectorAll(".signal-option")).toHaveLength(2);
 
@@ -285,6 +287,102 @@ describe("core product screens", () => {
     expect(root.textContent).not.toContain("Stays open");
     expect(root.textContent).toContain("When Garage Motion detects activity, notify me.");
     expect(root.querySelectorAll(".mobile-actions notification-manager-button")).toHaveLength(2);
+  });
+
+  it("shows discovered but unsupported signals without allowing them to reach the runtime", async () => {
+    const temperature: CapabilityTarget = {
+      ...garage,
+      entity_id: "sensor.garage_temperature",
+      display_name: "Garage temperature",
+      category: "temperature",
+      semantics: [{ semantic: "ABOVE", label: "Rises above", parameters: [] }],
+    };
+    const unavailable: CapabilityTarget = {
+      ...garage,
+      entity_id: "binary_sensor.garage_side_door",
+      display_name: "Side door",
+      available: false,
+    };
+    const page = document.createElement(
+      "notification-manager-rule-editor-page",
+    ) as RuleEditorPage;
+    page.api = { resolveTrigger: vi.fn() } as unknown as NotificationManagerApi;
+    page.currentUser = user;
+    page.targets = [garage, temperature, unavailable];
+    page.recipients = [recipient];
+    document.body.append(page);
+    await settle(page);
+
+    const root = page.shadowRoot as ShadowRoot;
+    expect(root.querySelector(".option-count")?.textContent).toMatch(/1\s+of\s+3\s+ready/);
+    const unsupported = [...root.querySelectorAll<HTMLButtonElement>(".signal-option")].find(
+      (button) => button.textContent?.includes("Garage temperature"),
+    ) as HTMLButtonElement;
+    expect(unsupported.disabled).toBe(true);
+    expect(unsupported.textContent).toContain("Not supported for notifications yet");
+    const unavailableSignal = [...root.querySelectorAll<HTMLButtonElement>(".signal-option")].find(
+      (button) => button.textContent?.includes("Side door"),
+    ) as HTMLButtonElement;
+    expect(unavailableSignal.disabled).toBe(true);
+    expect(unavailableSignal.textContent).toContain("Unavailable");
+  });
+
+  it("uses truthful discovery terminology in settings", async () => {
+    const page = document.createElement(
+      "notification-manager-settings-page",
+    ) as SettingsPage;
+    page.capabilityTargets = [garage, { ...garage, entity_id: "sensor.garage_temperature", category: "temperature", semantics: [{ semantic: "ABOVE", label: "Rises above", parameters: [] }] }];
+    document.body.append(page);
+    await settle(page);
+
+    const text = page.shadowRoot?.textContent ?? "";
+    expect(text).toContain("Discovered signals");
+    expect(text).toContain("Ready notification signals");
+    expect(text).toContain("Devices and entities with ready signals");
+    expect(text).not.toContain("Available devices");
+  });
+
+  it("keeps an unavailable existing trigger selected until the user chooses a ready replacement", async () => {
+    const unavailable = {
+      ...garage,
+      entity_id: "binary_sensor.side_door",
+      display_name: "Side Door",
+      available: false,
+    };
+    const resolveTrigger = vi.fn();
+    const page = document.createElement(
+      "notification-manager-rule-editor-page",
+    ) as RuleEditorPage;
+    page.api = { resolveTrigger } as unknown as NotificationManagerApi;
+    page.currentUser = user;
+    page.rule = {
+      ...rule,
+      trigger: {
+        ...rule.trigger,
+        target: { ...trigger.target!, entity_id: unavailable.entity_id, display_name_snapshot: unavailable.display_name },
+      },
+    };
+    page.targets = [garage, unavailable];
+    page.recipients = [recipient];
+    document.body.append(page);
+    await settle(page);
+
+    const root = page.shadowRoot as ShadowRoot;
+    expect(root.querySelector(".source-summary")?.textContent).toContain("Garage");
+    const selected = [...root.querySelectorAll<HTMLButtonElement>(".signal-option")].find(
+      (button) => button.textContent?.includes("Side Door"),
+    ) as HTMLButtonElement;
+    expect(selected.textContent).toContain("Side Door");
+    expect(selected.disabled).toBe(true);
+    expect(selected.getAttribute("aria-pressed")).toBe("true");
+
+    const save = [...root.querySelectorAll("notification-manager-button")].find((button) =>
+      button.textContent?.includes("Save notification"),
+    ) as HTMLElement;
+    save.click();
+    await settle(page);
+    expect(resolveTrigger).not.toHaveBeenCalled();
+    expect(root.textContent).toContain("Choose an available notification-ready signal.");
   });
 
   it("turns an optimistic concurrency error into product language", async () => {

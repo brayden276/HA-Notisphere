@@ -19,12 +19,12 @@ import type {
 import {
   createNotificationRule,
   generatedMessage,
-  groupTargetsBySource,
   newRuleId,
   reviewSentence,
   semanticFromTrigger,
   supportedSemantics,
-  supportedTargets,
+  targetInventory,
+  targetReadiness,
   targetSourceKey,
 } from "../rule-draft";
 import { pageStyles } from "./page-styles";
@@ -235,6 +235,11 @@ export class RuleEditorPage extends LitElement {
       }
 
       .signal-option:disabled {
+        cursor: not-allowed;
+        opacity: 0.62;
+      }
+
+      .source-option:disabled {
         cursor: not-allowed;
         opacity: 0.62;
       }
@@ -514,10 +519,12 @@ export class RuleEditorPage extends LitElement {
     this._initialisedFor = key;
     this._sourcePickerOpen = !this.rule;
     this._sourceSearch = "";
-    const available = supportedTargets(this.targets);
+    const inventory = targetInventory(this.targets);
     const target = this.rule?.trigger.target
-      ? available.find((item) => item.entity_id === this.rule?.trigger.target?.entity_id)
-      : available.find((item) => item.available) ?? available[0];
+      ? inventory.discoveredTargets.find(
+          (item) => item.entity_id === this.rule?.trigger.target?.entity_id,
+        )
+      : inventory.usableTargets[0];
     this._selectedSourceKey = target ? targetSourceKey(target) : "";
     this._selectedTargetId = target?.entity_id ?? "";
     this._selectedSemantic = this.rule
@@ -629,11 +636,11 @@ export class RuleEditorPage extends LitElement {
   }
 
   private _selectSource(sourceKey: string): void {
-    const source = groupTargetsBySource(supportedTargets(this.targets)).find(
+    const source = targetInventory(this.targets).sources.find(
       (item) => item.key === sourceKey,
     );
     if (!source) return;
-    const target = source.targets.find((item) => item.available) ?? source.targets[0];
+    const target = source.targets.find((item) => targetReadiness(item) === "ready");
     if (!target) return;
     this._selectedSourceKey = source.key;
     this._sourcePickerOpen = false;
@@ -785,7 +792,9 @@ export class RuleEditorPage extends LitElement {
   private async _draft(): Promise<NotificationRule> {
     if (!this.api || !this.currentUser) throw new Error("Home Assistant is unavailable.");
     const target = this._selectedTarget;
-    if (!target || !this._selectedSemantic) throw new Error("Choose what should be watched.");
+    if (!target || !this._selectedSemantic || targetReadiness(target) !== "ready") {
+      throw new Error("Choose an available notification-ready signal.");
+    }
     const audiences = this._audiences();
     if (audiences.length === 0) throw new Error("Choose at least one person or group.");
     if (!this._name.trim() || !this._title.trim() || !this._message.trim()) {
@@ -956,8 +965,8 @@ export class RuleEditorPage extends LitElement {
   }
 
   render() {
-    const targets = supportedTargets(this.targets);
-    const sources = groupTargetsBySource(targets);
+    const inventory = targetInventory(this.targets);
+    const { sources, usableTargets: readyTargets } = inventory;
     const selectedSource = sources.find((source) => source.key === this._selectedSourceKey);
     const query = this._sourceSearch.trim().toLocaleLowerCase();
     const visibleSources = query
@@ -971,7 +980,9 @@ export class RuleEditorPage extends LitElement {
             ),
         )
       : sources;
-    const semantics = supportedSemantics(this._selectedTarget);
+    const selectedTargetReady =
+      this._selectedTarget && targetReadiness(this._selectedTarget) === "ready";
+    const semantics = selectedTargetReady ? supportedSemantics(this._selectedTarget) : [];
     const personTargets = this.targets.filter((target) => target.category === "person");
     const showDuration = this._selectedSemantic.startsWith("REMAINS_");
     const canImportant = this._supports("important");
@@ -1009,7 +1020,7 @@ export class RuleEditorPage extends LitElement {
         <p>Choose what to monitor, what should happen and who should be notified.</p>
       </div>
 
-      ${targets.length === 0
+      ${readyTargets.length === 0
         ? html`
             <notification-manager-status-panel
               kind="error"
@@ -1042,17 +1053,24 @@ export class RuleEditorPage extends LitElement {
                             class="source-option"
                             type="button"
                             aria-pressed=${source.key === this._selectedSourceKey ? "true" : "false"}
+                            ?disabled=${source.targets.every(
+                              (target) => targetReadiness(target) !== "ready",
+                            )}
                             @click=${() => this._selectSource(source.key)}
                           >
                             <span class="option-copy">
                               <span class="option-title">${source.name}</span>
-                              <span class="option-meta">
-                                ${source.kind === "device" ? "Device" : "Individual entity"}
+                               <span class="option-meta">
+                                 ${source.kind === "device" ? "Device" : "Individual entity"}${
+                                   source.targets.every((target) => targetReadiness(target) !== "ready")
+                                     ? " · No notification-ready signals"
+                                     : ""
+                                 }
                               </span>
                             </span>
                             <span class="option-count">
-                              ${source.targets.length}
-                              ${source.targets.length === 1 ? "signal" : "signals"}
+                              ${source.targets.filter((target) => targetReadiness(target) === "ready").length}
+                              of ${source.targets.length} ready
                             </span>
                           </button>
                         `,
@@ -1089,17 +1107,21 @@ export class RuleEditorPage extends LitElement {
                   (target) => html`
                     <button
                       class="signal-option"
-                      type="button"
-                      aria-pressed=${target.entity_id === this._selectedTargetId ? "true" : "false"}
-                      ?disabled=${!target.available}
+                       type="button"
+                       aria-pressed=${target.entity_id === this._selectedTargetId ? "true" : "false"}
+                       ?disabled=${targetReadiness(target) !== "ready"}
                       @click=${() => this._selectTarget(target.entity_id)}
                     >
                       <span class="option-copy">
                         <span class="option-title">${target.display_name}</span>
                         <span class="option-meta">
-                          ${SIGNAL_LABELS[target.category] ?? "Entity state"}${target.available
-                            ? ""
-                            : " · Unavailable"}
+                           ${SIGNAL_LABELS[target.category] ?? "Entity state"}${
+                             targetReadiness(target) === "unavailable"
+                               ? " · Unavailable"
+                               : targetReadiness(target) === "unsupported"
+                                 ? " · Not supported for notifications yet"
+                                 : ""
+                           }
                         </span>
                       </span>
                     </button>

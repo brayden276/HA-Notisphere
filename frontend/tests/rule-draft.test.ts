@@ -9,6 +9,9 @@ import {
   semanticFromTrigger,
   supportedSemantics,
   supportedTargets,
+  targetInventory,
+  targetReadiness,
+  usableTargets,
 } from "../src/rule-draft";
 
 const garage: CapabilityTarget = {
@@ -74,6 +77,35 @@ describe("rule composer domain helpers", () => {
       "OPENED",
       "REMAINS_OPEN",
     ]);
+  });
+
+  it("keeps every discovered signal visible while separating ready signals from unavailable and unsupported ones", () => {
+    const unavailable: CapabilityTarget = { ...garage, entity_id: "binary_sensor.back_door", available: false };
+    const temperature: CapabilityTarget = {
+      ...garage,
+      entity_id: "sensor.garage_temperature",
+      category: "temperature",
+      available: false,
+      semantics: [{ semantic: "ABOVE", label: "Rises above", parameters: [] }],
+    };
+    const synthetic: CapabilityTarget = { ...garage, entity_id: "time", synthetic: true };
+    const standalone = {
+      ...garage,
+      entity_id: "binary_sensor.side_gate",
+      device_id: null,
+      device_name: null,
+    };
+
+    const inventory = targetInventory([garage, unavailable, temperature, standalone, synthetic]);
+
+    expect(inventory.discoveredTargets).toHaveLength(4);
+    expect(inventory.runtimeTargets).toEqual([garage, unavailable, standalone]);
+    expect(usableTargets(inventory.discoveredTargets)).toEqual([garage, standalone]);
+    expect(targetReadiness(unavailable)).toBe("unavailable");
+    expect(targetReadiness(temperature)).toBe("unsupported");
+    expect(inventory.sources.find((source) => source.name === "Garage")?.targets).toHaveLength(3);
+    expect(inventory.discoveredSourceCount).toBe(2);
+    expect(inventory.readySourceCount).toBe(2);
   });
 
   it("groups a device's signals while keeping standalone entities selectable", () => {

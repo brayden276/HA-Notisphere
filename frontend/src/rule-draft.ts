@@ -25,6 +25,17 @@ export interface TargetSource {
   targets: CapabilityTarget[];
 }
 
+export type TargetReadiness = "ready" | "unavailable" | "unsupported";
+
+export interface TargetInventory {
+  discoveredTargets: CapabilityTarget[];
+  runtimeTargets: CapabilityTarget[];
+  usableTargets: CapabilityTarget[];
+  sources: TargetSource[];
+  discoveredSourceCount: number;
+  readySourceCount: number;
+}
+
 export function targetSourceKey(target: CapabilityTarget): string {
   return target.device_id ? `device:${target.device_id}` : `entity:${target.entity_id}`;
 }
@@ -61,12 +72,43 @@ export function groupTargetsBySource(targets: CapabilityTarget[]): TargetSource[
     );
 }
 
+/** Targets discovered from Home Assistant that can be represented in the composer. */
+export function discoveredTargets(targets: CapabilityTarget[]): CapabilityTarget[] {
+  return targets.filter((target) => !target.synthetic);
+}
+
+/** True only for semantics the current runtime can actually evaluate. */
+export function isRuntimeSupported(target: CapabilityTarget): boolean {
+  return target.semantics.some((choice) => RUNTIME_SEMANTICS.has(choice.semantic));
+}
+
 export function supportedTargets(targets: CapabilityTarget[]): CapabilityTarget[] {
-  return targets.filter(
-    (target) =>
-      target.semantics.some((choice) => RUNTIME_SEMANTICS.has(choice.semantic)) &&
-      !target.synthetic,
-  );
+  return discoveredTargets(targets).filter(isRuntimeSupported);
+}
+
+/** Targets which can be selected and saved as a notification trigger today. */
+export function usableTargets(targets: CapabilityTarget[]): CapabilityTarget[] {
+  return supportedTargets(targets).filter((target) => target.available);
+}
+
+export function targetReadiness(target: CapabilityTarget): TargetReadiness {
+  if (!isRuntimeSupported(target)) return "unsupported";
+  return target.available ? "ready" : "unavailable";
+}
+
+export function targetInventory(targets: CapabilityTarget[]): TargetInventory {
+  const discovered = discoveredTargets(targets);
+  const usable = usableTargets(discovered);
+  const sources = groupTargetsBySource(discovered);
+  const readySourceKeys = new Set(usable.map(targetSourceKey));
+  return {
+    discoveredTargets: discovered,
+    runtimeTargets: supportedTargets(discovered),
+    usableTargets: usable,
+    sources,
+    discoveredSourceCount: sources.length,
+    readySourceCount: readySourceKeys.size,
+  };
 }
 
 export function supportedSemantics(target: CapabilityTarget | undefined) {

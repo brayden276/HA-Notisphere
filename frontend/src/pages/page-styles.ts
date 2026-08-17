@@ -3,6 +3,7 @@ import { css } from "lit";
 export const pageStyles = css`
   :host {
     display: block;
+    box-sizing: border-box;
     --nm-border: var(--divider-color, rgba(127, 127, 127, 0.3));
     --nm-control-border: var(--input-idle-line-color, rgba(127, 127, 127, 0.5));
     --nm-surface: var(--card-background-color, #fafafa);
@@ -19,12 +20,20 @@ export const pageStyles = css`
     --nm-row-height-comfortable: 72px;
     --nm-radius: 8px;
     --nm-radius-compact: 6px;
+    max-inline-size: 1120px;
+    margin-inline: auto;
+    border: 1px solid var(--nm-border);
+    border-radius: var(--nm-radius);
+    padding: var(--nm-space-5);
+    background: var(--nm-surface);
     color: var(--primary-text-color, #212121);
     font: inherit;
   }
 
   .page-heading {
-    margin-bottom: var(--nm-space-5);
+    margin-bottom: var(--nm-space-4);
+    padding-bottom: var(--nm-space-4);
+    border-bottom: 1px solid var(--nm-border);
   }
 
   h2,
@@ -59,6 +68,18 @@ export const pageStyles = css`
     margin-top: var(--nm-space-4);
     border-top: 1px solid var(--nm-border);
     padding-top: var(--nm-space-4);
+  }
+
+  .section {
+    min-inline-size: 0;
+  }
+
+  .page-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--nm-space-3);
+    margin-bottom: var(--nm-space-4);
   }
 
   .section-heading {
@@ -185,6 +206,12 @@ export const pageStyles = css`
   }
 
   @media (max-width: 600px) {
+    :host {
+      border-inline: 0;
+      border-radius: 0;
+      padding: var(--nm-space-4);
+    }
+
     .page-heading {
       margin-bottom: var(--nm-space-5);
     }
